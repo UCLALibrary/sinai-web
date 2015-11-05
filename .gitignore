@@ -1,0 +1,11 @@
+# The default Vertx uploads directory
+file-uploads
+
+# Directory for internal cache files
+.vertx
+
+# Directory for generated code
+src/main/generated
+
+# Log files
+sinai-*.log

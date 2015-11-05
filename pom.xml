@@ -1,0 +1,547 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>sinai-web</artifactId>
+  <groupId>edu.ucla.library.sinai</groupId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>The Sinai Scholars Website</name>
+  <description>A site for Sinai image viewing</description>
+
+  <properties>
+    <!-- Application properties -->
+    <sinai.port>8443</sinai.port>
+    <sinai.redirect.port>8000</sinai.redirect.port>
+
+    <!-- Versions of dependencies managed in this POM -->
+    <vertx.version>3.1.0</vertx.version>
+    <javatuples.version>1.2</javatuples.version>
+    <freelib.utils.version>0.6.0-SNAPSHOT</freelib.utils.version>
+    <handlebars.version>2.2.3</handlebars.version>
+    <scribe.version>1.3.7</scribe.version>
+
+    <!-- Versions of plugins managed in this POM -->
+    <maven.shade.plugin.version>2.4.1</maven.shade.plugin.version>
+    <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
+    <maven.clean.plugin.version>2.6.1</maven.clean.plugin.version>
+    <maven.keytool.plugin.version>1.5</maven.keytool.plugin.version>
+
+    <!-- This project depends on JDK 8 -->
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+
+    <!-- FIXME: Not a great practice to skip these, but for now... -->
+    <enforcer.skip>true</enforcer.skip>
+    <maven.test.skip>true</maven.test.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <!-- Parent project only uses logback for testing, but we want to use it for real -->
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Vertx dependencies -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-jwt</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-dropwizard-metrics</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <!-- Administrative UI dependencies -->
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars</artifactId>
+      <version>${handlebars.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars-jackson2</artifactId>
+      <version>${handlebars.version}</version>
+    </dependency>
+    <!-- Just some general utilities -->
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>freelib-utils</artifactId>
+      <version>${freelib.utils.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.javatuples</groupId>
+      <artifactId>javatuples</artifactId>
+      <version>${javatuples.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scribe</groupId>
+      <artifactId>scribe</artifactId>
+      <version>${scribe.version}</version>
+    </dependency>
+    <!-- Below here are our testing dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.detro.ghostdriver</groupId>
+      <artifactId>phantomjsdriver</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>info.freelibrary</groupId>
+          <artifactId>freelib-utils</artifactId>
+          <version>${freelib.utils.version}</version>
+          <executions>
+            <execution>
+              <id>set-key-pass</id>
+              <goals>
+                <goal>set-uuid-property</goal>
+              </goals>
+              <configuration>
+                <name>sinai.key.pass</name>
+              </configuration>
+            </execution>
+            <execution>
+              <id>set-file-perms</id>
+              <goals>
+                <goal>set-file-perms</goal>
+              </goals>
+              <phase>generate-resources</phase>
+              <configuration>
+                <perms>0775</perms>
+                <file>${project.basedir}/target/startup.sh</file>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin.version}</version>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+            <annotationProcessors>
+              <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+            </annotationProcessors>
+            <generatedSourcesDirectory> ${project.basedir}/src/main/generated </generatedSourcesDirectory>
+            <compilerArgs>
+              <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+            </compilerArgs>
+            <!-- Fork so we can set JUL logging configuration for CodeGen -->
+            <fork>true</fork>
+            <properties>
+              <java.util.logging.config.file>src/main/resources/logging.properties</java.util.logging.config.file>
+            </properties>
+            <!-- End of CodeGen logging configuration -->
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>keytool-maven-plugin</artifactId>
+        <version>${maven.keytool.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>keytool-keyPair</id>
+            <goals>
+              <goal>generateKeyPair</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <!-- Our default, and for testing purposes, is a self-signed certificate -->
+              <keystore>${project.basedir}/target/classes/sinai.jks</keystore>
+              <storepass>${sinai.key.pass}</storepass>
+              <keypass>${sinai.key.pass}</keypass>
+              <alias>sinai</alias>
+              <dname><![CDATA[cn=localhost, ou=Sinai Scholars Site, L=Los Angeles, ST=California, o=UCLA Library, c=US]]></dname>
+              <sigalg>SHA256withRSA</sigalg>
+              <validity>100</validity>
+              <keyalg>RSA</keyalg>
+              <keysize>1024</keysize>
+            </configuration>
+          </execution>
+          <execution>
+            <id>keytool-secretKey-HS256</id>
+            <goals>
+              <goal>generateSecretKey</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <keystore>${project.basedir}/target/classes/sinai.jceks</keystore>
+              <storepass>${sinai.key.pass}</storepass>
+              <storetype>jceks</storetype>
+              <keypass>${sinai.key.pass}</keypass>
+              <alias>HS256</alias>
+              <keyalg>HMacSHA256</keyalg>
+              <keysize>2048</keysize>
+            </configuration>
+          </execution>
+          <execution>
+            <id>keytool-secretKey-HS384</id>
+            <goals>
+              <goal>generateSecretKey</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <keystore>${project.basedir}/target/classes/sinai.jceks</keystore>
+              <storepass>${sinai.key.pass}</storepass>
+              <storetype>jceks</storetype>
+              <keypass>${sinai.key.pass}</keypass>
+              <alias>HS384</alias>
+              <keyalg>HMacSHA384</keyalg>
+              <keysize>2048</keysize>
+            </configuration>
+          </execution>
+          <execution>
+            <id>keytool-secretKey-HS512</id>
+            <goals>
+              <goal>generateSecretKey</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <keystore>${project.basedir}/target/classes/sinai.jceks</keystore>
+              <storepass>${sinai.key.pass}</storepass>
+              <storetype>jceks</storetype>
+              <keypass>${sinai.key.pass}</keypass>
+              <alias>HS512</alias>
+              <keyalg>HMacSHA512</keyalg>
+              <keysize>2048</keysize>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src/main/generated</directory>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-scripts</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/scripts</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-web-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- On classpath so it will get bundled up in the executable jar -->
+              <outputDirectory>${basedir}/target/classes/webroot</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/webapp</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <!-- Have our tests use the SLF4J loggers -->
+        <configuration>
+          <systemPropertyVariables>
+            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            <sinai.key.pass>${sinai.key.pass}</sinai.key.pass>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- We can run at a randomly discovered free port for testing -->
+            <sinai.port>${http.port}</sinai.port>
+            <!-- Let our testing framework know what version of PhantomJS we're using -->
+            <phantomjs.binary>${phantomjs.binary}</phantomjs.binary>
+            <!-- PhantomJS testing setup uses JUL (it's not used by Sinai though) -->
+            <java.util.logging.config.file>${basedir}/src/test/resources/jul-logging.properties</java.util.logging.config.file>
+            <!-- Have our tests use the SLF4J loggers -->
+            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            <!-- Keystore password for testing -->
+            <sinai.key.pass>${sinai.key.pass}</sinai.key.pass>
+          </systemPropertyVariables>
+          <!-- Temporarily turning off integration tests -->
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>br.com.ingenieux</groupId>
+        <artifactId>jbake-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <!-- FIXME: disabling for now
+      <plugin>
+        <groupId>com.github.klieber</groupId>
+        <artifactId>phantomjs-maven-plugin</artifactId>
+      </plugin>
+      -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <!-- Generate our MessageCodes class from the messages resource file -->
+      <plugin>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-utils</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>generate-codes</goal>
+            </goals>
+            <configuration>
+              <message-files>
+                <message-file>src/main/resources/sinai_messages.xml</message-file>
+              </message-files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Plugin to wrap everything in a fat jar for simple deployment -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven.shade.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>io.vertx.core.Starter</Main-Class>
+                    <Main-Verticle>edu.ucla.library.sinai.verticles.SinaiMainVerticle</Main-Verticle>
+                  </manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+              <artifactSet> </artifactSet>
+              <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-exec.jar</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>start-sinai</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/src/test/scripts/pre-it-startup.sh</executable>
+              <workingDirectory>${basedir}/target</workingDirectory>
+              <arguments>
+                <argument>java</argument>
+                <argument>-Dsinai.file.uploads=java.io.tmpdir</argument>
+                <argument>-Dsinai.port=${http.port}</argument>
+                <argument>-jar</argument>
+                <argument>${basedir}/target/${project.artifactId}-${project.version}-exec.jar</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-sinai</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/src/test/scripts/post-it-shutdown.sh</executable>
+              <workingDirectory>${basedir}/target</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>linux</id>
+      <activation>
+        <os>
+          <name>Linux</name>
+        </os>
+      </activation>
+      <!-- Default "out-of-the-box" deployment options to be overridden -->
+      <properties>
+        <sinai.user>${user.name}</sinai.user>
+        <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
+        <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac</id>
+      <activation>
+        <os>
+          <name>Mac OS X</name>
+        </os>
+      </activation>
+      <!-- Default "out-of-the-box" deployment options to be overridden -->
+      <properties>
+        <sinai.user>${user.name}</sinai.user>
+        <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
+        <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <!-- Default "out-of-the-box" deployment options to be overridden -->
+      <properties>
+        <sinai.user>${user.name}</sinai.user>
+        <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
+        <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
+      </properties>
+    </profile>
+  </profiles>
+
+  <!-- Couldn't push to Maven repo with this, but we don't plan to anyway -->
+  <pluginRepositories>
+    <pluginRepository>
+      <id>snapshots-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+  <repositories>
+    <repository>
+      <id>snapshots-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <!-- Enables pushing project documentation up to an S3 bucket -->
+  <distributionManagement>
+    <site>
+      <id>s3.site</id>
+      <url>s3://some.ucla.edu/bucket</url>
+    </site>
+  </distributionManagement>
+
+  <!-- Not a UCLA thing, but I have a lot of conveniences configured here, so reusing -->
+  <parent>
+    <groupId>info.freelibrary</groupId>
+    <artifactId>freelib-parent</artifactId>
+    <version>0.1.0</version>
+  </parent>
+
+</project>
