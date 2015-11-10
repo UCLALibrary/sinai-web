@@ -21,7 +21,7 @@ Check out the Library's restricted access 'ansible' project and run:
 
     git clone https://github.com/UCLALibrary/ansible
     cd ansible
-    PLAYBOOK=sinai_web vagrant up
+    PLAYBOOK=sinai_scholars_stage vagrant up
 
 This also generates a self-signed certificate, so when you visit
 
