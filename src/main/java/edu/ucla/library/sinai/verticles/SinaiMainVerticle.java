@@ -23,7 +23,6 @@ import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerOptions;
@@ -55,9 +54,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Store our parsed configuration so we can access it when needed
         myConfig = new Configuration(config());
         vertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, myConfig);
-
-        // Start up Sinai's other verticles
-        deploySinaiVerticles();
 
         // Set the port on which we want to listen for connections
         options.setPort(myConfig.getPort());
@@ -103,24 +99,28 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.route().handler(CookieHandler.create());
         router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
+        final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
+        final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
+
         // Serve static files like images, scripts, css, etc.
         router.getWithRegex(STATIC_FILES_RE).handler(StaticHandler.create());
 
-        // Put everything in the administrative interface behind an authentication check
+        // Put everything behind an authentication check
         if (jwtAuth != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Using the JWT authentication handler");
             }
 
+            /* Turn this off for now to make development easier */
             // router.route().handler(UserSessionHandler.create(jwtAuth));
-            // router.routeWithRegex(ADMIN_UI_RE).handler(JWTAuthHandler.create(jwtAuth, LOGIN));
+            // router.route().handler(JWTAuthHandler.create(jwtAuth, LOGIN));
         }
 
         // Login and logout routes
-        router.get(LOGOUT).handler(new LogoutHandler(myConfig));
-        router.get(LOGIN).handler(new LoginHandler(myConfig, jwtAuth));
-        router.post(LOGIN).handler(new LoginHandler(myConfig, jwtAuth));
-        router.getWithRegex(LOGIN_RESPONSE_RE).handler(new LoginHandler(myConfig, jwtAuth));
+        router.get(LOGOUT).handler(logoutHandler);
+        router.get(LOGIN).handler(loginHandler);
+        router.post(LOGIN).handler(loginHandler);
+        router.getWithRegex(LOGIN_RESPONSE_RE).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(templateHandler).failureHandler(failureHandler);
 
         // Then we have the plain old administrative UI patterns
@@ -129,6 +129,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Create a index handler just to test for session; this could go in template handler
         router.get(ROOT).handler(templateHandler).failureHandler(failureHandler);
 
+        // Configure our StatusHandler, used by the Nagios script
         router.get(STATUS).handler(new StatusHandler(myConfig));
 
         // Start the server and start listening for connections
@@ -177,38 +178,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
         // FIXME: Accidentally connecting to http port with a https connection fails badly
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=479488
-    }
-
-    /**
-     * Loads the set of verticles that comprise "Sinai". Sinai verticles are used to create content that's then served
-     * by the Sinai handlers.
-     *
-     * @param aConfig A Sinai configuration
-     */
-    private void deploySinaiVerticles() {
-        final DeploymentOptions workerOptions = new DeploymentOptions().setWorker(true).setMultiThreaded(true);
-        final DeploymentOptions options = new DeploymentOptions();
-
-        // TODO: Perhaps some method more dynamic in the future?
-        // deployVerticle(SolrServiceVerticle.class.getName(), options);
-    }
-
-    /**
-     * Deploys a particular verticle.
-     *
-     * @param aVerticleName The name of the verticle to deploy
-     * @param aOptions Any deployment options that should be considered
-     */
-    private void deployVerticle(final String aVerticleName, final DeploymentOptions aOptions) {
-        vertx.deployVerticle(aVerticleName, aOptions, response -> {
-            if (response.succeeded()) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Successfully deployed {} [{}]", aVerticleName, response.result());
-                }
-            } else {
-                LOGGER.error("Failed to launch {}", aVerticleName);
-            }
-        });
     }
 
 }

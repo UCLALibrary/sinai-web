@@ -41,7 +41,7 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
             LOGGER.debug("{} JSON passed to template page: {}", getClass().getSimpleName(), aJsonObject.toString());
         }
 
-        // Are we logged into the administrative interface?
+        // Are we logged in?
         if (aContext.user() == null) {
             aJsonObject.put("logged-in", false);
         } else {

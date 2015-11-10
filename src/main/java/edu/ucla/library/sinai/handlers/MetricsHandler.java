@@ -18,8 +18,6 @@ public class MetricsHandler extends SinaiHandler {
 
     @Override
     public void handle(final RoutingContext aContext) {
-        LOGGER.debug("Requested: {}", aContext.request().uri());
-
         final MetricsService metricsService = MetricsService.create(aContext.vertx());
         final JsonObject metrics = metricsService.getMetricsSnapshot(aContext.vertx());
         final HttpServerResponse response = aContext.response();
