@@ -1,3 +1,38 @@
-{{> templates/header}}
-<div>This is main page content</div>
-{{> templates/footer}}
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../css/styles.css">
+	</head>
+	<body>
+    	{{> templates/header}}
+
+		<div id="main">
+			<div id="text">
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			</div>
+			<div id="links">
+				<ul>
+					<a href="#1">
+						<li>
+							<div class="top"><img src="http://www.sinaipalimpsests.org/sites/all/themes/custom/palimpsests_omega/images/homepage-featured-monastery.jpg"></div>
+							<div class="bottom">TEXT</div>
+						</li>
+					</a>
+					<a href="#2">
+						<li>
+							<div class="top"><img src="http://www.sinaipalimpsests.org/sites/all/themes/custom/palimpsests_omega/images/homepage-featured-technologies.jpg"></div>
+							<div class="bottom">TEXT</div>
+						</li>
+					</a>
+					<a href="#3">
+						<li>
+							<div class="top"><img src="http://www.sinaipalimpsests.org/sites/all/themes/custom/palimpsests_omega/images/homepage-featured-palimpsests.jpg"></div>
+							<div class="bottom">TEXT</div>
+						</li>
+					</a>
+				</ul>
+			</div>
+		</div>
+    	{{> templates/footer}}
+	</body>
+</html>
