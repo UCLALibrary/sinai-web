@@ -40,6 +40,7 @@ ul {
 	padding: 50px;
 	border: 1px solid #CBC5BA;
 	background-color: #E2DBCF;
+	max-width: 300px;
 }
 
 #sponsors li:hover {
@@ -57,7 +58,11 @@ img {
 }
 
 body {
-	background-image: "http://www.sinaipalimpsests.org/sites/all/themes/custom/palimpsests_omega/images/bg-header.jpg";
+	background-image: url("../images/bg-header.jpg");
 	background-repeat: no-repeat;
 	background-position: center top;
+}
+
+#header, #main, #footer {
+	background: rgba(255, 247, 233, 0.8) none repeat scroll 0% 0%;
 }
