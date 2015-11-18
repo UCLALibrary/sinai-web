@@ -39,6 +39,8 @@ body {
 .center-fixed-width {
 	margin: auto;
 	max-width: 940px;
+	padding-left: 20px;
+	padding-right: 20px;
 }
 
 ul {
@@ -54,6 +56,10 @@ ul {
 	margin-top: 10px;
 }
 
+.uppercase {
+	text-transform: uppercase;
+}
+
 .navbar {
 	color: #FFF;
 }
@@ -61,7 +67,6 @@ ul {
 .navbar li {
 	display: inline-block;
     font-weight: 300;
-    text-transform: uppercase;
 }	
 
 .navbar > li > a {
@@ -159,7 +164,12 @@ a {
 }
 
 #copyright span {
+	display: table;
 	margin: auto;
+}
+
+#copyright img {
+	vertical-align: text-bottom;
 }
 
 #banner {
