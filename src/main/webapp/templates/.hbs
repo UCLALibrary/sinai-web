@@ -1,38 +1,41 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" type="text/css" href="../css/fonts.css">
 		<link rel="stylesheet" type="text/css" href="../css/styles.css">
+		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 	</head>
 	<body>
     	{{> templates/header}}
-
 		<div id="main">
-			<div id="text">
+			<div id="description" class="center-fixed-width">
 				<strong>The Sinai Palimpsests Project</strong> is using state-of-the-art spectral imaging to recover erased texts from palimpsest manuscripts in the library of St. Catherine's Monastery of the Sinai, the world's oldest continually operating monastery.  The monastery holds an exceptional collection of more than 160 palimpsests, the erased layers of which preserve unstudied texts from the 4th to the 12th century.  An online research library, now in development, will make the palimpsests of Sinai globally accessible for study.
 			</div>
-			<div id="links">
-				<ul>
-					<a href="#1">
-						<li>
-							<div class="top"><img src="../images/homepage-featured-monastery.jpg"></div>
-							<div class="bottom">St. Catherine's Monastery</div>
-						</li>
-					</a>
-					<a href="#2">
-						<li>
-							<div class="top"><img src="../images/homepage-featured-technologies.jpg"></div>
-							<div class="bottom">Technologies</div>
-						</li>
-					</a>
-					<a href="#3">
-						<li>
-							<div class="top"><img src="../images/homepage-featured-palimpsests.jpg"></div>
-							<div class="bottom">Palimpsests &amp; Scholarship</div>
-						</li>
-					</a>
+			<div id="featured-links">
+				<ul class="uppercase">
+					<li>
+						<a href="#1">
+							<img src="../images/homepage-featured-monastery.jpg">
+							<span class="overlay">St. Catherine's Monastery</span>
+						</a>
+					</li>
+					<li>
+						<a href="#2">
+							<img src="../images/homepage-featured-technologies.jpg">
+							<span class="overlay">Technologies</span>
+						</a>
+					</li>
+					<li>
+						<a href="#3">
+							<img src="../images/homepage-featured-palimpsests.jpg">
+							<span class="overlay">Palimpsests &amp; Scholarship</span>
+						</a>
+					</li>
 				</ul>
 			</div>
 		</div>
     	{{> templates/footer}}
+
+		<script src="../js/main.js"></script>
 	</body>
 </html>
