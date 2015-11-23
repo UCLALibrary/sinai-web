@@ -41,6 +41,14 @@ public interface Constants {
 
     public static final String CONFIG_KEY = "sinai.config";
 
+    public static final String GOOGLE_OAUTH_CLIENT_ID = "sinai.oauth.google.clientId";
+
+    public static final String FACEBOOK_OAUTH_CLIENT_ID = "sinai.oauth.facebook.clientId";
+
+    public static final String TWITTER_OAUTH_CLIENT_ID = "sinai.oauth.twitter.clientId";
+
+    public static final String TWITTER_OAUTH_SECRET_KEY = "sinai.oauth.twitter.secretKey";
+
     public static final String ID_KEY = "id";
 
     public static final String HBS_DATA_KEY = "hbs.data";

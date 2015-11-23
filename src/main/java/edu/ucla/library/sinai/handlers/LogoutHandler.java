@@ -1,7 +1,7 @@
 
 package edu.ucla.library.sinai.handlers;
 
-import static edu.ucla.library.sinai.RoutePatterns.LOGIN;
+import static edu.ucla.library.sinai.RoutePatterns.ROOT;
 
 import edu.ucla.library.sinai.Configuration;
 import io.vertx.core.http.HttpServerResponse;
@@ -29,7 +29,7 @@ public class LogoutHandler extends SinaiHandler {
         }
 
         session.destroy();
-        response.setStatusCode(303).putHeader("Location", LOGIN).end();
+        response.setStatusCode(303).putHeader("Location", ROOT).end();
     }
 
 }
