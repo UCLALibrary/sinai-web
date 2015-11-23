@@ -9,14 +9,12 @@
     {{> templates/header}}
     <div id="main">
       <div class="beige-transparent">
-        <div class="center-fixed-width">
-          <div style="padding: 30px;">
-            <h3>{{error-header}}</h3>
-            <p>{{error-message}}</p>
-            {{#if contact-info}}
-            <p>{{contact-info}}</p>
-            {{/if}}
-          </div>
+        <div id="search-results" class="center-fixed-width">
+          <form>
+            <input type="text" name="query" value="Search title, date, location">
+              <button type="submit" name="search">Search</button>
+          </form>
+          Search results page.
         </div>
       </div>
     </div>

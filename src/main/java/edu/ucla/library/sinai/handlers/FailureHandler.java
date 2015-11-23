@@ -89,11 +89,10 @@ public class FailureHandler extends SinaiHandler {
             if (throwable != null) {
                 String message = throwable.getMessage();
 
-                if (errorMessage == null) {
-                    if (message == null) {
-                        message = "";
-                    }
-                } else {
+                if (message.startsWith("/webroot/templates")) {
+                    jsonObject.put(ERROR_HEADER, "File Not Found");
+                    message = message.replace("/webroot/templates", "").replace(".hbs", "");
+                } else if (errorMessage != null) {
                     message = errorMessage;
                 }
 

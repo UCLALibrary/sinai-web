@@ -1,12 +1,16 @@
 
 package edu.ucla.library.sinai;
 
+import static edu.ucla.library.sinai.Constants.FACEBOOK_OAUTH_CLIENT_ID;
+import static edu.ucla.library.sinai.Constants.GOOGLE_OAUTH_CLIENT_ID;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
+import static edu.ucla.library.sinai.Constants.TWITTER_OAUTH_CLIENT_ID;
+import static edu.ucla.library.sinai.Constants.TWITTER_OAUTH_SECRET_KEY;
 import static edu.ucla.library.sinai.Constants.URL_SCHEME_PROP;
 
 import java.io.File;
@@ -58,6 +62,14 @@ public class Configuration implements Shareable {
 
     private final String myURLScheme;
 
+    private final String myGoogleClientID;
+
+    private final String myFacebookClientID;
+
+    private final String myTwitterClientID;
+
+    private final String myTwitterSecretKey;
+
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
      *
@@ -71,17 +83,81 @@ public class Configuration implements Shareable {
         myHost = setHost(aConfig);
         mySolrServer = setSolrServer(aConfig);
         myURLScheme = setURLScheme(aConfig);
+        myGoogleClientID = setGoogleClientID(aConfig);
+        myFacebookClientID = setFacebookClientID(aConfig);
+        myTwitterClientID = setTwitterClientID(aConfig);
+        myTwitterSecretKey = setTwitterSecretKey(aConfig);
+    }
+
+    public String setGoogleClientID(final JsonObject aConfig) {
+        final Properties properties = System.getProperties();
+
+        // We'll give command line properties first priority then fall back to our JSON configuration
+        if (properties.containsKey(GOOGLE_OAUTH_CLIENT_ID)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Found {} set in system properties", GOOGLE_OAUTH_CLIENT_ID);
+            }
+
+            return properties.getProperty(GOOGLE_OAUTH_CLIENT_ID);
+        } else {
+            return aConfig.getString(GOOGLE_OAUTH_CLIENT_ID, "");
+        }
+    }
+
+    public String setFacebookClientID(final JsonObject aConfig) {
+        final Properties properties = System.getProperties();
+
+        // We'll give command line properties first priority then fall back to our JSON configuration
+        if (properties.containsKey(FACEBOOK_OAUTH_CLIENT_ID)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Found {} set in system properties", FACEBOOK_OAUTH_CLIENT_ID);
+            }
+
+            return properties.getProperty(FACEBOOK_OAUTH_CLIENT_ID);
+        } else {
+            return aConfig.getString(FACEBOOK_OAUTH_CLIENT_ID, "");
+        }
+    }
+
+    public String setTwitterClientID(final JsonObject aConfig) {
+        final Properties properties = System.getProperties();
+
+        // We'll give command line properties first priority then fall back to our JSON configuration
+        if (properties.containsKey(TWITTER_OAUTH_CLIENT_ID)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Found {} set in system properties", TWITTER_OAUTH_CLIENT_ID);
+            }
+
+            return properties.getProperty(TWITTER_OAUTH_CLIENT_ID);
+        } else {
+            return aConfig.getString(TWITTER_OAUTH_CLIENT_ID, "");
+        }
+    }
+
+    public String setTwitterSecretKey(final JsonObject aConfig) {
+        final Properties properties = System.getProperties();
+
+        // We'll give command line properties first priority then fall back to our JSON configuration
+        if (properties.containsKey(TWITTER_OAUTH_SECRET_KEY)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Found {} set in system properties", TWITTER_OAUTH_SECRET_KEY);
+            }
+
+            return properties.getProperty(TWITTER_OAUTH_SECRET_KEY);
+        } else {
+            return aConfig.getString(TWITTER_OAUTH_SECRET_KEY, "");
+        }
     }
 
     public String getOAuthClientID(final String aService) {
         final String service = aService.toLowerCase();
 
         if (service.equals(LoginHandler.GOOGLE)) {
-            return "";
+            return myGoogleClientID;
         } else if (service.equals(LoginHandler.TWITTER)) {
-            return "";
+            return myTwitterClientID;
         } else if (service.equals(LoginHandler.FACEBOOK)) {
-            return "";
+            return myFacebookClientID;
         }
 
         // FIXME: something better than a RuntimeException
@@ -94,7 +170,7 @@ public class Configuration implements Shareable {
         if (service.equals(LoginHandler.GOOGLE)) {
             return "";
         } else if (service.equals(LoginHandler.TWITTER)) {
-            return "";
+            return myTwitterSecretKey;
         } else if (service.equals(LoginHandler.FACEBOOK)) {
             return "";
         }

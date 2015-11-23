@@ -33,9 +33,11 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.TemplateHandler;
+import io.vertx.ext.web.handler.UserSessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.TemplateEngine;
 
@@ -105,15 +107,14 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                 LOGGER.debug("Using the JWT authentication handler");
             }
 
-            /* Turn this off for now to make development easier */
-            // router.route().handler(UserSessionHandler.create(jwtAuth));
-            // router.route().handler(JWTAuthHandler.create(jwtAuth, LOGIN));
+            router.route().handler(UserSessionHandler.create(jwtAuth));
+            router.route().handler(JWTAuthHandler.create(jwtAuth, "/login-response"));
         }
 
         // Login and logout routes
         router.get(LOGOUT).handler(logoutHandler);
-        router.get(LOGIN).handler(loginHandler);
-        router.post(LOGIN).handler(loginHandler);
+        router.get(ROOT).handler(loginHandler);
+        router.post(ROOT).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(templateHandler).failureHandler(failureHandler);
 
@@ -121,7 +122,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
 
         // Create a index handler just to test for session; this could go in template handler
-        router.get(ROOT).handler(templateHandler).failureHandler(failureHandler);
+        router.get().handler(templateHandler).failureHandler(failureHandler);
 
         // Configure our StatusHandler, used by the Nagios script
         router.get(STATUS).handler(new StatusHandler(myConfig));

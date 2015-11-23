@@ -24,14 +24,14 @@ public interface RoutePatterns {
     public static final String LOGIN_RESPONSE_RE = "\\/login-response";
 
     /**
+     * A root path.
+     */
+    public static final String ROOT = "/";
+
+    /**
      * A path for logouts from the administrative interface.
      */
     public static final String LOGOUT = "/logout";
-
-    /**
-     * A generic path for the root of the Web application.
-     */
-    public static final String ROOT = "/";
 
     /**
      * A generic path for Web application metrics.
