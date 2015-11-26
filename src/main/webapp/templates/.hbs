@@ -21,22 +21,33 @@
     }
   </script>
   </head>
-  <body>
-    {{> templates/header}}
-    <div id="main">
-      <div class="beige-transparent">
-        <div class="center-fixed-width">
-          <div style="padding: 20px 0px;">This is some text about logging in...</div>
-          <div id="google-login" style="float:left;">
-            <button id="googleButton" class="zocial google" onclick="login('google')">Login with Google</button>
-          </div>
-          <div id="facebook-login" style="float:right;">
-            <button id="facebookButton" class="zocial facebook" onclick="login('facebook')">Login with Facebook</button>
-          </div>
-          <div style="height:200px"></div>
-        </div>
-      </div>
-    </div>
-    {{> templates/footer}}
-  </body>
+	<body>
+    	{{> templates/header}}
+		<div id="main">
+				<div>
+					<h1>Welcome to the Sinai Palimpsests Scholar's Site!</h1>
+					<p>Please login or register to access the materials.  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+					<!--
+					<div id="login-or-register">
+							<button class="maroon-button" type="button" id="show-login">Enter site</button>
+							<span>or <a href="#">Register</a></span>
+					</div>-->
+				</div>
+		</div>
+		<div id="login-form">
+        	<div>
+        		<div id="google-login">
+        			<button id="googleButton" class="zocial google" onclick="login('google')">Login with Google</button>
+        		</div>
+        		<div id="facebook-login">
+        			<button id="facebookButton" class="zocial facebook" onclick="login('facebook')">Login with Facebook</button>
+        		</div>
+				<button class="maroon-button" type="button" id="hide-login">cancel</button>
+			</div>
+		</div>
+    	{{> templates/footer}}
+
+
+		<script src="../js/main.js"></script>
+	</body>
 </html>
