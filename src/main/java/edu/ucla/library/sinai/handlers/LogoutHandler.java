@@ -28,7 +28,7 @@ public class LogoutHandler extends SinaiHandler {
             LOGGER.debug("Logging out of session '{}': {} ({})", session.id(), user, email);
         }
 
-        session.destroy();
+        aContext.clearUser();
         response.setStatusCode(303).putHeader("Location", ROOT).end();
     }
 
