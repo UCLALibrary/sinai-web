@@ -93,7 +93,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Configure some basics
         router.route().handler(BodyHandler.create().setUploadsDirectory(myConfig.getTempDir().getAbsolutePath()));
         router.route().handler(CookieHandler.create());
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)).setSessionTimeout(7200000L));
 
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
         final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
