@@ -1,0 +1,59 @@
+<html>
+
+  <head>
+    <link href="/mirador/css/mirador-combined.css" rel="stylesheet" type="text/css">
+      <script src="/mirador/mirador.js"></script>
+      <style type="text/css">
+        body { padding: 0; margin: 0; overflow: hidden; font-size: 70%; }
+        #viewer {
+          background: #333 url(/mirador/images/debut_dark.png) left top repeat;
+          width: 100%; height: 100%; position: fixed;
+        }
+        .window-manifest-title {
+          font-size: 85%;
+        }
+        .manifest-info {
+          overflow: hidden;
+          font-size: .85em;
+        }
+      </style>
+  </head>
+
+  <body>
+    <div id="viewer"></div>
+    <script type="text/javascript">
+      $(function() {
+        Mirador({
+          "id": "viewer",
+          "mainMenuSettings": {
+            'show': true,
+            'buttons': {
+              'bookmark': false
+            }
+          },
+          "saveSession": false,
+          "showAddFromURLBox": false,
+          "layout": "1x1",
+          "data": [{
+            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "location": "UCLA"
+          }],
+          "windowObjects": [{
+            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "availableViews": ["ImageView","ThumbnailsView","ScrollView"],
+            "viewType": "ImageView",
+            "annotationLayer": false,
+            "overlay": false,
+            "fullScreen": true,
+            "displayLayout": false,
+            "bottomPanel": true,
+            "bottomPanelVisible": true,
+            "sidePanel": true,
+            "sidePanelVisible": true
+          }]
+        });
+      });
+    </script>
+  </body>
+
+</html>

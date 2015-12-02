@@ -20,6 +20,7 @@ import edu.ucla.library.sinai.handlers.FailureHandler;
 import edu.ucla.library.sinai.handlers.LoginHandler;
 import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
+import edu.ucla.library.sinai.handlers.MiradorHandler;
 import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
@@ -117,6 +118,9 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.post(ROOT).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(templateHandler).failureHandler(failureHandler);
+
+        // Route for Mirador viewing
+        router.getWithRegex(VIEWER_RE).handler(new MiradorHandler(myConfig));
 
         // Then we have the plain old administrative UI patterns
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
