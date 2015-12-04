@@ -26,17 +26,20 @@
         Mirador({
           "id": "viewer",
           "mainMenuSettings": {
-            'show': true,
+            'show': false,
             'buttons': {
               'bookmark': false
             }
           },
           "saveSession": false,
           "showAddFromURLBox": false,
-          "layout": "1x1",
+          "layout": "1x2",
           "data": [{
             "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
             "location": "UCLA"
+          }, {
+            "manifestUri": "",
+            "location": ""
           }],
           "windowObjects": [{
             "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
@@ -48,8 +51,8 @@
             "displayLayout": false,
             "bottomPanel": true,
             "bottomPanelVisible": true,
-            "sidePanel": true,
-            "sidePanelVisible": true
+            "sidePanel": false,
+            "sidePanelVisible": false
           }]
         });
       });

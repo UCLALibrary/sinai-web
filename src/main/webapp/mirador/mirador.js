@@ -3045,9 +3045,9 @@ window.Mirador = window.Mirador || function(config) {
     //true or false.  controls display of "Add new object from URL" on manifest listing page
     'showAddFromURLBox' : true,
 
-    'i18nPath' : '../../mirador/locales/',
+    'i18nPath' : '/mirador/locales/',
 
-    'logosLocation' : '../../mirador/images/logos/',
+    'logosLocation' : '/mirador/images/logos/',
 
     'repoImages' : {
       'other': 'iiif_logo.png'
@@ -4968,7 +4968,7 @@ window.Mirador = window.Mirador || function(config) {
           'admin':  [this.userid]
         }
       };
-      this.search({"uri" : this.uri});        
+      this.search({"uri" : this.uri});
     },
 
     //Search endpoint for all annotations with a given URI
@@ -5653,7 +5653,7 @@ window.Mirador = window.Mirador || function(config) {
     annotationSaveEvent: function(event, api) {
       var _this = this,
       annoTooltip = new $.AnnotationTooltip();
-      
+
       jQuery('.annotation-tooltip').on("submit", function(event) {
         event.preventDefault();
         jQuery('.annotation-tooltip a.save').click();
@@ -5661,11 +5661,11 @@ window.Mirador = window.Mirador || function(config) {
 
       jQuery('.annotation-tooltip a.save').on("click", function(event) {
         event.preventDefault();
-                  
+
         var display = jQuery(this).parents('.annotation-tooltip'),
         id = display.attr('data-anno-id'),
         oaAnno = _this.getAnnoFromRegion(id)[0];
-                  
+
         //check if new resourceText is empty??
         var tagText = jQuery(this).parents('.annotation-editor').find('.tags-editor').val(),
         resourceText = tinymce.activeEditor.getContent(),
@@ -5679,11 +5679,11 @@ window.Mirador = window.Mirador || function(config) {
         var scope = _this.osdViewer.viewport.viewportToImageRectangle(bounds);
         //bounds is giving negative values?
         //update scope?
-                  
+
         var motivation = [],
         resource = [],
         on;
-                  
+
         //remove all tag-related content in annotation
         oaAnno.motivation = jQuery.grep(oaAnno.motivation, function(value) {
             return value !== "oa:tagging";
@@ -5695,7 +5695,7 @@ window.Mirador = window.Mirador || function(config) {
         if (tags.length > 0) {
             oaAnno.motivation.push("oa:tagging");
             jQuery.each(tags, function(index, value) {
-                oaAnno.resource.push({      
+                oaAnno.resource.push({
                     "@type":"oa:Tag",
                      "chars":value
                 });
@@ -5711,13 +5711,13 @@ window.Mirador = window.Mirador || function(config) {
 
         _this.unFreezeQtip(api, oaAnno, annoTooltip);
         });
-        
+
         jQuery('.annotation-tooltip a.cancel').on("click", function(event) {
           event.preventDefault();
           var display = jQuery(this).parents('.annotation-tooltip'),
           id = display.attr('data-anno-id'),
           oaAnno = _this.getAnnoFromRegion(id)[0];
-   
+
         _this.unFreezeQtip(api, oaAnno, annoTooltip);
         });
 
@@ -5742,20 +5742,20 @@ window.Mirador = window.Mirador || function(config) {
       dragging:    false,
       parent:      null
       }, options);
-      
+
       this.init();
   };
 
   $.OsdRegionRectTool.prototype = {
-  
+
     init: function() {
       this.bindEvents();
     },
-    
+
     bindEvents: function() {
       var _this = this;
     },
-    
+
     reset: function(osdViewer) {
       this.dragging = false;
       this.osdOverlay = null;
