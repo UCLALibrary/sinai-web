@@ -1,19 +1,119 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<link rel="stylesheet" type="text/css" href="/css/fonts.css"/>
-		<link rel="stylesheet" type="text/css" href="/css/styles.css"/>
-		<script src="/js/jquery-1.11.1.min.js"></script>
-	</head>
-	<body>
-    	{{> templates/header}}
-		<div id="main">
-			<div class="beige-transparent">
-				<div id="image-view" class="center-fixed-width">
-					Image view page.
-				</div>
-			</div>
-		</div>
-    	{{> templates/footer}}
-	</body>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/jcarousel.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    <script src="/js/jquery.jcarousel.min.js"></script>
+    <script>
+      var selected = '{{selected}}';
+      var storedItems;
+      var start = 0;
+    
+      function updateView(id) {
+        document.getElementById('viewer').src = '/viewer/' + id;
+      }
+      
+      function checkCarousel() {
+        var jcarousel = $('.jcarousel').jcarousel();
+      
+        if (jcarousel.jcarousel('items').length != storedItems.length) {
+          var html = '<ul>';
+
+          $.each(storedItems, function(index, value) {
+            var jsMethod = "updateView('" + value.id + "')";
+
+            html += ('<li><a onclick="' + jsMethod + '; return false;" href="#">');
+            html += ('<img src="' + value.thumbnail + '" alt="' + value.label + '"/>');
+            html += '</a></li>';
+          });
+
+          html += '</ul>';
+
+          jcarousel.html(html);
+          jcarousel.jcarousel('reload');
+          jcarousel.jcarousel('scroll', start, false);
+        }
+      }
+    
+      (function($) {
+        $(function() {
+          var jcarousel = $('.jcarousel').jcarousel();
+
+          $('.jcarousel-control-prev').on('jcarouselcontrol:active', function() {
+            $(this).removeClass('inactive');
+          }).on('jcarouselcontrol:inactive', function() {
+            $(this).addClass('inactive');
+          }).jcarouselControl({ target: '-=6' });
+
+          $('.jcarousel-control-next').on('jcarouselcontrol:active', function() {
+            $(this).removeClass('inactive');
+          }).on('jcarouselcontrol:inactive', function() {
+            $(this).addClass('inactive');
+          }).jcarouselControl({
+            target: '+=6'
+          });
+
+          var setup = function(data) {
+            var html = '<ul>';
+            
+            // We'll load this fully later
+            storedItems = data.items;
+            
+            $.each(storedItems, function(index, value) {
+              if (value.id == selected) {
+                start = index;
+              }
+            });
+
+            $.each(storedItems.slice(start > 0 ? start - 1 : start, start + 7), function(index, value) {
+              var jsMethod = "updateView('" + value.id + "')";
+
+              html += ('<li><a onclick="' + jsMethod + '; return false;" href="#">');
+              html += ('<img src="' + value.thumbnail + '" title="' + value.label + '" alt="' + value.label + '"/>');
+              html += '</a></li>';
+
+              if ((index == 0 && start == 0) || (index == 1 && start > 0)) {
+                updateView(value.id);
+              }
+            });
+
+            html += '</ul>';
+
+            jcarousel.html(html);
+            jcarousel.jcarousel('reload');
+            
+            if (start > 0) {
+              jcarousel.jcarousel('scroll', 1, false);
+            }
+          };
+
+          $.getJSON('https://stage-images.library.ucla.edu/iiif/{{id}}/manifest/thumbnails', setup);
+        });
+      })(jQuery);
+    </script>
+  </head>
+  <body>
+    {{> templates/header}}
+    <div id="main">
+      <div class="beige-transparent" style="max-width: 1366px;">
+          <div style="float:right;">
+            <span class="fa fa-2x fa-square" style="color:#9d9386"></span>
+            <a href="/scan/{{id}}" style="text-decoration:none;color:#4e443c"><span class="fa fa-2x fa-th"></span></a>
+          </div>
+          <div class="jcarousel-wrapper" name="view">
+            <div class="jcarousel">
+              <div class="loading">Loading thumbnails...</div>
+            </div>
+            <a href="#" onclick="checkCarousel(); return false;" class="jcarousel-control-prev">&lsaquo;</a>
+            <a href="#" onclick="checkCarousel(); return false;" class="jcarousel-control-next">&rsaquo;</a>
+          </div>
+          <iframe id="viewer" width="1366px;" height="680px;" marginwidth="0" src="/viewer/empty" marginheight="0"
+            frameborder="0" scrolling="no" allowfullscreen=""></iframe>
+        </div>
+    </div>
+    {{> templates/footer}}
+  </body>
 </html>
