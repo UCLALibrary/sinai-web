@@ -46,6 +46,8 @@ public class Configuration implements Shareable {
 
     public static final int RETRY_COUNT = 10;
 
+    public static final long DEFAULT_SESSION_TIMEOUT = 7200000L; // two hours
+
     private static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinai";
 
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);

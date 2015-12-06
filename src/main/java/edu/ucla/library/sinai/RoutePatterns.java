@@ -38,11 +38,11 @@ public interface RoutePatterns {
      */
     public static final String STATUS = "/status/*";
 
-    public static final String VIEWER_RE = "/view(er)?.*";
+    public static final String VIEWER_RE = "\\/(view(er)?|scan)\\/.*";
 
     /**
      * A route pattern for serving static files.
      */
     public static final String STATIC_FILES_RE =
-            ".*(\\.js|\\.css|\\.ico|\\.png|\\.gif|\\.ttf|\\.eot|\\.svg|\\.woff|\\.woff2|\\.jpg|translation\\.json)$";
+            ".*(\\.js|\\.css|\\.ico|\\.png|\\.gif|\\.ttf|\\.eot|\\.svg|\\.woff|\\.woff2|\\.jpg|translation\\.json|\\.map)$";
 }

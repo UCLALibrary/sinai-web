@@ -142,6 +142,12 @@ a {
     #sponsors > ul > li.border-right {
       border-right: 1px solid #CBC5BA; }
 
+#thumbnail-wrapper:after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  height: 0; }
+
 #copyright {
   color: white;
   background-color: black;

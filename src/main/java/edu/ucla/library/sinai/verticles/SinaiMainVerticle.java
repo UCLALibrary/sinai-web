@@ -1,12 +1,14 @@
 
 package edu.ucla.library.sinai.verticles;
 
+import static edu.ucla.library.sinai.Configuration.DEFAULT_SESSION_TIMEOUT;
 import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
 import static edu.ucla.library.sinai.Constants.JCEKS_PROP;
 import static edu.ucla.library.sinai.Constants.JKS_PROP;
 import static edu.ucla.library.sinai.Constants.KEY_PASS_PROP;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -48,6 +50,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
     @Override
     public void start(final Future<Void> aFuture) throws ConfigurationException, IOException {
+        final SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
         final TemplateEngine templateEngine = HandlebarsTemplateEngine.create();
         final TemplateHandler templateHandler = TemplateHandler.create(templateEngine);
         final HttpServerOptions options = new HttpServerOptions();
@@ -61,26 +64,36 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Set the port on which we want to listen for connections
         options.setPort(myConfig.getPort());
         options.setHost("0.0.0.0");
+        options.setCompressionSupported(true);
 
         // Use https or http, but switching between them requires re-ingesting everything
         if (myConfig.usesHttps()) {
-            final InputStream inStream = getClass().getResourceAsStream("/" + JKS_PROP);
-            final String keystorePassword = System.getProperty(KEY_PASS_PROP, "");
-            final JksOptions jksOptions = new JksOptions().setPassword(keystorePassword);
+            final String jksProperty = System.getProperty(JKS_PROP, JKS_PROP);
+            final String ksPassword = System.getProperty(KEY_PASS_PROP, "");
+            final JksOptions jksOptions = new JksOptions().setPassword(ksPassword);
             final JsonObject jceksConfig = new JsonObject();
+            final File jksFile = new File(jksProperty);
 
-            jceksConfig.put("path", JCEKS_PROP).put("type", "jceks").put("password", keystorePassword);
+            jceksConfig.put("path", JCEKS_PROP).put("type", "jceks").put("password", ksPassword);
             jwtAuth = JWTAuth.create(vertx, new JsonObject().put("keyStore", jceksConfig));
 
-            if (inStream != null) {
-                jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
+            if (jksFile.exists()) {
+                LOGGER.info("Using a system JKS configuration: {}", jksFile);
+                jksOptions.setPath(jksFile.getAbsolutePath());
             } else {
-                // TODO: Make the store configurable (but keep this one around too for testing purposes)
-                jksOptions.setPath("target/classes/" + JKS_PROP);
+                final InputStream inStream = getClass().getResourceAsStream("/" + jksProperty);
+
+                if (inStream != null) {
+                    jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
+                } else {
+                    LOGGER.debug("Trying to use the build's default JKS: {}", jksProperty);
+                    jksOptions.setPath("target/classes/" + jksProperty);
+                }
             }
 
-            options.setSsl(true);
-            options.setKeyStoreOptions(jksOptions);
+            options.setSsl(true).setKeyStoreOptions(jksOptions);
+            sessionHandler.setCookieHttpOnlyFlag(true).setCookieSecureFlag(true);
+            sessionHandler.setSessionTimeout(DEFAULT_SESSION_TIMEOUT);
 
             configureHttpRedirect(aFuture);
         } else {
@@ -94,7 +107,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Configure some basics
         router.route().handler(BodyHandler.create().setUploadsDirectory(myConfig.getTempDir().getAbsolutePath()));
         router.route().handler(CookieHandler.create());
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)).setSessionTimeout(7200000L));
+        router.route().handler(sessionHandler);
 
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
         final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
