@@ -7,16 +7,16 @@ import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
+import static edu.ucla.library.sinai.Constants.OAUTH_USERS;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
-import static edu.ucla.library.sinai.Constants.TWITTER_OAUTH_CLIENT_ID;
-import static edu.ucla.library.sinai.Constants.TWITTER_OAUTH_SECRET_KEY;
 import static edu.ucla.library.sinai.Constants.URL_SCHEME_PROP;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.ConfigurationException;
@@ -25,6 +25,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.sinai.handlers.LoginHandler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -68,9 +69,7 @@ public class Configuration implements Shareable {
 
     private final String myFacebookClientID;
 
-    private final String myTwitterClientID;
-
-    private final String myTwitterSecretKey;
+    private final String[] myUsers;
 
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
@@ -87,8 +86,22 @@ public class Configuration implements Shareable {
         myURLScheme = setURLScheme(aConfig);
         myGoogleClientID = setGoogleClientID(aConfig);
         myFacebookClientID = setFacebookClientID(aConfig);
-        myTwitterClientID = setTwitterClientID(aConfig);
-        myTwitterSecretKey = setTwitterSecretKey(aConfig);
+        myUsers = setUsers(aConfig);
+    }
+
+    private String[] setUsers(final JsonObject aConfig) {
+        final List<?> list = aConfig.getJsonArray(OAUTH_USERS, new JsonArray()).getList();
+        final String[] users = new String[list.size()];
+
+        for (int index = 0; index < list.size(); index++) {
+            users[index] = list.get(index).toString();
+        }
+
+        return users;
+    }
+
+    public String[] getUsers() {
+        return myUsers;
     }
 
     public String setGoogleClientID(final JsonObject aConfig) {
@@ -121,43 +134,11 @@ public class Configuration implements Shareable {
         }
     }
 
-    public String setTwitterClientID(final JsonObject aConfig) {
-        final Properties properties = System.getProperties();
-
-        // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(TWITTER_OAUTH_CLIENT_ID)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Found {} set in system properties", TWITTER_OAUTH_CLIENT_ID);
-            }
-
-            return properties.getProperty(TWITTER_OAUTH_CLIENT_ID);
-        } else {
-            return aConfig.getString(TWITTER_OAUTH_CLIENT_ID, "");
-        }
-    }
-
-    public String setTwitterSecretKey(final JsonObject aConfig) {
-        final Properties properties = System.getProperties();
-
-        // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(TWITTER_OAUTH_SECRET_KEY)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Found {} set in system properties", TWITTER_OAUTH_SECRET_KEY);
-            }
-
-            return properties.getProperty(TWITTER_OAUTH_SECRET_KEY);
-        } else {
-            return aConfig.getString(TWITTER_OAUTH_SECRET_KEY, "");
-        }
-    }
-
     public String getOAuthClientID(final String aService) {
         final String service = aService.toLowerCase();
 
         if (service.equals(LoginHandler.GOOGLE)) {
             return myGoogleClientID;
-        } else if (service.equals(LoginHandler.TWITTER)) {
-            return myTwitterClientID;
         } else if (service.equals(LoginHandler.FACEBOOK)) {
             return myFacebookClientID;
         }
@@ -171,8 +152,6 @@ public class Configuration implements Shareable {
 
         if (service.equals(LoginHandler.GOOGLE)) {
             return "";
-        } else if (service.equals(LoginHandler.TWITTER)) {
-            return myTwitterSecretKey;
         } else if (service.equals(LoginHandler.FACEBOOK)) {
             return "";
         }
