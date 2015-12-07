@@ -31,6 +31,10 @@ ul {
 }
 
 a {
+		/*
+	max-width: 100%;
+	max-height: 100%;
+	*/
 	text-decoration: none;
 }
 
@@ -137,7 +141,6 @@ img {
 #sub-navbar {
 	@extend .navbar;
 	background: $black-transparent;
-	text-transform: uppercase;
 	//visibility: hidden;
 }
 
@@ -147,21 +150,8 @@ img {
 
 	> div {
 		@extend .center-fixed-width;
-/*
-		> p {
-			display: inline-block;
-			max-width: 66%;
-			margin-right: auto;
-		}
 
-		#login-or-register {
-			display: inline-block;
-			max-width: 33%;
-			margin-left: auto;
-		}
-		*/
-
-		> div {
+		#browse-main-content {
 			overflow: hidden;
 
 			#search-results {
@@ -188,23 +178,22 @@ img {
 				float: right;
 			}
 		}
-	}
 
-	p > a {
-		color: $maroon;
-		font-weight: bold;
-	}
-
-	form {
-		input[type="text"] {
-			
+		p > a {
+			color: $maroon;
+			font-weight: bold;
 		}
-
-		input[type="submit"] {
-			@extend .maroon-button;
+	
+		form {
+			input[type="text"] {
+				
+			}
+	
+			input[type="submit"] {
+				@extend .maroon-button;
+			}
 		}
 	}
-
 }
 
 #login-form {
