@@ -30,10 +30,12 @@ function login(site) {
               var divElement = document.createElement('div');
               var button = document.getElementById(site + 'Button');
 
+
 			  var bannerText = document.getElementById('greeting');
 			  var logoutLink = document.createElement('a');
 			  var nameStrongText = document.createElement('b');
 			  var linkStrongText = document.createElement('b');
+
 
               divElement.setAttribute('style', 'margin-top: 10px;');
               userImage.setAttribute('src', json.thumbnail);
@@ -46,7 +48,6 @@ function login(site) {
               loginTd.appendChild(divElement); 
 
 
-
 			  nameStrongText.innerHTML = json.name;
 			  linkStrongText.innerHTML = 'logout';
 
@@ -55,7 +56,7 @@ function login(site) {
 
               bannerText.innerHTML = 'welcome, ';
 			  bannerText.appendChild(nameStrongText);
-			  bannerText.appendChild(document.createElement('br'));
+			  bannerText.appendChild(document.createTextNode(' | '));
 			  bannerText.appendChild(logoutLink);
 			  
 			  setTimeout(function() { $('#hide-login').click(); }, 1000);

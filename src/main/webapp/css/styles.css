@@ -20,6 +20,10 @@ ul {
   padding: 0; }
 
 a {
+  	/*
+  max-width: 100%;
+  max-height: 100%;
+  */
   text-decoration: none; }
 
 img {
@@ -47,12 +51,12 @@ img {
     .navbar > ul > li:hover, #main-navbar > ul > li:hover, #sub-navbar > ul > li:hover, #footer-navbar > ul > li:hover {
       color: #AAA; }
 
-.maroon-button, #main form input[type="submit"] {
+.maroon-button, #main > div form input[type="submit"] {
   background-color: #800020;
   border: none;
   color: white;
   padding: 10px; }
-  .maroon-button:hover, #main form input[type="submit"]:hover {
+  .maroon-button:hover, #main > div form input[type="submit"]:hover {
     color: #AAA; }
 
 /*
@@ -86,44 +90,29 @@ img {
   text-transform: uppercase; }
 
 #sub-navbar {
-  background: rgba(0, 0, 0, 0.8);
-  text-transform: uppercase; }
+  background: rgba(0, 0, 0, 0.8); }
 
 #main {
   background: rgba(255, 247, 233, 0.8);
   padding: 20px 0px; }
-  #main > div {
-    /*
-    		> p {
-    			display: inline-block;
-    			max-width: 66%;
-    			margin-right: auto;
-    		}
-    
-    		#login-or-register {
-    			display: inline-block;
-    			max-width: 33%;
-    			margin-left: auto;
-    		}
-    		*/ }
-    #main > div > div {
-      overflow: hidden; }
-      #main > div > div #search-results {
-        width: 75%;
-        float: left; }
-        #main > div > div #search-results ul > li {
-          border-bottom: 1px solid #800020;
-          padding-top: 20px; }
-          #main > div > div #search-results ul > li img {
-            max-width: 40%; }
-          #main > div > div #search-results ul > li p, #main > div > div #search-results ul > li table {
-            display: inline-block;
-            max-width: 40%;
-            padding-left: 20px; }
-      #main > div > div #narrow-search {
-        width: 25%;
-        float: right; }
-  #main p > a {
+  #main > div #browse-main-content {
+    overflow: hidden; }
+    #main > div #browse-main-content #search-results {
+      width: 75%;
+      float: left; }
+      #main > div #browse-main-content #search-results ul > li {
+        border-bottom: 1px solid #800020;
+        padding-top: 20px; }
+        #main > div #browse-main-content #search-results ul > li img {
+          max-width: 40%; }
+        #main > div #browse-main-content #search-results ul > li p, #main > div #browse-main-content #search-results ul > li table {
+          display: inline-block;
+          max-width: 40%;
+          padding-left: 20px; }
+    #main > div #browse-main-content #narrow-search {
+      width: 25%;
+      float: right; }
+  #main > div p > a {
     color: #800020;
     font-weight: bold; }
 
