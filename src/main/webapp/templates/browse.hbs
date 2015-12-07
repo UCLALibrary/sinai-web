@@ -8,11 +8,59 @@
   <body>
     {{> templates/header}}
     <div id="main">
-      <div class="beige-transparent">
-        <div id="browse" class="center-fixed-width">
-          Browse page.
-        </div>
-      </div>
+		<div>
+			<h1>Browse</h1>
+
+			<form>
+				<input type="text" name="query" value="Search title, date, location">
+				<input type="submit" name="search" value="Search">
+			</form>
+
+			<div>
+				<div id="search-results">
+					<h3>2 results</h3>
+
+					<ul>
+						<li>
+								<img src="https://openclipart.org/image/300px/svg_to_png/95785/1289855802.png" alt="image of thing">
+								<p>
+								<a href="#">Arabic NF 8</a><br><br>
+								<b>Language:</b> Arabic<br>
+								<b>New Find:</b> no<br>
+								<b>Date:</b> ca. 200 B.C.<br>
+								<b>Description:</b> this is really old
+								</p>
+						</li>
+						<li>
+								<img src="https://openclipart.org/image/300px/svg_to_png/95785/1289855802.png" alt="image of thing">
+								<p>
+								<a href="">Syriac 2A</a><br><br>
+								<b>Language:</b> Arabic<br>
+								<b>New Find:</b> yes<br>
+								<b>Date:</b> ca. 2000 B.C.<br>
+								<b>Description:</b> this is really old too. Here is more info about it. You can see more info about it in this paragraph. This is very interesting
+								</p>
+						</li>
+					</ul>
+				</div>
+
+				<div id="narrow-search">
+					<h3>narrow your search</h3>
+
+					<form>
+						<!-- date slider -->
+						<input type="checkbox" name="new"> New<br>
+						<input type="checkbox" name="fragment"> Fragment<br>
+						<input type="checkbox" name="0"> xxx<br>
+						<input type="checkbox" name="1"> xxx<br>
+						<input type="checkbox" name="2"> xxx<br>
+						<input type="checkbox" name="3"> xxx<br>
+						<input type="checkbox" name="4"> xxx
+						
+					</form>
+				</div>
+			</div>
+		</div>
     </div>
     {{> templates/footer}}
   </body>
