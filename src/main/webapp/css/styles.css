@@ -17,40 +17,42 @@ body {
 ul {
   list-style: outside none none;
   margin: 0;
-  padding: 0;
-  text-align: center; }
+  padding: 0; }
 
 a {
-  max-width: 100%;
-  max-height: 100%;
   text-decoration: none; }
+
+img {
+  border: none; }
 
 /*
  * by class
  */
 .center-fixed-width, .navbar > ul, #main-navbar > ul, #sub-navbar > ul, #footer-navbar > ul, #banner > div, #main > div, #login-form, #sponsors > ul {
   margin: auto;
-  max-width: 940px;
+  max-width: 1366px;
   padding-left: 20px;
   padding-right: 20px; }
 
-.navbar > ul > li, #main-navbar > ul > li, #sub-navbar > ul > li, #footer-navbar > ul > li {
-  color: white;
-  display: inline-block;
-  font-weight: 300; }
-  .navbar > ul > li > a, #main-navbar > ul > li > a, #sub-navbar > ul > li > a, #footer-navbar > ul > li > a {
-    color: inherit;
+.navbar > ul, #main-navbar > ul, #sub-navbar > ul, #footer-navbar > ul {
+  text-align: center; }
+  .navbar > ul > li, #main-navbar > ul > li, #sub-navbar > ul > li, #footer-navbar > ul > li {
+    color: white;
     display: inline-block;
-    padding: 10px 10px; }
-  .navbar > ul > li:hover, #main-navbar > ul > li:hover, #sub-navbar > ul > li:hover, #footer-navbar > ul > li:hover {
-    color: #AAA; }
+    font-weight: 300; }
+    .navbar > ul > li > a, #main-navbar > ul > li > a, #sub-navbar > ul > li > a, #footer-navbar > ul > li > a {
+      color: inherit;
+      display: inline-block;
+      padding: 10px 10px; }
+    .navbar > ul > li:hover, #main-navbar > ul > li:hover, #sub-navbar > ul > li:hover, #footer-navbar > ul > li:hover {
+      color: #AAA; }
 
-.maroon-button {
+.maroon-button, #main form input[type="submit"] {
   background-color: #800020;
   border: none;
   color: white;
   padding: 10px; }
-  .maroon-button:hover {
+  .maroon-button:hover, #main form input[type="submit"]:hover {
     color: #AAA; }
 
 /*
@@ -64,13 +66,20 @@ a {
       display: inline-block;
       margin-left: 10px;
       margin-top: 10px; }
-  #banner > div span {
-    float: right;
-    text-align: right; }
-    #banner > div span > a {
-      color: #800020; }
+  #banner > div > div {
+    overflow: hidden; }
+    #banner > div > div > span {
+      float: right;
+      text-align: right; }
+      #banner > div > div > span > a, #banner > div > div > span span {
+        color: #800020;
+        font-weight: bold; }
   #banner > div > a > img {
-    margin: 20px 0; }
+    display: block;
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 20px 0; }
 
 #main-navbar {
   background-color: #800020;
@@ -78,8 +87,7 @@ a {
 
 #sub-navbar {
   background: rgba(0, 0, 0, 0.8);
-  text-transform: uppercase;
-  visibility: hidden; }
+  text-transform: uppercase; }
 
 #main {
   background: rgba(255, 247, 233, 0.8);
@@ -98,6 +106,26 @@ a {
     			margin-left: auto;
     		}
     		*/ }
+    #main > div > div {
+      overflow: hidden; }
+      #main > div > div #search-results {
+        width: 75%;
+        float: left; }
+        #main > div > div #search-results ul > li {
+          border-bottom: 1px solid #800020;
+          padding-top: 20px; }
+          #main > div > div #search-results ul > li img {
+            max-width: 40%; }
+          #main > div > div #search-results ul > li p, #main > div > div #search-results ul > li table {
+            display: inline-block;
+            max-width: 40%;
+            padding-left: 20px; }
+      #main > div > div #narrow-search {
+        width: 25%;
+        float: right; }
+  #main p > a {
+    color: #800020;
+    font-weight: bold; }
 
 #login-form {
   background-color: #E2DBCF;
@@ -121,14 +149,15 @@ a {
 #sponsors {
   background-color: #E2DBCF; }
   #sponsors > ul {
+    text-align: center;
     padding: 35px 0px; }
     #sponsors > ul > li {
-      display: table-cell;
+      display: inline-block;
       font-size: 13px;
       font-weight: 400;
       padding: 0 2.5%;
       vertical-align: middle;
-      width: 33%; }
+      width: 28%; }
       #sponsors > ul > li > a {
         color: #333; }
         #sponsors > ul > li > a:hover {

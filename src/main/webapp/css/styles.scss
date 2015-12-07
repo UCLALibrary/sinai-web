@@ -28,13 +28,14 @@ ul {
 	list-style: outside none none;
 	margin: 0;
 	padding: 0;
-	text-align: center;
 }
 
 a {
-	max-width: 100%;
-	max-height: 100%;
 	text-decoration: none;
+}
+
+img {
+	border: none;
 }
 
 /*
@@ -43,7 +44,7 @@ a {
 
 .center-fixed-width {
 	margin: auto;
-	max-width: 940px;
+	max-width: 1366px;
 	padding-left: 20px;
 	padding-right: 20px;
 }
@@ -51,6 +52,7 @@ a {
 .navbar {
 	> ul {
 		@extend .center-fixed-width;
+		text-align: center;
 
 		> li {
 			color: white;
@@ -102,17 +104,26 @@ a {
 	
 		}
 
-		span {
-			float: right;
-			text-align: right;
+		> div {
+			overflow: hidden;
 
-			> a {
-				color: $maroon;
+			> span {
+				float: right;
+				text-align: right;
+	
+				> a, span {
+					color: $maroon;
+					font-weight: bold;
+				}
 			}
 		}
 
 		> a > img {
-			margin: 20px 0;
+			display: block;
+			width: 100%;
+			max-width: 940px;
+			margin: 0 auto;
+			padding: 20px 0;
 		}
 	}
 }
@@ -127,7 +138,7 @@ a {
 	@extend .navbar;
 	background: $black-transparent;
 	text-transform: uppercase;
-	visibility: hidden;
+	//visibility: hidden;
 }
 
 #main {
@@ -149,7 +160,51 @@ a {
 			margin-left: auto;
 		}
 		*/
+
+		> div {
+			overflow: hidden;
+
+			#search-results {
+				width: 75%;
+				float: left;
+
+				ul > li {
+					border-bottom: 1px solid $maroon;
+					padding-top: 20px;
+
+					img {
+						max-width: 40%;
+					}	
+					p, table {
+						display: inline-block;
+						max-width: 40%;
+						padding-left: 20px;
+					}
+				}
+			}
+
+			#narrow-search {
+				width: 25%;
+				float: right;
+			}
+		}
 	}
+
+	p > a {
+		color: $maroon;
+		font-weight: bold;
+	}
+
+	form {
+		input[type="text"] {
+			
+		}
+
+		input[type="submit"] {
+			@extend .maroon-button;
+		}
+	}
+
 }
 
 #login-form {
@@ -187,15 +242,16 @@ a {
 
 	> ul {
 		@extend .center-fixed-width;
+		text-align: center;
 		padding: 35px 0px;
 
 		> li {
-			display: table-cell;
+			display: inline-block;
 			font-size: 13px;
 			font-weight: 400;
 			padding: 0 2.5%;
 			vertical-align: middle;
-			width: 33%;
+			width: 28%;
 	
 			> a {
 				color: #333;
