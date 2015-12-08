@@ -30,13 +30,6 @@ function login(site) {
               var divElement = document.createElement('div');
               var button = document.getElementById(site + 'Button');
 
-
-			  var bannerText = document.getElementById('greeting');
-			  var logoutLink = document.createElement('a');
-			  var nameStrongText = document.createElement('b');
-			  var linkStrongText = document.createElement('b');
-
-
               divElement.setAttribute('style', 'margin-top: 10px;');
               userImage.setAttribute('src', json.thumbnail);
               divElement.setAttribute('id', site + '-login-response');
@@ -47,17 +40,12 @@ function login(site) {
               button.innerHTML = 'Logged into ' + site.charAt(0).toUpperCase() + site.slice(1);
               loginTd.appendChild(divElement); 
 
+			  // replace generic "welcome, please login" with personalized
+			  // greeting
+			  constructGreetingBanner(json.name);
 
-			  nameStrongText.innerHTML = json.name;
-			  linkStrongText.innerHTML = 'logout';
-
-			  logoutLink.setAttribute('href', '/logout');
-			  logoutLink.appendChild(linkStrongText);
-
-              bannerText.innerHTML = 'welcome, ';
-			  bannerText.appendChild(nameStrongText);
-			  bannerText.appendChild(document.createTextNode(' | '));
-			  bannerText.appendChild(logoutLink);
+			  // store username for later
+			  localStorage['sinai-scholars-username'] = json.name;
 			  
 			  setTimeout(function() { $('#hide-login').click(); }, 1000);
             });
