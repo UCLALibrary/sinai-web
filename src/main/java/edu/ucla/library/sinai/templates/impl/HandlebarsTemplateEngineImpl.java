@@ -20,10 +20,13 @@ import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 
 import info.freelibrary.util.Logger;
@@ -116,7 +119,27 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
             }
 
             final Map<String, Object> dataMap = aContext.data();
-            final String templateOutput = template.apply(dataMap.get(HBS_DATA_KEY));
+            Context context = (Context) dataMap.get(HBS_DATA_KEY);
+
+            if (context == null) {
+                final Map<String, Boolean> map = new HashMap<String, Boolean>();
+
+                if (aContext.user() != null) {
+                    map.put("logged-in", true);
+                } else {
+                    map.put("logged-in", false);
+                }
+
+                context = Context.newBuilder(map).resolver(MapValueResolver.INSTANCE).build();
+            } else {
+                if (aContext.user() != null) {
+                    context.data("logged-in", true);
+                } else {
+                    context.data("logged-in", false);
+                }
+            }
+
+            final String templateOutput = template.apply(context);
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Handlebars template output: {}", templateOutput);
