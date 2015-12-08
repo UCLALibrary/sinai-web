@@ -22,6 +22,10 @@
     <appender-ref ref="FILE" />
   </logger>
 
+  <logger name="edu.ucla.library.sinai.templates.impl.HandlebarsTemplateEngineImpl" level="WARN">
+    <appender-ref ref="FILE" />
+  </logger>
+
   <root level="WARN">
     <appender-ref ref="STDOUT" />
   </root>

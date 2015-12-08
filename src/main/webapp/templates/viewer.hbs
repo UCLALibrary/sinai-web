@@ -39,13 +39,26 @@
           "data": [{
             "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
             "location": "UCLA"
-          }, {
-            "manifestUri": "",
-            "location": ""
+          },{
+            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "location": "UCLA"
           }],
           "windowObjects": [{
             "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
             "availableViews": ["ImageView"],
+            "viewType": "ImageView",
+            "annotationLayer": false,
+            "annotationState": "annoOff",
+            "overlay": false,
+            "fullScreen": true,
+            "displayLayout": false,
+            "bottomPanel": false,
+            "bottomPanelVisible": false,
+            "sidePanel": false,
+            "sidePanelVisible": false
+          },{
+            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
             "viewType": "ImageView",
             "annotationLayer": false,
             "annotationState": "annoOff",

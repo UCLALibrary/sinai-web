@@ -4,6 +4,8 @@ package edu.ucla.library.sinai.handlers;
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
 
+import java.net.URISyntaxException;
+
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,22 +27,40 @@ public class MiradorHandler extends SinaiHandler {
 
     @Override
     public void handle(final RoutingContext aContext) {
+        final String selected = aContext.request().getParam("selected");
         final ObjectMapper mapper = new ObjectMapper();
         final ObjectNode jsonNode = mapper.createObjectNode();
         final String requestPath = aContext.request().uri();
-        final String[] pathParts = requestPath.split("\\/");
+        final int index = requestPath.indexOf("?");
+        final String path;
+
+        if (index != -1) {
+            path = requestPath.substring(0, index);
+        } else {
+            path = requestPath;
+        }
+
+        final String[] pathParts = path.split("\\/");
         final String id = pathParts[2];
         final int skip;
 
         if (pathParts.length > 3) {
             skip = 2 + slashCount(PathUtils.decode(pathParts[3]));
             jsonNode.put("selected", pathParts[3]);
+        } else if (selected != null) {
+            try {
+                jsonNode.put("selected", PathUtils.encodeIdentifier(selected));
+            } catch (final URISyntaxException details) {
+                LOGGER.warn("Bad 'selected' value: {}", selected, details);
+            }
+
+            skip = 1;
         } else {
             skip = 1;
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Getting item page for : {} ({})", id, requestPath);
+            LOGGER.debug("Getting item page for : {} ({})", id, path);
         }
 
         jsonNode.put("id", id);
