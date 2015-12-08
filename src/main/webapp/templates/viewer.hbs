@@ -26,12 +26,7 @@
         Mirador({
           "id": "viewer",
           "mainMenuSettings": {
-            'show': true,
-            'buttons': {
-              'bookmark': false,
-              'layout': true,
-              'fullScreenViewer': true
-            }
+            'show': false
           },
           "saveSession": false,
           "showAddFromURLBox": false,
@@ -39,9 +34,9 @@
           "data": [{
             "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
             "location": "UCLA"
-          }, {
-            "manifestUri": "",
-            "location": ""
+          },{
+            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "location": "UCLA"
           }],
           "windowObjects": [{
             "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
@@ -51,7 +46,29 @@
             "annotationState": "annoOff",
             "overlay": false,
             "fullScreen": true,
-            "displayLayout": false,
+            "displayLayout": true,
+            "layoutOptions": {
+              "close": true
+            },
+            "bottomPanel": false,
+            "bottomPanelVisible": false,
+            "sidePanel": false,
+            "sidePanelVisible": false
+          },{
+            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
+            "viewType": "ImageView",
+            "annotationLayer": false,
+            "annotationState": "annoOff",
+            "overlay": false,
+            "fullScreen": true,
+            "displayLayout": true,
+            "layoutOptions": {
+              "newObject": true,
+              "close": true,
+              "slotRight": true,
+              "slotBelow": true
+            },
             "bottomPanel": true,
             "bottomPanelVisible": true,
             "sidePanel": false,

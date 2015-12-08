@@ -12,8 +12,8 @@
       var storedItems;
       var start = 0;
     
-      function updateView(id) {
-        document.getElementById('viewer').src = '/viewer/' + id;
+      function updateView(id, label) {
+        document.getElementById('viewer').src = '/viewer/' + id + '?selected={{id}}/' + label;
       }
       
       function checkCarousel() {
@@ -23,7 +23,7 @@
           var html = '<ul>';
 
           $.each(storedItems, function(index, value) {
-            var jsMethod = "updateView('" + value.id + "')";
+            var jsMethod = "updateView('" + value.id + "', '" + value.label + "')";
 
             html += ('<li><a onclick="' + jsMethod + '; return false;" href="#">');
             html += ('<img src="' + value.thumbnail + '" alt="' + value.label + '"/>');
@@ -69,14 +69,14 @@
             });
 
             $.each(storedItems.slice(start > 0 ? start - 1 : start, start + 7), function(index, value) {
-              var jsMethod = "updateView('" + value.id + "')";
+              var jsMethod = "updateView('" + value.id + "', '" + value.label + "')";
 
               html += ('<li><a onclick="' + jsMethod + '; return false;" href="#">');
               html += ('<img src="' + value.thumbnail + '" title="' + value.label + '" alt="' + value.label + '"/>');
               html += '</a></li>';
 
               if ((index == 0 && start == 0) || (index == 1 && start > 0)) {
-                updateView(value.id);
+                updateView(value.id, value.label);
               }
             });
 
