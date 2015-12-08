@@ -15,7 +15,7 @@
 		<div>
 			<span id="greeting">welcome, please <a href="javascript:;" id="show-login">login</a></span>
 		</div>
-	    <a href="http://sinaipalimpsests.org">
+	    <a href="/">
 	      <img src="/images/logo.png">
 	    </a>
 	</div>
@@ -24,32 +24,24 @@
 <div id="main-navbar">
     <ul>
       <li>
-        <a id="about" href="http://sinaipalimpsests.org/about-project">About</a>
+        <a href="/">Home</a>
       </li>
       <li>
-        <a href="http://sinaipalimpsests.org/st-catherines-monastery-sinai">St Catherine's Monastery</a>
+        <a href="/browse">Browse</a>
       </li>
+      <!--<li>
+        <a href="/register">Register</a>
+      </li>-->
       <li>
-        <a href="http://sinaipalimpsests.org/technologies">Technologies</a>
-      </li>
-      <li>
-        <a href="http://sinaipalimpsests.org/palimpsests-and-scholarship">Palimpsests &amp; Scholarship</a>
-      </li>
-      <li>
-        <a href="http://sinaipalimpsests.org/galleries">Galleries</a>
+        <a href="http://sinaipalimpsests.org">Educational Site</a>
       </li>
     </ul>
 </div>
-<div id="sub-navbar">
-    <ul>
-      <li>
-        <a href="http://sinaipalimpsests.org/about-project">About the Project</a>
-      </li>
-      <li>
-        <a href="http://sinaipalimpsests.org/content/open-letter-monastery">Open Letter from the Monastery</a>
-      </li>
-      <li>
-        <a href="http://sinaipalimpsests.org/participants">Participants</a>
-      </li>
-    </ul>
-</div>
+
+{{#if logged-in}}
+<script>
+$(document).ready(function() {
+	constructGreetingBanner(localStorage['sinai-scholars-username']);
+});
+</script>
+{{/if}}

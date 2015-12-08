@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-<!--  <link rel="stylesheet" type="text/css" href="/css/reset.css" />-->
-    <link rel="stylesheet" type="text/css" href="/css/fonts-ie.css" />
-    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
-    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
-    <link rel="stylesheet" type="text/css" href="/css/zocial.css"/>
-    <script src="/js/jquery-1.11.1.min.js"></script>
-    <script src="/js/hello-min.js" defer="true"></script>
-    <script src="/js/google-min.js" defer="true"></script>
-    <script src="/js/twitter-min.js" defer="true"></script>
-    <script src="/js/facebook-min.js" defer="true"></script>
-    <script src="/js/login.js" defer="true"></script>
+	<link rel="stylesheet" type="text/css" href="/css/fonts.css" />
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="stylesheet" type="text/css" href="/css/zocial.css"/>
+
+	<script src="/js/jquery-1.11.1.min.js"></script>
+	<script src="/js/hello-min.js" defer="true"></script>
+	<script src="/js/google-min.js" defer="true"></script>
+	<script src="/js/twitter-min.js" defer="true"></script>
+	<script src="/js/facebook-min.js" defer="true"></script>
+	<script src="/js/login.js" defer="true"></script>
+	<script src="/js/main.js" defer="true"></script>
+
     <script>
     var urlParts = window.location.href.split("/");
     window.onload = function() {
@@ -21,12 +22,12 @@
         'facebook': '{{facebook}}'
       }, {redirect_uri: urlParts[0] + "//" + urlParts[2] + '/login-response'});
     }
-  </script>
+	</script>
   </head>
 	<body>
     	{{> templates/header}}
 		<div id="main">
-				<div id="landing-page-content">
+				<div>
 					<h1>Welcome to the Sinai Palimpsests Scholar's Site</h1>
 					<p>Please login or register to access the Scholar's Site using the above link.</p>
 					<p>You can login with your Google or Facebook ID and password.</p>
@@ -49,6 +50,5 @@
     	{{> templates/footer}}
 
 
-		<script src="../js/main.js"></script>
 	</body>
 </html>

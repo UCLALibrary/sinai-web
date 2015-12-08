@@ -93,7 +93,7 @@ img {
   background: rgba(0, 0, 0, 0.8); }
 
 #main {
-  background: rgba(255, 247, 233, 0.8);
+  background: #F7F2EA;
   padding: 20px 0px; }
   #main > div #browse-main-content {
     overflow: hidden; }
