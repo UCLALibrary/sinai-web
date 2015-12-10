@@ -1,3 +1,8 @@
+/*
+ * constructGreetingBanner
+ *
+ * Generates and inserts personalized message into the site banner
+ */
 function constructGreetingBanner(username) {
 
     var bannerText = document.getElementById('greeting');
@@ -7,6 +12,7 @@ function constructGreetingBanner(username) {
 
     nameStrongText.innerHTML = username;
     linkStrongText.innerHTML = 'logout';
+
     logoutLink.setAttribute('href', '/logout');
 	logoutLink.setAttribute('onclick', 'logout()');
     logoutLink.appendChild(linkStrongText);
@@ -15,9 +21,14 @@ function constructGreetingBanner(username) {
     bannerText.appendChild(nameStrongText);
     bannerText.appendChild(document.createTextNode(' | '));
     bannerText.appendChild(logoutLink);
-
 }
 
+/*
+ * This function adds onclick event listeners for:
+ *
+ * 1. login link in banner (brings up login dialog box)
+ * 2. cancel button inside that dialog box (closes dialog box)
+ */
 $(document).ready(function() {
 
 	$("a#show-login").on("click", function() {

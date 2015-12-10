@@ -39,9 +39,10 @@ img {
   padding-right: 20px; }
 
 .navbar > ul, #main-navbar > ul, #sub-navbar > ul, #footer-navbar > ul {
+  color: white;
   text-align: center; }
   .navbar > ul > li, #main-navbar > ul > li, #sub-navbar > ul > li, #footer-navbar > ul > li {
-    color: white;
+    color: inherit;
     display: inline-block;
     font-weight: 300; }
     .navbar > ul > li > a, #main-navbar > ul > li > a, #sub-navbar > ul > li > a, #footer-navbar > ul > li > a {
@@ -63,7 +64,7 @@ img {
  * by id
  */
 #banner {
-  background: rgba(255, 247, 233, 0.8); }
+  background-color: rgba(255, 247, 233, 0.8); }
   #banner > div > ul {
     text-align: right; }
     #banner > div > ul > li {
@@ -90,11 +91,11 @@ img {
   text-transform: uppercase; }
 
 #sub-navbar {
-  background: rgba(0, 0, 0, 0.8); }
+  background-color: rgba(0, 0, 0, 0.8); }
 
-#main {
-  background: #F7F2EA;
-  padding: 20px 0px; }
+#main > div {
+  padding-top: 35px;
+  padding-bottom: 35px; }
   #main > div #browse-main-content {
     overflow: hidden; }
     #main > div #browse-main-content #search-results {
@@ -103,18 +104,32 @@ img {
       #main > div #browse-main-content #search-results ul > li {
         border-bottom: 1px solid #800020;
         padding-top: 20px; }
-        #main > div #browse-main-content #search-results ul > li img {
-          max-width: 40%; }
-        #main > div #browse-main-content #search-results ul > li p, #main > div #browse-main-content #search-results ul > li table {
+        #main > div #browse-main-content #search-results ul > li .helper {
           display: inline-block;
-          max-width: 40%;
-          padding-left: 20px; }
+          height: 100%;
+          vertical-align: middle; }
+        #main > div #browse-main-content #search-results ul > li img {
+          float: left; }
+        #main > div #browse-main-content #search-results ul > li p {
+          overflow: hidden;
+          width: auto;
+          padding: 0px 20px;
+          margin-top: 0px; }
     #main > div #browse-main-content #narrow-search {
       width: 25%;
       float: right; }
   #main > div p > a {
     color: #800020;
     font-weight: bold; }
+
+.viewer-bg {
+  background-color: rgba(255, 247, 233, 0.8); }
+
+.text-bg {
+  background-color: #F7F2EA; }
+  .text-bg > div {
+    background-color: white;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5); }
 
 #login-form {
   background-color: #E2DBCF;

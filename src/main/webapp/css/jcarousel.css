@@ -1,5 +1,6 @@
 .jcarousel-wrapper {
     margin: 20px auto;
+	margin-top: 0px;
     position: relative;
     border: 10px solid #fff;
     /*
@@ -85,4 +86,8 @@
 .jcarousel-control-next.inactive {
     opacity: .5;
     cursor: default;
+}
+
+.jcarousel-view-select-wrapper {
+	text-align: right;
 }
