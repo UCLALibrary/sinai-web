@@ -22,6 +22,14 @@
   <body>
     <div id="viewer"></div>
     <script type="text/javascript">
+      $(document).ajaxStop(function() {
+        var page = $(".window-manifest-title:not(:contains('ark:'))");
+
+        if (page) {
+          $(".window-manifest-title:contains('ark:')").text(page.text() + '_PSH_color');
+        }
+      });
+
       $(function() {
         Mirador({
           "id": "viewer",
@@ -40,6 +48,7 @@
           }],
           "windowObjects": [{
             "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "slotAddress" : "row1.column1",
             "availableViews": ["ImageView"],
             "viewType": "ImageView",
             "annotationLayer": false,
@@ -56,6 +65,7 @@
             "sidePanelVisible": false
           },{
             "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "slotAddress" : "row1.column2",
             "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
             "viewType": "ImageView",
             "annotationLayer": false,
