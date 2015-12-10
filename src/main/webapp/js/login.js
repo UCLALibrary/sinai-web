@@ -22,10 +22,9 @@ function login(site) {
 			  // replace generic banner with personalized greeting
 			  constructGreetingBanner(json.name);
 
-			  // store username for later
+			  // store username that is used to construct personalized banner
 			  localStorage['sinai-scholars-username'] = json.name;
 			  
-			  setTimeout(function() { $('#hide-login').click(); }, 1000);
             });
           }
 
@@ -40,4 +39,7 @@ function login(site) {
       console.log('Login error: ' + e.error.message);
     }
   );
+
+  // close the login dialog box
+  setTimeout(function() { $('#hide-login').click(); }, 1000);
 }

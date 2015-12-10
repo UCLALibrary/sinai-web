@@ -10,17 +10,33 @@
   <body>
     {{> templates/header}}
     <div id="main">
-		<div>
+		<div class="white-bg">
+			<h1>Sinai Scholars Site Registration Questionnaire</h1>
 			<form>
-				Username:* <input type="text" name="user"><br>
-				Email address:* <input type="text" name="email"><br>
-				First name:* <input type="text" name="fname"><br>
-				Last name:* <input type="text" name="lname"><br>
-				Affiliation:* <input type="text" name="affl"><br>
-				Occupation:* <input type="text" name="occ"><br>
-				Website:* <input type="text" name="site"><br>
-				Password: <input type="text" name="pass"><br>
-				Confirm password: <input type="text" name="confirm-pass"><br>
+				Name (first, last):
+				<input type="text" name="user"><br>
+
+				Current institutional or research affiliation:
+				<input type="text" name="purpose"><br>
+
+				Professional title or role (professor, research assistant, etc.):
+				<input type="text" name="purpose"><br>
+
+				Email address:
+				<input type="text" name="email"><br>
+
+				Work telephone number:
+				<input type="text" name="purpose"><br>
+
+				Work location (city and country):
+				<input type="text" name="fname"><br>
+
+				Briefly describe the purpose or interest you have in accessing the site and its images:
+				<input type="text" name="purpose"><br>
+
+				Please read and click in the box if you agree to the <a href="http://sinaipalimpsests.org/copyright-terms-use">conditions of use</a>:
+				<input type="checkbox" name="agree"><br>
+
 				<input type="submit" value="Submit">
 			</form>
     	</div>

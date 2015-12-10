@@ -56,10 +56,11 @@ img {
 .navbar {
 	> ul {
 		@extend .center-fixed-width;
+		color: white;
 		text-align: center;
 
 		> li {
-			color: white;
+			color: inherit;
 			display: inline-block;
 		    font-weight: 300;
 	
@@ -92,7 +93,7 @@ img {
  */
 
 #banner {
-	background: $beige-transparent;
+	background-color: $beige-transparent;
 
 	> div {
 		@extend .center-fixed-width;
@@ -140,16 +141,16 @@ img {
 
 #sub-navbar {
 	@extend .navbar;
-	background: $black-transparent;
+	background-color: $black-transparent;
 	//visibility: hidden;
 }
 
 #main {
-	background: $beige;
-	padding: 20px 0px;
 
 	> div {
 		@extend .center-fixed-width;
+		padding-top: 35px;
+		padding-bottom: 35px;
 
 		#browse-main-content {
 			overflow: hidden;
@@ -162,13 +163,23 @@ img {
 					border-bottom: 1px solid $maroon;
 					padding-top: 20px;
 
-					img {
-						max-width: 40%;
-					}	
-					p, table {
+					.helper {
 						display: inline-block;
-						max-width: 40%;
-						padding-left: 20px;
+						height: 100%;
+						vertical-align: middle;
+					}
+
+					img {
+						//vertical-align: top;
+						float: left;
+					}
+
+					p {
+						//display: inline-block;
+						overflow: hidden;
+						width: auto;
+						padding: 0px 20px;
+						margin-top: 0px;
 					}
 				}
 			}
@@ -194,6 +205,19 @@ img {
 			}
 		}
 	}
+}
+
+.viewer-bg {
+	background-color: $beige-transparent;
+}
+
+.text-bg {
+	background-color: $beige;
+
+	> div {
+		background-color: white;
+		box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+	}	
 }
 
 #login-form {
