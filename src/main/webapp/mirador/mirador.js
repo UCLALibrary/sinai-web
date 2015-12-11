@@ -8484,7 +8484,7 @@ window.Mirador = window.Mirador || function(config) {
                                  '<ul class="{{listingCssCls}}">',
                                  '{{#thumbs}}',
                                  '<li class="{{highlight}}">',
-                                 '<img class="thumbnail-image {{highlight}}" title="{{title}}" data-image-id="{{id}}" src="" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
+                                 '<img class="thumbnail-image {{highlight}}" title="{{title}}" data-image-id="{{id}}" src="{{thumbUrl}}" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
                                  '<div class="thumb-label">{{title}}</div>',
                                  '</li>',
                                  '{{/thumbs}}',
