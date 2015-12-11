@@ -23,7 +23,7 @@ function login(site) {
 			  constructGreetingBanner(json.name);
 
 			  // store username that is used to construct personalized banner
-			  localStorage['sinai-scholars-username'] = json.name;
+			  localStorage.setItem('sinai-scholars-username', json.name);
 			  
             });
           }
@@ -43,3 +43,60 @@ function login(site) {
   // close the login dialog box
   setTimeout(function() { $('#hide-login').click(); }, 1000);
 }
+	
+
+// Generates and inserts personalized message into the site banner
+
+function constructGreetingBanner(username) {
+
+    var bannerText = document.getElementById('greeting');
+    var logoutLink = document.createElement('a');
+    var nameStrongText = document.createElement('b');
+    var linkStrongText = document.createElement('b');
+
+    nameStrongText.innerHTML = username;
+    linkStrongText.innerHTML = 'logout';
+
+    logoutLink.setAttribute('href', '/logout');
+	logoutLink.setAttribute('onclick', 'logout()');
+    logoutLink.appendChild(linkStrongText);
+
+    bannerText.innerHTML = 'welcome, ';
+    bannerText.appendChild(nameStrongText);
+    bannerText.appendChild(document.createTextNode(' | '));
+    bannerText.appendChild(logoutLink);
+}
+
+
+// Handles the display of the login dialog box
+
+$(document).ready(function() {
+
+	// use to force login dialog box popup after redirect to "/"
+	localStorageKey = 'sinai-user-wants-to-log-in';
+
+	// if key-value pair exists, then show the dialog box
+	if (localStorage.getItem(localStorageKey) !== null)
+	{
+		$("#login-form").css("visibility", "visible");
+	}
+	
+	$("button#hide-login").on("click", function() {
+		$("#login-form").css("visibility", "hidden");
+		localStorage.removeItem(localStorageKey);
+	});
+
+	$("a").on("click", function() {
+
+		// if the login link is clicked, set localStorage
+		// otherwise, clear that key-value pair if it exists
+		if ($(this).attr("id") == "show-login")
+		{
+			localStorage.setItem(localStorageKey, true);
+		}
+		else
+		{
+			localStorage.removeItem(localStorageKey);
+		}
+	});
+});
