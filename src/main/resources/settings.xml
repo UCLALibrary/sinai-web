@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <profiles>
+    <profile>
+      <id>sinai-default-profile</id>
+      <activation>
+        <property>
+          <name>!skipDefaultProfile</name>
+        </property>
+      </activation>
+      <properties>
+        <!-- For connecting from tools like Eclipse's debugger -->
+        <jmx.tool>JDWP_AGENTLIB</jmx.tool>
+
+        <!-- For connecting from tools like visualvm and jconsole -->
+        <!-- <jmx.tool>JMX_REMOTE</jmx.tool> -->
+
+        <!-- For connecting from both types of tools at once -->
+        <!-- <jmx.tool>JDWP_AGENTLIB JMX_REMOTE</jmx.tool> -->
+      </properties>
+    </profile>
+  </profiles>
+</settings>
