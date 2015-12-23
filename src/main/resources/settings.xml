@@ -12,13 +12,13 @@
       </activation>
       <properties>
         <!-- For connecting from tools like Eclipse's debugger -->
-        <jmx.tool>JDWP_AGENTLIB</jmx.tool>
+        <dev.tools>JDWP_AGENTLIB</dev.tools>
 
         <!-- For connecting from tools like visualvm and jconsole -->
-        <!-- <jmx.tool>JMX_REMOTE</jmx.tool> -->
+        <!-- <dev.tools>JMX_REMOTE</dev.tools> -->
 
         <!-- For connecting from both types of tools at once -->
-        <!-- <jmx.tool>JDWP_AGENTLIB JMX_REMOTE</jmx.tool> -->
+        <!-- <dev.tools>JDWP_AGENTLIB JMX_REMOTE</dev.tools> -->
       </properties>
     </profile>
   </profiles>

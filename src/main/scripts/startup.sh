@@ -26,12 +26,12 @@ if [ -e "${sinai.json.config.path}" ]; then
   SINAI_CONFIG="-conf ${sinai.json.config.path}"
 fi
 
-if [[ "${jmx.tool}" == *"JDWP_AGENTLIB"* ]]; then
+if [[ "${dev.tools}" == *"JDWP_AGENTLIB"* ]]; then
   echo "Using JDWP_AGENTLIB for JMX connections (port 9003)"
   JMX_METRICS="$JMX_METRICS $JDWP_AGENTLIB"
 fi
 
-if [[ "${jmx.tool}" == *"JMX_REMOTE"* ]]; then
+if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   echo "Using JMX_REMOTE for JMX connections (port 9001)"
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
