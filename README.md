@@ -29,6 +29,22 @@ https://localhost/
 
 You will have to click through the security warning.
 
+### Connecting a JDWP agent or JMX monitor
+
+You can build the project with support for connecting a JDWP agent by running with:
+
+    mvn clean install -Ddev.tools=JDWP_AGENTLIB
+
+Or with support for a JMX monitor:
+
+    mvn clean install -Ddev.tools=JMX_REMOTE
+
+Or with both:
+
+    mvn clean install -Ddev.tools="JDWP_AGENTLIB JMX_REMOTE"
+
+You can also supply the `dev.tools` variable in a default Maven profile. See `src/main/resources/settings.xml` for an example.
+
 ### Contact
 
 Contact Kevin with any build, etc., questions you have.
