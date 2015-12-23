@@ -16,6 +16,7 @@
     <sinai.jks>sinai.jks</sinai.jks>
     <!-- These are samples for testing purposes only ... DO NOT USE THEM IN PRODUCTION!!! -->
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
+    <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
     <vertx.version>3.1.0</vertx.version>
