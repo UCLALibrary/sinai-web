@@ -19,17 +19,34 @@ function login(site) {
               var button = document.getElementById(site + 'Button');
               button.innerHTML = 'Logged into ' + site.charAt(0).toUpperCase() + site.slice(1);
 
-			  // replace generic banner with personalized greeting
-			  constructGreetingBanner(json.name);
+              // replace generic banner with personalized greeting
+              constructGreetingBanner(json.name);
 
-			  // store username that is used to construct personalized banner
-			  localStorage.setItem('sinai-scholars-username', json.name);
-			  
+              // store username that is used to construct personalized banner
+              localStorage.setItem('sinai-scholars-username', json.name);  
             });
           }
 
           console.log('Signed into ' + site);
         } else {
+
+          // Something went wrong
+          try {
+
+            // See if the response is JSON
+            var serverResponse = JSON.parse(this.responseText);
+            if (serverResponse.message === 'Not an allowed email') {
+              alert('Please log out of the Google account "' + serverResponse.email + '" to proceed.');
+            }
+          } catch (e) {
+            if (e instanceof SyntaxError) {
+              // this.responseText is not JSON
+            }
+            else {
+              // some other error
+              throw e;
+            }
+          }
           console.log('Server response: ' + this.responseText);
         }
       };
@@ -43,7 +60,6 @@ function login(site) {
   // close the login dialog box
   setTimeout(function() { $('#hide-login').click(); }, 1000);
 }
-	
 
 // Generates and inserts personalized message into the site banner
 
@@ -58,7 +74,7 @@ function constructGreetingBanner(username) {
     linkStrongText.innerHTML = 'logout';
 
     logoutLink.setAttribute('href', '/logout');
-	logoutLink.setAttribute('onclick', 'logout()');
+    logoutLink.setAttribute('onclick', 'logout()');
     logoutLink.appendChild(linkStrongText);
 
     bannerText.innerHTML = 'welcome, ';
@@ -72,31 +88,31 @@ function constructGreetingBanner(username) {
 
 $(document).ready(function() {
 
-	// use to force login dialog box popup after redirect to "/"
-	localStorageKey = 'sinai-user-wants-to-log-in';
+    // use to force login dialog box popup after redirect to "/"
+    localStorageKey = 'sinai-user-wants-to-log-in';
 
-	// if key-value pair exists, then show the dialog box
-	if (localStorage.getItem(localStorageKey) !== null)
-	{
-		$("#login-form").css("visibility", "visible");
-	}
-	
-	$("button#hide-login").on("click", function() {
-		$("#login-form").css("visibility", "hidden");
-		localStorage.removeItem(localStorageKey);
-	});
+    // if key-value pair exists, then show the dialog box
+    if (localStorage.getItem(localStorageKey) !== null)
+    {
+        $("#login-form").css("visibility", "visible");
+    }
+    
+    $("button#hide-login").on("click", function() {
+        $("#login-form").css("visibility", "hidden");
+        localStorage.removeItem(localStorageKey);
+    });
 
-	$("a").on("click", function() {
+    $("a").on("click", function() {
 
-		// if the login link is clicked, set localStorage
-		// otherwise, clear that key-value pair if it exists
-		if ($(this).attr("id") == "show-login")
-		{
-			localStorage.setItem(localStorageKey, true);
-		}
-		else
-		{
-			localStorage.removeItem(localStorageKey);
-		}
-	});
+        // if the login link is clicked, set localStorage
+        // otherwise, clear that key-value pair if it exists
+        if ($(this).attr("id") == "show-login")
+        {
+            localStorage.setItem(localStorageKey, true);
+        }
+        else
+        {
+            localStorage.removeItem(localStorageKey);
+        }
+    });
 });

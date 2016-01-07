@@ -6,8 +6,10 @@ import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Metadata.CONTENT_TYPE;
 import static edu.ucla.library.sinai.Metadata.TEXT_MIME_TYPE;
+import static edu.ucla.library.sinai.Metadata.JSON_MIME_TYPE;
 
 import javax.security.auth.login.FailedLoginException;
+import java.lang.ClassCastException;
 
 import org.javatuples.Pair;
 
@@ -25,6 +27,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.DecodeException;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.ext.web.RoutingContext;
@@ -178,11 +181,34 @@ public class LoginHandler extends SinaiHandler {
                 });
             } catch (final FailedLoginException details) {
                 final HttpServerResponse response = myContext.response();
+                String loggerMessage;
+                String responseBody;
 
-                LOGGER.error(details.getMessage());
+                // Check to see why the login failed
+                try {
+                    final JsonObject exceptionJsonMessage = new JsonObject(details.getMessage());
+                    try {
+                        loggerMessage = exceptionJsonMessage.getString("message") + ": " + exceptionJsonMessage.getString("email");
+                    } catch (ClassCastException e) {
+                        LOGGER.error("Cannot decode the error message of the exception thrown by extractJWT: invalid JSON");
+                        throw e;
+                    }
 
-                response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
-                response.end(FAILURE_RESPONSE);
+                    // JSON response
+                    response.putHeader(CONTENT_TYPE, JSON_MIME_TYPE);
+                    responseBody = details.getMessage();
+
+                } catch (DecodeException e) {
+                    loggerMessage = details.getMessage();
+
+                    // Plain-text response
+                    response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
+                    responseBody = FAILURE_RESPONSE;
+                }
+
+                response.end(responseBody);
+
+                LOGGER.error(loggerMessage);
 
                 myClient.close();
             }
@@ -207,7 +233,10 @@ public class LoginHandler extends SinaiHandler {
                     if (email.equals("")) {
                         throw new FailedLoginException("No email was retrieved from OAuth");
                     } else {
-                        throw new FailedLoginException("Not an allowed email: " + email);
+                        // Use the extant JsonObject
+                        jsonObject.put("message", "Not an allowed email");
+                        jsonObject.put("email", email);
+                        throw new FailedLoginException(jsonObject.toString());
                     }
                 }
             }
