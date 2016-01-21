@@ -186,22 +186,33 @@ public class LoginHandler extends SinaiHandler {
 
                 // Check to see why the login failed
                 try {
+                    // The following statement will throw DecodeException if details.getMessage()
+                    // does not return a valid string-ified JsonObject
                     final JsonObject exceptionJsonMessage = new JsonObject(details.getMessage());
+
                     try {
-                        loggerMessage = exceptionJsonMessage.getString("message") + ": " + exceptionJsonMessage.getString("email");
+                        // Log the concatenation of the JSON values
+                        loggerMessage = exceptionJsonMessage.getString("message") + ": "
+                            + exceptionJsonMessage.getString("email");
                     } catch (ClassCastException e) {
-                        LOGGER.error("Cannot decode the error message of the exception thrown by extractJWT: invalid JSON");
+                        LOGGER.error(
+                            "Cannot decode the error message of the exception thrown by extractJWT:"
+                            + "invalid JSON");
+
+                        // TODO: will never reach this statement, but should discuss what to do here
                         throw e;
                     }
 
-                    // JSON response
+                    // If we get here, send JSON response to client for easier parsing
                     response.putHeader(CONTENT_TYPE, JSON_MIME_TYPE);
+                    // TODO: make a new constant for this error message (FAILURE_RESPONSE_BAD_EMAIL)
                     responseBody = details.getMessage();
 
                 } catch (DecodeException e) {
                     loggerMessage = details.getMessage();
 
-                    // Plain-text response
+                    // If we get here, send plain-text response to client (won't be parsed)
+                    // TODO: all responses should probably be the same format (JSON)
                     response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
                     responseBody = FAILURE_RESPONSE;
                 }
@@ -231,6 +242,8 @@ public class LoginHandler extends SinaiHandler {
 
                 if (!found) {
                     if (email.equals("")) {
+                        // TODO: might want to pass JSON instead of a string, for consistency with
+                        // the 'else' block below
                         throw new FailedLoginException("No email was retrieved from OAuth");
                     } else {
                         // Use the extant JsonObject

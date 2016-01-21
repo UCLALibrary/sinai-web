@@ -33,19 +33,25 @@ function login(site) {
           // Something went wrong
           try {
 
-            // See if the response is JSON
+            // See if the response is JSON. The following statement throws SyntaxError if
+            // this.responseText is not a valid string-ified JSON object
             var serverResponse = JSON.parse(this.responseText);
+
             if (serverResponse.message === 'Not an allowed email') {
               alert('Please log out of the Google account "' + serverResponse.email + '" to proceed.');
             }
-          } catch (e) {
-            if (e instanceof SyntaxError) {
-              // this.responseText is not JSON
-            }
             else {
-              // some other error
+              // handle other error messages here
+              // No other messages supported now, so throw exception
+              throw "Unknown error";
+            }
+          } catch (e) {
+
+            if (!(e instanceof SyntaxError)) {
+              // "Unknown error"
               throw e;
             }
+            // If we get here, then this.responseText is just plaintext
           }
           console.log('Server response: ' + this.responseText);
         }
@@ -97,15 +103,15 @@ $(document).ready(function() {
         $("#login-form").css("visibility", "visible");
     }
     
+    // 'cancel' button on the dialog box
     $("button#hide-login").on("click", function() {
         $("#login-form").css("visibility", "hidden");
         localStorage.removeItem(localStorageKey);
     });
 
+    // if the login link is clicked, set localStorage
+    // otherwise, clear that key-value pair if it exists
     $("a").on("click", function() {
-
-        // if the login link is clicked, set localStorage
-        // otherwise, clear that key-value pair if it exists
         if ($(this).attr("id") == "show-login")
         {
             localStorage.setItem(localStorageKey, true);
