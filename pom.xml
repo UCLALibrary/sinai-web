@@ -21,7 +21,7 @@
     <!-- Versions of dependencies managed in this POM -->
     <vertx.version>3.1.0</vertx.version>
     <javatuples.version>1.2</javatuples.version>
-    <freelib.utils.version>0.6.0-SNAPSHOT</freelib.utils.version>
+    <freelib.utils.version>0.6.1-SNAPSHOT</freelib.utils.version>
     <handlebars.version>2.2.3</handlebars.version>
     <scribe.version>1.3.7</scribe.version>
 
@@ -579,7 +579,7 @@
   <parent>
     <groupId>info.freelibrary</groupId>
     <artifactId>freelib-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.3</version>
   </parent>
 
 </project>
