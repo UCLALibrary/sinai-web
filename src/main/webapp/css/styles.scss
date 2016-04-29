@@ -169,7 +169,7 @@ img {
 						vertical-align: middle;
 					}
 
-					img {
+					img.browse-thumbnail {
 						//vertical-align: top;
 						float: left;
 					}
@@ -180,7 +180,17 @@ img {
 						width: auto;
 						padding: 0px 20px;
 						margin-top: 0px;
+
 					}
+                    
+                    a.beta {
+                        color: #003CC9;
+                        padding-left: 50px;
+
+                        img {
+                            vertical-align: middle;
+                        }
+                    }
 				}
 			}
 
