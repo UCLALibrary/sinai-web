@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    <script src="/mirador-flex/mirador.js"></script>
+    <link href="/mirador-flex/css/mirador-combined.css" rel="stylesheet" type="text/css">
+    <title>Mirador Viewer</title>
+    <style type="text/css">
+     #viewer {  width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="viewer"></div>
+
+    <script type="text/javascript">
+
+     $(function() {
+         var anno_token;
+         Mirador({
+          "id": "viewer",
+          "showAddFromURLBox": false,
+          "layout": "1x2",
+          "data": [{
+            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "location": "UCLA"
+          },{
+            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "location": "UCLA"
+          }],
+          "windowObjects": [{
+            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "slotAddress" : "row1.column1",
+            "availableViews": ["ImageView"],
+            "viewType": "ImageView",
+            "annotationLayer": false,
+            "annotationState": "annoOff",
+            "overlay": false,
+            "fullScreen": true,
+            "displayLayout": true,
+            "layoutOptions": {
+              "close": true
+            },
+            "bottomPanel": false,
+            "bottomPanelVisible": false,
+            "sidePanel": false,
+            "sidePanelVisible": false
+          },{
+            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "slotAddress" : "row1.column2",
+            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
+            "viewType": "ImageView",
+            "annotationLayer": false,
+            "annotationState": "annoOff",
+            "overlay": false,
+            "fullScreen": true,
+            "displayLayout": true,
+            "layoutOptions": {
+              "newObject": true,
+              "close": true,
+              "slotRight": true,
+              "slotBelow": true
+            },
+            "bottomPanel": true,
+            "bottomPanelVisible": true,
+            "sidePanel": false,
+            "sidePanelVisible": false
+          }]
+        });
+     });
+    </script>
+</body>
+</html>

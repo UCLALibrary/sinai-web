@@ -38,7 +38,7 @@ public interface RoutePatterns {
      */
     public static final String STATUS = "/status/*";
 
-    public static final String VIEWER_RE = "\\/(view(er)?|scan)\\/.*";
+    public static final String VIEWER_RE = "\\/(view(er2?)?|scan)\\/.*";
 
     /**
      * A route pattern for serving static files.
