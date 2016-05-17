@@ -57,7 +57,7 @@
           }
         };
 
-        $.getJSON('https://stage-images.library.ucla.edu/iiif/{{id}}/manifest/thumbnails', setup);
+        $.getJSON('{{imageserver}}/iiif/{{id}}/manifest/thumbnails', setup);
       });
     </script>
   </head>

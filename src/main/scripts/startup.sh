@@ -4,7 +4,8 @@
 LOG_DELEGATE="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
 KEY_PASS_CONFIG="-Dsinai.key.pass=${sinai.key.pass}"
 SINAI_TEMP_DIR="-Dsinai.temp.dir=${sinai.temp.dir}"
-SINAI_PORT="-Dsinai.port=${sinai.port}"
+SINAI_PORT="-Dsinai.port=${sinai.port} -Dsinai.redirect.port=${sinai.redirect.port}"
+IMAGE_SERVER="-Dsinai.image.server=${sinai.image.server}"
 DROPWIZARD_METRICS="-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=sinai.metrics"
 JMX_METRICS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true"
 # For tools like Eclipse's Debugging
@@ -36,5 +37,5 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS \
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS \
   $JMX_METRICS $1 -jar target/sinai-web-${project.version}-exec.jar $SINAI_CONFIG

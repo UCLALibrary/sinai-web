@@ -23,14 +23,14 @@
           "showAddFromURLBox": false,
           "layout": "1x2",
           "data": [{
-            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest",
             "location": "UCLA"
           },{
-            "manifestUri": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "manifestUri": "{{imageserver}}/iiif/{{selected}}/manifest",
             "location": "UCLA"
           }],
           "windowObjects": [{
-            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{id}}/manifest",
+            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
             "slotAddress" : "row1.column1",
             "availableViews": ["ImageView"],
             "viewType": "ImageView",
@@ -47,7 +47,7 @@
             "sidePanel": false,
             "sidePanelVisible": false
           },{
-            "loadedManifest": "https://stage-images.library.ucla.edu/iiif/{{selected}}/manifest",
+            "loadedManifest": "{{imageserver}}/iiif/{{selected}}/manifest",
             "slotAddress" : "row1.column2",
             "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
             "viewType": "ImageView",
