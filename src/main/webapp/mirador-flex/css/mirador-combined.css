@@ -3836,6 +3836,7 @@ li.highlight {
   right:0px;
   top:30px;
 }
+
 /* Additions to support image manipulation. */
 .mirador-osd-contrast {
   font-size: 103%;
@@ -3955,6 +3956,7 @@ li.highlight {
   font-size: 88%;
 }
 /* end of Additions to support image manipulation. */
+
 .mirador-osd-up {
   position:absolute;
   right:51px;
