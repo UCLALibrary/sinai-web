@@ -34,6 +34,11 @@ public interface RoutePatterns {
     public static final String LOGOUT = "/logout";
 
     /**
+     * A path for the browse page.
+     */
+    public static final String BROWSE = "/browse";
+
+    /**
      * A generic path for Web application metrics.
      */
     public static final String STATUS = "/status/*";

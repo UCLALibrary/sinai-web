@@ -23,6 +23,7 @@ import edu.ucla.library.sinai.handlers.LoginHandler;
 import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.MiradorHandler;
+import edu.ucla.library.sinai.handlers.PageHandler;
 import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
@@ -138,7 +139,10 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Then we have the plain old administrative UI patterns
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
 
-        // Create a index handler just to test for session; this could go in template handler
+        // We just use the generic handler for browse page
+        router.get(BROWSE).handler(new PageHandler(myConfig));
+
+        // Create a catch-all that passes content to the template handler
         router.get().handler(templateHandler).failureHandler(failureHandler);
 
         // Configure our StatusHandler, used by the Nagios script
