@@ -21,35 +21,14 @@
          Mirador({
           "id": "viewer",
           "showAddFromURLBox": false,
-          "layout": "1x2",
+          "layout": "1",
           "data": [{
             "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest",
-            "location": "UCLA"
-          },{
-            "manifestUri": "{{imageserver}}/iiif/{{selected}}/manifest",
             "location": "UCLA"
           }],
           "windowObjects": [{
             "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
-            "slotAddress" : "row1.column1",
-            "availableViews": ["ImageView"],
-            "viewType": "ImageView",
-            "annotationLayer": false,
-            "annotationState": "annoOff",
-            "overlay": false,
-            "fullScreen": true,
-            "displayLayout": true,
-            "layoutOptions": {
-              "newObject": true,
-              "close": true
-            },
-            "bottomPanel": false,
-            "bottomPanelVisible": false,
-            "sidePanel": false,
-            "sidePanelVisible": false
-          },{
-            "loadedManifest": "{{imageserver}}/iiif/{{selected}}/manifest",
-            "slotAddress" : "row1.column2",
+            "slotAddress" : "row1",
             "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
             "viewType": "ImageView",
             "annotationLayer": false,
