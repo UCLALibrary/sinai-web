@@ -197,12 +197,13 @@ img {
                     }
 				}
 			}
-
-			#narrow-search {
-				width: 25%;
-				float: right;
-			}
 		}
+
+        #browse-error {
+            code.error-code {
+                color: $maroon;
+            }
+        }
 
 		p > a {
 			color: $maroon;
@@ -285,7 +286,7 @@ img {
 
 				&:hover
 				{
-					color: #800020;
+					color: $maroon;
 				}
 
 				> img {

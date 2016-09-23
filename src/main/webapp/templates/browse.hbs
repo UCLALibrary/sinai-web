@@ -1,132 +1,48 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<link rel="stylesheet" type="text/css" href="/css/fonts.css" />
-	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
 
-	<script src="/js/jquery-1.11.1.min.js"></script>
-	<script src="/js/login.js"></script>
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    <script src="/js/login.js"></script>
   </head>
   <body>
     {{> templates/header}}
     <div id="main" class="text-bg">
-		<div>
-			<h1>Browse</h1>
+      <div>
+        <h1>Browse Manuscripts by Shelfmark</h1>
 
-			<form>
-				<input type="text" name="query" value="Search title, date, location">
-				<input type="submit" name="search" value="Search">
-			</form>
-
-			<div id="browse-main-content">
-				<div id="search-results">
-					<h3>2 results</h3>
-
-					<ul>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz14q7rws/0,1022,6132,6132/150,150/0/default.jpg" alt="AraN8">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz1kd1z25">Arabic NF 8</a> 
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz14q7rws"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> Arabic<br>
-								<b>New Find:</b> yes<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1np24m5/0,902,5412,5412/150,150/0/default.jpg" alt="Syr2A">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz1h70g33">Syriac 2A</a> 
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz1np24m5"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> Arabic<br>
-								<b>New Find:</b> yes<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1dj5fzz/1022,0,6132,6132/150,150/0/default.jpg" alt="CPA_NF_frg._5">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz14m95mw">CPA_NF_frg._5</a>
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz14m95mw"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> ???<br>
-								<b>New Find:</b> ???<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1f47pgh/0,1022,6132,6132/150,150/0/default.jpg" alt="CPA_NF_frg._16">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz18c9x9s">CPA_NF_frg._16</a>
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz18c9x9s"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> ???<br>
-								<b>New Find:</b> ???<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1b56k4t/0,1022,6132,6132/150,150/0/default.jpg" alt="Syriac_NF_frg._53">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz10v8dvq">Syriac_NF_frg._53</a>
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz10v8dvq"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> ???<br>
-								<b>New Find:</b> ???<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1gx4bvd/1022,0,6132,6132/150,150/0/default.jpg" alt="Syriac_NF_frg._74">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz1w37xcr">Syriac_NF_frg._74</a>
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz1w37xcr"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> ???<br>
-								<b>New Find:</b> ???<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-						<li>
-								<span class="helper"></span>
-								<img class='browse-thumbnail' src="{{imageserver}}/iiif/ark:%2F21198%2Fz1gb24c1/1022,0,6132,6132/150,150/0/default.jpg" alt="Syriac_NF_frg._75">
-								<p>
-								<a href="/view/ark%3A%2F21198%2Fz1rb75nd">Syriac_NF_frg._75</a>
-                                <a class="beta" href="/viewer2/ark:%2F21198%2Fz1rb75nd"><img src="http://www.optrip.com/images/logo/optrip-beta.png" alt="beta">FLEXIBLE WORKSPACE VIEWER</a><br><br>
-								<b>Language:</b> ???<br>
-								<b>New Find:</b> ???<br>
-								<b>Date:</b> ???<br>
-								<b>Description:</b> ???
-								</p>
-						</li>
-					</ul>
-				</div>
-
-				<div id="narrow-search">
-					<h3>narrow your search</h3>
-
-					<form>
-						<!-- date slider -->
-						<input type="checkbox" name="new"> New<br>
-						<input type="checkbox" name="fragment"> Fragment<br>
-						<input type="checkbox" name="0"> xxx<br>
-						<input type="checkbox" name="1"> xxx<br>
-						<input type="checkbox" name="2"> xxx<br>
-						<input type="checkbox" name="3"> xxx<br>
-						<input type="checkbox" name="4"> xxx
-						
-					</form>
-				</div>
-			</div>
-		</div>
+        {{#unless error}}
+        <div id="browse-main-content">
+          <div id="search-results">
+            <ul>
+              {{#each sinai-manuscript-metadata}}
+              <li>
+                <span class="helper"></span>
+                <img class='browse-thumbnail' src="{{imageserver}}/iiif/{{ThumbnailURLFragment}}" alt="{{Title}}">
+                <p>
+                  <a href="/viewer2/{{urlencode ARK}}">{{Title}}</a><br><br>
+                  <b>Overtext Languages:</b> {{OvertextLanguages}}<br>
+                  <b>Overtext Content:</b> {{OvertextContent}}<br>
+                  <b>Undertext Languages:</b> {{UndertextLanguages}}<br>
+                  <b>Date:</b> {{Date}}<br>
+                  <b>Extent:</b> {{Extent}}<br>
+                  <b>Form:</b> {{Form}}<br>
+                </p>
+              </li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+        {{else}}
+        <div id="browse-error">
+          <h3>Error</h3>
+          <p>There was an error generating this page. Please report the following to the system administrator:</p>
+          <code class="error-code">{{error}}</code>
+        </div>
+        {{/unless}}
+      </div>
     </div>
     {{> templates/footer}}
   </body>
