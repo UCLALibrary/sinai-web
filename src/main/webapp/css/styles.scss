@@ -5,46 +5,41 @@ $brown: #CBC5BA;
 $black-transparent: rgba(0, 0, 0, 0.8);
 $beige-transparent: rgba(255, 247, 233, 0.8);
 
-/*
- * by tag
- */
-
-html {
-	background-color: $beige;
+@mixin font-settings {
 	font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif; 
 	font-size: 1em;
 	font-weight: 300;
 	line-height: 1.538;
 }
 
-body {
+/*
+ * by class
+ */
+
+body.sinai-body {
+    @include font-settings;
+	background-color: $beige;
 	background-image: url("../images/bg-header.jpg");
 	background-repeat: no-repeat;
 	background-position: center top;
 	margin: 0;
-}
+    padding: 0;
+    height: 100%;
 
-ul {
-	list-style: outside none none;
-	margin: 0;
-	padding: 0;
-}
+    ul {
+	    list-style: outside none none;
+	    margin: 0;
+	    padding: 0;
+    }
 
-a {
-		/*
-	max-width: 100%;
-	max-height: 100%;
-	*/
-	text-decoration: none;
-}
+    img {
+	    border: none;
+    }
 
-img {
-	border: none;
+    a {
+	    text-decoration: none;
+    }
 }
-
-/*
- * by class
- */
 
 .center-fixed-width {
 	margin: auto;
@@ -54,6 +49,7 @@ img {
 }
 
 .navbar {
+    @include font-settings;
 	> ul {
 		@extend .center-fixed-width;
 		color: white;
@@ -257,8 +253,15 @@ img {
 	p {
 		margin: 0;
 	}
-
 }
+
+/*
+#footer {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+}
+*/
 
 #footer-navbar {
 	@extend .navbar;
