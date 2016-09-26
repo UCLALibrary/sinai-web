@@ -18,43 +18,51 @@
     </style>
 
 </head>
-<body>
+  <body>
     {{> templates/main-navbar}}
-    <div id="viewer"></div>
+    {{#unless error}}
+      <div id="viewer"></div>
 
-    <script type="text/javascript">
+      <script type="text/javascript">
 
-     $(function() {
-         var anno_token;
-         Mirador({
-          "id": "viewer",
-          "showAddFromURLBox": false,
-          "layout": "1",
-          "data": [{
-            "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest",
-            "location": "UCLA"
-          }],
-          "windowObjects": [{
-            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
-            "slotAddress" : "row1",
-            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
-            "viewType": "ImageView",
-            "annotationLayer": false,
-            "annotationState": "annoOff",
-            "overlay": false,
-            "fullScreen": true,
-            "displayLayout": true,
-            "layoutOptions": {
-              "newObject": true,
-              "close": true,
-            },
-            "bottomPanel": true,
-            "bottomPanelVisible": true,
-            "sidePanel": false,
-            "sidePanelVisible": false
-          }]
-        });
-     });
-    </script>
-</body>
+       $(function() {
+           var anno_token;
+           Mirador({
+            "id": "viewer",
+            "showAddFromURLBox": false,
+            "layout": "1",
+            "data": [
+              {{#each sinai-manuscript-metadata}}
+              {
+                "manifestUri": "{{imageserver}}/iiif/{{urlencode ARK}}/manifest",
+                "location": "UCLA"
+              },
+              {{/each}}
+            ],
+            "windowObjects": [{
+              "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
+              "slotAddress" : "row1",
+              "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
+              "viewType": "ImageView",
+              "annotationLayer": false,
+              "annotationState": "annoOff",
+              "overlay": false,
+              "fullScreen": true,
+              "displayLayout": true,
+              "layoutOptions": {
+                "newObject": true,
+                "close": true,
+              },
+              "bottomPanel": true,
+              "bottomPanelVisible": true,
+              "sidePanel": false,
+              "sidePanelVisible": false
+            }]
+          });
+       });
+      </script>
+    {{else}}
+      <p>There was an error loading Mirador. Please contact the system administrator.</p>
+    {{/unless}}
+  </body>
 </html>
