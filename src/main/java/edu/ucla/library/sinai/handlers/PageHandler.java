@@ -12,8 +12,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.ucla.library.sinai.Configuration;
 import io.vertx.ext.web.RoutingContext;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.lang.Exception;
 
 /**
@@ -38,16 +39,9 @@ public class PageHandler extends SinaiHandler {
         if (aContext.normalisedPath().equals(BROWSE)) {
             try {
                 String metadataFilePath = System.getProperty(MANUSCRIPT_METADATA_PROP);
-                File metadataFile = new File(metadataFilePath);
+                InputStream in = getClass().getResourceAsStream(metadataFilePath); 
+                BufferedReader metadataFile = new BufferedReader(new InputStreamReader(in));
                 jsonNode = (ObjectNode) mapper.readTree(metadataFile);
-            } catch (IOException e) {
-                errorMessage = "The manuscript metadata file cannot be read. ERROR: " + e.toString();
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
-                }
-
-                jsonNode = mapper.createObjectNode();
-                jsonNode.put("error", errorMessage);
             } catch (Exception e) {
                 errorMessage = "Something went wrong while loading the manuscript metadata. ERROR: " + e.toString();
                 if (LOGGER.isDebugEnabled()) {
