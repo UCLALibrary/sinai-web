@@ -66,7 +66,8 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
         myHandlebars.registerHelper("urlencode", new Helper<String>() {
             public String apply(String str, Options options) {
                 try {
-                    return URLEncoder.encode(str, "UTF-8");
+                    // do not want to encode colons
+                    return URLEncoder.encode(str, "UTF-8").replace("%3A", ":");
                 } catch (UnsupportedEncodingException e) {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("{} UTF-8 is unsupported: {}", HandlebarsTemplateEngineImpl.class, e.toString());
