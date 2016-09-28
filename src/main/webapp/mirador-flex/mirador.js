@@ -21255,6 +21255,18 @@ return paper;
         _this.renderDragHandles();
         _this.saveSnapGroupState();
       });
+
+      _this.eventEmitter.subscribe('BROWSER_VIEWPORT_RESIZED', function(event) {
+        _this.resizeDraggableBoundingBoxes();
+      });
+
+      _this.eventEmitter.subscribe('ADD_DUPLICATE_WINDOW', function(event, config) {
+        // add blank slot
+        _this.eventEmitter.publish('ADD_FLEXIBLE_SLOT');
+        config.slotAddress = _this.getAvailableSlot().layoutAddress;
+        // instantiate the blank slot
+        _this.eventEmitter.publish('ADD_WINDOW', config);
+      });
     },
 
     get: function(prop, parent) {
@@ -21272,6 +21284,13 @@ return paper;
         this[prop] = value;
       }
       _this.eventEmitter.publish(prop + '.set', value);
+    },
+
+    // reset the draggable area bounding boxes when the browser viewport is resized
+    resizeDraggableBoundingBoxes: function() {
+      ['layout-slot.ui-draggable', 'drag-handle.ui-draggable'].forEach(function(i) {
+        jQuery('.' + i).draggable('option', 'containment', $.getWorkspaceBoundingBox(i));
+      });
     },
 
     /*
@@ -21629,11 +21648,17 @@ return paper;
           'border-top-right-radius': '8px',
           'height': '25px',
           'position': 'absolute',
-          'width': '50px'
+          'width': '100px'
+        })
+        .on('click', function() {
+          // Bring clicked window to the top
+          $.bringEltToTop.call(this, '.layout-slot, .drag-handle');
+          d3.event.stopPropagation();
         })
         .each(function(d) {
           // make this a draggable element that can drag multiple other draggable elements
           jQuery(this).draggable({
+            containment: $.getWorkspaceBoundingBox('drag-handle.ui-draggable'),
             multiple: {
               items: function getSelectedItems() {
                 return jQuery('.ui-draggable.' + d.name);
@@ -21673,8 +21698,14 @@ return paper;
           assocSnapGroup = _this.getSnapGroupObject(d.name);
           if (assocSnapGroup.left === undefined && assocSnapGroup.top === undefined) {
             // new dragHandle, so give it the defaults and update the data model
-            d3.select(this).style({'left': 75*n + 'px', 'top': '50px'});
-            _this.updateDragHandlePosition(d.name, {'left': 75*n, 'top': 50});
+            var windowDims = $.getBrowserViewportDimensions(),
+                ll = Math.floor((windowDims.x - 100)/2),
+                tt = Math.floor((windowDims.y - 25)/2);
+            d3.select(this).style({'left': ll + 'px', 'top': tt + 'px'});
+            _this.updateDragHandlePosition(d.name, {'left': ll, 'top': tt});
+
+            // bring it to front
+            $.bringEltToTop.call(this, '.layout-slot, .drag-handle');
           }
           else {
             // restoring a dragHandle, so set only the style
@@ -21720,12 +21751,15 @@ return paper;
       // default slot window dimensions
       slotX = 50,
       slotY = 50,
-      slotDX = 500,
-      slotDY = 500,
+      slotDX = 750,
+      slotDY = 750,
 
       children,
       child,
-      tscKey;
+      tscKey,
+      
+      // call $.bringToFront() on these
+      newNodesBringToFront = [];
 
       /*
        * Saves the slotCoordinates from the given layout node,
@@ -21793,11 +21827,14 @@ return paper;
 
           // if _this.slotCoordinates doesnt have anything for this children item, new window
           if (!_this.slotCoordinates[tscKey]) {
+            var windowDims = $.getBrowserViewportDimensions();
             _this.slotCoordinates[tscKey] = {};
-            _this.slotCoordinates[tscKey].x = slotX * (j + 1);
-            _this.slotCoordinates[tscKey].y = slotY * (j + 1);
+            _this.slotCoordinates[tscKey].x = Math.floor((windowDims.x - slotDX)/2);
+            _this.slotCoordinates[tscKey].y = slotY;
             _this.slotCoordinates[tscKey].dx = slotDX;
             _this.slotCoordinates[tscKey].dy = slotDY;
+
+            newNodesBringToFront.push(tscKey);
           }
 
           // restore the layout object
@@ -21842,35 +21879,16 @@ return paper;
           eventEmitter: _this.eventEmitter
         }));
 
-        _this.updateConnectivityGraphAndClasses({option: 'addWindow', eltName: d.id});
-      })
-      .on('click', function() {
-        // Bring clicked window to the top
-        var elem = this,
-        stack = '.layout-slot',
-        min,
-        group = jQuery.makeArray(jQuery(stack)).sort(function(a, b) {
-          return (parseInt(jQuery(a).css("zIndex"), 10) || 0) - (parseInt(jQuery(b).css("zIndex"), 10) || 0);
-        });
-        if (group.length < 1) {
-          return;
+        // bring to front
+        if (newNodesBringToFront.indexOf(d.id) !== -1) {
+          $.bringEltToTop.call(this, '.layout-slot, .drag-handle');
         }
-        min = parseInt(group[0].style.zIndex, 10) || 0;
-        jQuery(group).each(function(i) {
-          this.style.zIndex = min+i;
-        });
-        /* // why do we need the following check
-        if (elem === undefined) {
-          return;
-        }
-        */
-        jQuery(elem).css({'zIndex' : min+group.length});
 
-        d3.event.stopPropagation();
-      })
-      .each(function() {
+        _this.updateConnectivityGraphAndClasses({option: 'addWindow', eltName: d.id});
+
         jQuery(this)
         .draggable({
+          containment: $.getWorkspaceBoundingBox('layout-slot.ui-draggable'),
           handle: '.manifest-info',
           stack: '.layout-slot',
           snap: '.layout-slot, .drag-handle',
@@ -21904,6 +21922,11 @@ return paper;
           // fit image choice menu to the new window size
           _this.eventEmitter.publish('fitImageChoiceMenu');
         });
+      })
+      .on('click', function() {
+        // Bring clicked window to the top
+        $.bringEltToTop.call(this, '.layout-slot, .drag-handle');
+        d3.event.stopPropagation();
       });
 
       // Exit
@@ -22450,6 +22473,20 @@ return paper;
         type: 'checkbox',
         disabled: false,
         test:function(lg) { return function(d) { return lg.byGroup[d].settings.reset ? 'checked' : '';};}
+      },
+      {
+        name: 'rulerControls',
+        label: 'ruler controls',
+        type: 'checkbox',
+        disabled: false,
+        test:function(lg) { return function(d) { return lg.byGroup[d].settings.rulerControls ? 'checked' : '';};}
+      },
+      {
+        name: 'navigationControls',
+        label: 'navigation controls',
+        type: 'checkbox',
+        disabled: false,
+        test:function(lg) { return function(d) { return lg.byGroup[d].settings.navigationControls ? 'checked' : '';};}
       }
     ];
 
@@ -23042,8 +23079,8 @@ return paper;
           continue;
         }
 
-        var aspectRatio = canvas.height/canvas.width,
-        width = (_this.thumbHeight/aspectRatio);
+        // we want a square thumbnail
+        width = _this.thumbHeight;
         url = _this.manifest.getThumbnailForCanvas(canvas, width);
 
         _this.allImages.push({
@@ -23297,6 +23334,9 @@ return paper;
 
             jQuery(window).resize($.throttle(function() {
               _this.resizePanel();
+
+              // sent to workspace
+              _this.eventEmitter.publish('BROWSER_VIEWPORT_RESIZED');
             }, 50, true));
         },
         
@@ -23653,8 +23693,8 @@ return paper;
           // load file contents into local storage, keyed by sessionID
 	      localStorage.setItem(sessionID, event.target.result);
 
-	      // reload page to URL with sessionID appended
-	      window.location.assign("http://localhost:8000/#" + sessionID);
+	      // reload page to URL with new sessionID appended
+	      window.location.assign(window.location.origin + window.location.pathname + '#' + sessionID);
           window.location.reload();
         };
 	    fr.readAsText(file);
@@ -27535,6 +27575,24 @@ return paper;
       });
 
       /*
+       * Sync the ruler control action of any followers of the viewobject
+       *
+       * @param {Object} viewObj The leader.
+       */
+      _this.eventEmitter.subscribe('synchronizeRulerControls', function(event, data) {
+        _this.updateFollowers(data.viewObj, 'rulerControls', data.value);
+      });
+
+      /*
+       * Sync the navigation control action of any followers of the viewobject
+       *
+       * @param {Object} viewObj The leader.
+       */
+      _this.eventEmitter.subscribe('synchronizeNavigationControls', function(event, data) {
+        _this.updateFollowers(data.viewObj, 'navigationControls', data.value);
+      });
+
+      /*
        * Handle the request from the DOM to toggle settings for a lock group.
        *
        * @param {Object} data Contains
@@ -27590,7 +27648,9 @@ return paper;
             contrast: true,
             invert: true,
             grayscale: true,
-            reset: true
+            reset: true,
+            rulerControls: true,
+            navigationControls: true
           }
         };
         
@@ -27695,6 +27755,8 @@ return paper;
         case 'invert':
         case 'grayscale':
         case 'reset':
+        case 'rulerControls':
+        case 'navigationControls':
           // just flip the current setting
           settings[key] = !settings[key];
           break;
@@ -27763,6 +27825,13 @@ return paper;
                     break;
                   case 'rotation':
                     follower.imageRotate(value);
+                    break;
+                  case 'rulerControls':
+                    // calls the function with the argument on the window associated with the viewObject
+                    follower.windowObj[value.fn](value.arg);
+                    break;
+                  case 'navigationControls':
+                    this.eventEmitter.publish('SET_CURRENT_CANVAS_ID.' + follower.windowId, value);
                     break;
                   default:
                     // should never get here
@@ -27895,13 +27964,14 @@ return paper;
     },
 
     bindEvents: function() {
-      var _this = this,
-          dropTarget = this.element.find('.dropMask');
+      var _this = this;
+      // var dropTarget = this.element.find('.dropMask');
 
       this.element.find('.addItemLink').on('click', function(){ _this.addItem(); });
       this.element.find('.remove-slot-option').on('click', function(){
         _this.eventEmitter.publish('REMOVE_NODE', _this);
       });
+      /*
       this.element.on('dragover', function(e) {
         e.preventDefault();
         dropTarget.show();
@@ -27918,6 +27988,7 @@ return paper;
       this.element.on('drop', function(e) {
         _this.dropItem(e);
       });
+      */
     },
 
     dropItem: function(e) {
@@ -28063,16 +28134,16 @@ return paper;
                                  // if these are merely h1 tags for aesthetic purposes, it might be better to make them specific classes
                                 '<h1 class="plus" role="presentation" aria-label="Add item using Link">',
                                     '<span>+</span>',
-                                '<div class="dropIcon">',
-                                    '<i class="fa fa-level-down"></i>',
-                                '</div>',
+                                // '<div class="dropIcon">',
+                                //     '<i class="fa fa-level-down"></i>',
+                                // '</div>',
                                 '</h1>',
                                  '<h1 class="addItemText">{{t "addItem"}}</h1>',
-                                 '<h1 class="dropMeMessage">{{t "dropToLoad"}}</h1>',
+                                // '<h1 class="dropMeMessage">{{t "dropToLoad"}}</h1>',
                                  '</div>',
                                  '<a class="addItemLink" role="button" aria-label="Add item"></a>',
                                  '<a class="remove-slot-option"><i class="fa fa-times fa-lg fa-fw"></i> {{t "close"}}</a>',
-      '<a class="dropMask"></a>',
+      // '<a class="dropMask"></a>',
                                  '</div>'
     ].join(''))
   };
@@ -28247,8 +28318,6 @@ return paper;
       templateData.currentFocusClass = _this.iconClasses[_this.viewType];
       templateData.showFullScreen = _this.fullScreen;
 
-
-
       // get info about lockGroups
       templateData.lockGroups = Object.keys(this.lockController.getLockGroupData());
 
@@ -28401,6 +28470,13 @@ return paper;
 
       _this.eventEmitter.subscribe('SET_CURRENT_CANVAS_ID.' + this.id, function(event, canvasID) {
         _this.setCurrentCanvasID(canvasID);
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeNavigationControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: canvasID
+          });
+        }
       });
 
       _this.eventEmitter.subscribe('REMOVE_CLASS.' + this.id, function(event, className) {
@@ -28463,7 +28539,7 @@ return paper;
       _this.eventEmitter.subscribe('activateLockGroupMenuItem', function(event, data) {
         // check if this window has the window id
         // if so, set the li with the innerHTML that has groupID to data.groupId
-        if (data.windowId === _this.focusModules[_this.currentImageMode].windowId) { 
+        if (data.windowId === _this.focusModules[_this.currentImageMode].windowId) {
           _this.element.find('.add-to-lock-group').each(function(i, e) {
             if (e.innerHTML === data.groupId) {
               jQuery(this).parent().children('.add-to-lock-group').removeClass('current-lg');
@@ -28500,6 +28576,21 @@ return paper;
 
     bindEvents: function() {
       var _this = this;
+
+      // prevent infinite looping with coordinated zoom
+      this.element.on({
+        mouseenter: function() {
+          _this.leading = true;
+        },
+        mouseleave: function() {
+          _this.leading = false;
+        }
+      });
+
+      // onclick event to add the window to the selected lock group
+      this.element.find('.add-to-lock-group').on('click', function(event) {
+        _this.addToLockGroup(this);
+      });
 
       //this event should trigger from layout
       jQuery(window).resize($.debounce(function(){
@@ -28550,14 +28641,23 @@ return paper;
       */
       // TODO: remove the above
 
-      // onclick event to add the window to the selected lock group
-      this.element.find('.add-to-lock-group').on('click', function(event) {
-        _this.addToLockGroup(this);
-      });
-
       // onclick event to remove the window from its lock group
       this.element.find('.remove-from-lock-group').on('click', function(event) {
         _this.removeFromLockGroup(this);
+      });
+
+      this.element.find('.mirador-icon-duplicate-window').on('click', function(event) {
+        // get info of the current window to duplicate
+        var windowConfig = {
+          canvasID: _this.canvasID,
+          manifest: _this.manifest,
+          viewType: _this.currentImageMode,
+          choiceImageIDs: _this.choiceImageIDs,
+          slotAddress: null
+        };
+
+        // to workspace
+        _this.eventEmitter.publish('ADD_DUPLICATE_WINDOW', windowConfig);
       });
     },
 
@@ -28886,6 +28986,7 @@ return paper;
           manifest: this.manifest,
           appendTo: this.element.find('.view-container'),
           windowId: this.id,
+          windowObj: this,
           state:  this.state,
           eventEmitter: this.eventEmitter,
           canvasID: canvasID,
@@ -28904,6 +29005,9 @@ return paper;
       this.toggleFocus('ImageView', 'ImageView');
     },
 
+    /*
+     * @param {Array} data Array of objects that contains label and thumbnail url
+     */
     renderImageChoiceMenu: function(data) {
 
       // first remove inline style attr
@@ -28913,9 +29017,19 @@ return paper;
       var _this = this;
       var lis;
       
-      lis = d3.select(_this.element[0]).select('.multi-image-list').selectAll('li').data(data, function(d) { return d; });
+      lis = d3.select(_this.element[0]).select('.multi-image-list').selectAll('li').data(data, function(d) { return d.label; });
       lis.enter().append('li')
-        .text(function(d) { return d; })
+        .append('img')
+          .attr('src', function(d) { return d.thumbnail;})
+          .attr('alt', function(d) { return d.label; })
+          .classed({'choice-img-thumbnail': true})
+          .select(function() {
+              return this.parentNode; })
+        .append('span')
+          .text(function(d) {
+            return d.label; })
+          .select(function() {
+              return this.parentNode; })
         .classed({'multi-image-list-item': true})
         .call(function(curSel) {
           // get label of choice image for this selection
@@ -28937,7 +29051,7 @@ return paper;
           // window is subscribed
           _this.eventEmitter.publish('showChoiceImage', {
             id: _this.id,
-            choiceImageID: d
+            choiceImageID: d.label
           });
           
           // update dom
@@ -29279,61 +29393,196 @@ return paper;
       this.element.find('.mirador-icon-ruler').on('mouseenter',
         function() {
         _this.element.find('.ruler-options-list').stop().slideFadeToggle(300);
+        _this.element.find('.ruler-icon-grey').hide();
+        _this.element.find('.ruler-icon').show();
       }).on('mouseleave',
       function() {
         _this.element.find('.ruler-options-list').stop().slideFadeToggle(300);
+        _this.element.find('.ruler-icon').hide();
+        _this.element.find('.ruler-icon-grey').show();
       });
+      _this.element.find('.ruler-icon').hide();
       
       this.element.find('.ruler-hide').on('click', function() {
         _this.setRulerVisibility('invisible');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerVisibility',
+              arg: 'invisible'
+            }
+          });
+        }
       });
       
       this.element.find('.ruler-horizontal').on('click', function() {
         _this.setRulerOrientation('horizontal');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerOrientation',
+              arg: 'horizontal'
+            }
+          });
+        }
       });
       
       this.element.find('.ruler-vertical').on('click', function() {
         _this.setRulerOrientation('vertical');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerOrientation',
+              arg: 'vertical'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-black').on('click', function() {
         _this.setRulerColor('black');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerColor',
+              arg: 'black'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-white').on('click', function() {
         _this.setRulerColor('white');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerColor',
+              arg: 'white'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-top-left').on('click', function() {
         _this.setRulerPosition('tl');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'tl'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-top-middle').on('click', function() {
         _this.setRulerPosition('tm');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'tm'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-top-right').on('click', function() {
         _this.setRulerPosition('tr');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'tr'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-middle-left').on('click', function() {
         _this.setRulerPosition('ml');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'ml'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-middle-right').on('click', function() {
         _this.setRulerPosition('mr');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'mr'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-bottom-left').on('click', function() {
         _this.setRulerPosition('bl');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'bl'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-bottom-middle').on('click', function() {
         _this.setRulerPosition('bm');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'bm'
+            }
+          });
+        }
       });
 
       this.element.find('.ruler-bottom-right').on('click', function() {
         _this.setRulerPosition('br');
+
+        if (_this.leading) {
+          _this.eventEmitter.publish('synchronizeRulerControls', {
+            viewObj: _this.focusModules[_this.currentImageMode],
+            value: {
+              fn: 'setRulerPosition',
+              arg: 'br'
+            }
+          });
+        }
       });
     },
 
@@ -29345,15 +29594,15 @@ return paper;
     renderLockGroupMenu: function(lockGroupNames) {
       // each menu in the window should get a dropdown with items in the 'data' array
       var _this = this,
-      lockGroups = d3.selectAll('.lock-options-list').selectAll('.lock-options-list-item')
+      lockGroups = d3.select(this.element[0]).select('.lock-options-list').selectAll('.lock-options-list-item')
         .data(lockGroupNames, function(d) { return d; });
       lockGroups.enter().append('li')
         .classed({'lock-options-list-item': true, 'add-to-lock-group': true})
-        .text(function(d) { return d; });
+        .text(function(d) { return d; })
+        .on('click', function() {
+          _this.addToLockGroup(this);
+        });
       lockGroups.exit().remove();
-
-      // bind lock group click events on all new li's
-      _this.bindEvents();
     },
 
     // template should be based on workspace type
@@ -29401,7 +29650,6 @@ return paper;
                                  '<hr class="menu-divider"/>',
                                  '{{/if}}',
                                  '{{#if layoutOptions.slotRight}}',
-                                 // lockGroup stuff
                                  '<li class="add-slot-right"><i class="fa fa-arrow-circle-right fa-lg fa-fw"></i> {{t "addSlotRight"}}</li>',
                                  '{{/if}}',
                                  '{{#if layoutOptions.slotLeft}}',
@@ -29421,9 +29669,12 @@ return paper;
                                  '{{/if}}',
 
                                  // TODO: hide this ruler UI html if no physical dimensions are available
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-ruler" title="ruler"><i class="fa fa-text-width fa-lg fa-fw"></i>',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-ruler" title="ruler">',
+                                 '<i class="fa fa-lg fa-fw ruler-icon-grey"></i>',
+                                 '<i class="fa fa-lg fa-fw ruler-icon"></i>',
+                                 '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown ruler-options-list">',
-                                 '<li class="ruler-hide"><i class="fa fa-ban fa-lg fa-fw"></i></li>',
+                                 '<li class="ruler-hide"><i class="fa fa-ban fa-lg fa-fw"></i> Hide Ruler</li>',
                                  '<li class="ruler-horizontal"><i class="fa fa-text-width fa-lg fa-fw"></i> Horizontal Ruler</li>',
                                  '<li class="ruler-vertical"><i class="fa fa-text-height fa-lg fa-fw"></i> Vertical Ruler</li>',
                                  '<li class="ruler-black"><i class="fa fa-square fa-lg fa-fw"></i> Black Lines</li>',
@@ -29441,7 +29692,9 @@ return paper;
                                  // end of ruler UI html
  
                                  // lockController
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-lock-window" title="lock"><i class="fa fa-lock fa-lg fa-fw"></i>',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-lock-window" title="lock">',
+                                 '<i class="fa fa-lock fa-lg fa-fw"></i>',
+                                 '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown lock-options-list">',
                                  '<li class="no-lock remove-from-lock-group"><i class="fa fa-ban fa-lg fa-fw"></i></li>',
                                  '{{#list2 lockGroups}}{{/list2}}',
@@ -29451,10 +29704,18 @@ return paper;
 
                                  //'{{#if isMultiImageView}}',
                                  // dropdown list for multi
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-multi-image" title="multi-image"><i class="fa fa-copy fa-lg fa-fw"></i>',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-multi-image" title="multi-image">',
+                                 '<i class="fa fa-th-list fa-lg fa-fw"></i>',
+                                 '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown multi-image-list"></ul>',
                                  '</a>',
                                  //'{{/#if}}',
+
+                                 // duplicate
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-duplicate-window" title="duplicate window">',
+                                 '<i class="fa fa-copy fa-lg fa-fw"></i>',
+                                 '</a>',
+
 
                                  '<h3 class="window-manifest-title" title="{{title}}" aria-label="{{title}}">{{title}}</h3>',
                                  '</div>',
@@ -31227,6 +31488,7 @@ return paper;
     jQuery.extend(this, {
       currentImg:       null,
       windowId:         null,
+      windowObj:        null,
       currentImgIndex:  0,
       canvasID:          null,
       // key-value map of canvasIDs to choiceImageIDs
@@ -31277,7 +31539,7 @@ return paper;
       // if currentImg has choice, then display the menu in the Window obj (eventEmit)
       // TODO: get labels and label the dropdown menu accordingly
       if ($.Iiif.imageHasAlternateResources(this.currentImg)) {
-        this.createOpenSeadragonInstance($.Iiif.getImageResourceLabelsAndUrls(this.currentImg));
+        this.createOpenSeadragonInstance($.Iiif.getImageResourceLabelsIdsAndThumbnails(this.currentImg));
       } else {
         this.createOpenSeadragonInstance($.Iiif.getImageUrl(this.currentImg));
       }
@@ -31428,6 +31690,16 @@ return paper;
 
     bindEvents: function() {
       var _this = this;
+
+      // prevent infinite looping with coordinated zoom
+      this.element.on({
+        mouseenter: function() {
+          _this.leading = true;
+        },
+        mouseleave: function() {
+          _this.leading = false;
+        }
+      });
 
       this.element.find('.mirador-osd-next').on('click', function() {
         _this.next();
@@ -31891,8 +32163,6 @@ return paper;
       alternateImgObjList = [];
 
       if (typeof imageUrlData === 'string') {
-        imageUrlData += '/info.json';
-
         jQuery.when.apply(this, [
           jQuery.getJSON(imageUrlData, function(data) { 
             defaultImgObj = data;
@@ -31902,15 +32172,12 @@ return paper;
         });
 
       } else if (typeof imageUrlData === 'object') {
-        imageUrlData['default'].url += '/info.json';
-        imageUrlData.item.forEach(function(v) { v.url += '/info.json';});
-
         jQuery.when.apply(this, [
-          jQuery.getJSON(imageUrlData['default'].url, function(data) { 
+          jQuery.getJSON(imageUrlData['default']['@id'], function(data) { 
             imageUrlData['default'].data = data;
           })]
           .concat(imageUrlData.item.map(function(v) {
-            return jQuery.getJSON(v.url, function(data) {
+            return jQuery.getJSON(v['@id'], function(data) {
               v.data = data;
             });
           }))
@@ -31968,15 +32235,6 @@ return paper;
           }
         }, 30));
 
-        // prevent infinite looping with coordinated zoom
-        _this.element.on({
-          mouseenter: function() {
-            _this.leading = true;
-          },
-          mouseleave: function() {
-            _this.leading = false;
-          }
-        });
 
         if (_this.state.getStateProperty('autoHideControls')) {
           var timeoutID = null,
@@ -32077,7 +32335,7 @@ return paper;
 
             // tell window to render the dropdown menu
             _this.eventEmitter.publish('imageChoiceReady', {
-              data: [infoJson['default'].label].concat(infoJson.item.map(function(v) { return v.label; })),
+              data: [infoJson['default']].concat(infoJson.item),
               id: _this.windowId
             });
           }
@@ -32163,7 +32421,7 @@ return paper;
         this.osd.close();
 
         if ($.Iiif.imageHasAlternateResources(this.currentImg)) {
-          this.createOpenSeadragonInstance($.Iiif.getImageResourceLabelsAndUrls(this.currentImg));
+          this.createOpenSeadragonInstance($.Iiif.getImageResourceLabelsIdsAndThumbnails(this.currentImg));
         } else {
           this.createOpenSeadragonInstance($.Iiif.getImageUrl(this.currentImg));
         }
@@ -32997,13 +33255,24 @@ return paper;
           return {};
         }
 
-        var aspectRatio = canvas.height/canvas.width,
-        width = (_this.thumbInfo.thumbsHeight/aspectRatio),
+        // we want square thumbnails
+        width = _this.thumbInfo.thumbsHeight,
         thumbnailUrl = $.getThumbnailForCanvas(canvas, width);
+
+        /*
+         * Gets the page number, r/v distinction, and photosettings for the image.
+         * @param {String} l Label to extract substring from. Should be in the form of:
+         *   <ManuscriptName>_\d{3}{r|v}_<PhotoSettings>
+         * @return {String}
+         */
+        function extractLabelSubstring(l) {
+          var manuscriptName = l.split('_', 1);
+          return l.substring(manuscriptName.length + 1);
+        }
 
         return {
           thumbUrl: thumbnailUrl,
-          title:    $.JsonLd.getTextValue(canvas.label),
+          title:    extractLabelSubstring($.JsonLd.getTextValue(canvas.label)),
           id:       canvas['@id'],
           width:    width,
           highlight: _this.currentImgIndex === index ? 'highlight' : ''
@@ -33765,12 +34034,12 @@ return paper;
      * @param {Object} image JSON representation of image
      * @return {Object}
      */
-    getImageResourceLabelsAndUrls: function(image) {
+    getImageResourceLabelsIdsAndThumbnails: function(image) {
       var d = image.images[0].resource['default'];
       var i = image.images[0].resource.item;
       return {
-        'default': {'label': d.label, 'url': d.service['@id'].replace(/\/$/, "")},
-        'item': i.map(function(v) { return {'label': v.label, 'url': v.service['@id'].replace(/\/$/, "")}; })
+        'default': {'label': d.label, '@id': d.service['@id'].replace(/\/$/, "") + '/info.json', 'thumbnail': d.thumbnail},
+        'item': i.map(function(v) { return {'label': v.label, '@id': v.service['@id'].replace(/\/$/, "") + '/info.json', 'thumbnail': v.thumbnail}; })
       };
     },
 
@@ -34700,6 +34969,55 @@ return paper;
 
   $.fullscreenElement = function() {
     return (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement);
+  };
+
+  $.getBrowserViewportDimensions = function() {
+    var w=window,d=document,e=d.documentElement,g=d.getElementsByTagName('body')[0],x=w.innerWidth||e.clientWidth||g.clientWidth,y=w.innerHeight||e.clientHeight||g.clientHeight;
+    return {x:x,y:y};
+  };
+
+  $.getWorkspaceBoundingBox = function(elt) {
+    var manifestInfoHeight = 39,
+        mainMenuHeight = 33,
+        dragHandleWidth = 100,
+        dragHandleHeight = 25,
+        dimensions = $.getBrowserViewportDimensions(),
+        x = dimensions.x,
+        y = dimensions.y;
+    if (elt === 'drag-handle.ui-draggable') {
+      // must drag drag-handle within browser viewport
+      return [0, mainMenuHeight, x - dragHandleWidth, y - dragHandleHeight];
+    } else if (elt === 'layout-slot.ui-draggable') {
+      // can drag window horizontally off the screen if desired
+      return [-x, mainMenuHeight, 2*x, y - manifestInfoHeight];
+    } else {
+      throw '$.getWorkspaceBoundingBox: unknown element type "' + elt + '"';
+    }
+  };
+
+  /*
+   * Used to bring an element to the top of a stack.
+   * @param {String} stack jQuery selector that selects all elements to stack on top of
+   */
+  $.bringEltToTop = function(stack) {
+    var elem = this,
+    min,
+    group = jQuery.makeArray(jQuery(stack)).sort(function(a, b) {
+      return (parseInt(jQuery(a).css("zIndex"), 10) || 0) - (parseInt(jQuery(b).css("zIndex"), 10) || 0);
+    });
+    if (group.length < 1) {
+      return;
+    }
+    min = parseInt(group[0].style.zIndex, 10) || 0;
+    jQuery(group).each(function(i) {
+      this.style.zIndex = min+i;
+    });
+    /* // why do we need the following check
+    if (elem === undefined) {
+      return;
+    }
+    */
+    jQuery(elem).css({'zIndex' : min+group.length});
   };
 
 }(Mirador));
