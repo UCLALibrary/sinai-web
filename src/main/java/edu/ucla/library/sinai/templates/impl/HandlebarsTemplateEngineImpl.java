@@ -22,9 +22,13 @@ import static edu.ucla.library.sinai.Constants.MESSAGES;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
@@ -55,6 +59,23 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
     public HandlebarsTemplateEngineImpl() {
         super(HandlebarsTemplateEngine.DEFAULT_TEMPLATE_EXTENSION, HandlebarsTemplateEngine.DEFAULT_MAX_CACHE_SIZE);
         myHandlebars = new Handlebars(new ClassPathTemplateLoader("/webroot"));
+
+        /*
+         * URL-encodes a string.
+         */
+        myHandlebars.registerHelper("urlencode", new Helper<String>() {
+            public String apply(String str, Options options) {
+                try {
+                    // do not want to encode colons
+                    return URLEncoder.encode(str, "UTF-8").replace("%3A", ":");
+                } catch (UnsupportedEncodingException e) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("{} UTF-8 is unsupported: {}", HandlebarsTemplateEngineImpl.class, e.toString());
+                    }
+                    return "";
+                }
+            }
+        });
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Handlebars template engine created");

@@ -3,6 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
+import static edu.ucla.library.sinai.Constants.MANUSCRIPT_METADATA_PROP;
 
 import java.net.URISyntaxException;
 
@@ -17,6 +18,11 @@ import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.util.PathUtils;
 import io.vertx.ext.web.RoutingContext;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.lang.Exception;
+
 public class MiradorHandler extends SinaiHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MiradorHandler.class);
@@ -29,10 +35,27 @@ public class MiradorHandler extends SinaiHandler {
     public void handle(final RoutingContext aContext) {
         final String selected = aContext.request().getParam("selected");
         final ObjectMapper mapper = new ObjectMapper();
-        final ObjectNode jsonNode = mapper.createObjectNode();
+        ObjectNode jsonNode;
         final String requestPath = aContext.request().uri();
         final int index = requestPath.indexOf("?");
         final String path;
+        String errorMessage;
+
+        // load manifest metadata from file
+        try {
+            String metadataFilePath = System.getProperty(MANUSCRIPT_METADATA_PROP);
+            InputStream in = getClass().getResourceAsStream(metadataFilePath); 
+            BufferedReader metadataFile = new BufferedReader(new InputStreamReader(in));
+            jsonNode = (ObjectNode) mapper.readTree(metadataFile);
+        } catch (Exception e) {
+            errorMessage = "Something went wrong while loading the manuscript metadata. ERROR: " + e.toString();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
+            }
+
+            jsonNode = mapper.createObjectNode();
+            jsonNode.put("error", errorMessage);
+        }
 
         if (index != -1) {
             path = requestPath.substring(0, index);
@@ -58,6 +81,8 @@ public class MiradorHandler extends SinaiHandler {
         } else {
             skip = 1;
         }
+
+
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Getting item page for : {} ({})", id, path);
