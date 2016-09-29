@@ -33266,13 +33266,14 @@ return paper;
          * @return {String}
          */
         function extractLabelSubstring(l) {
-          var manuscriptName = l.split('_', 1);
+          var manuscriptName = l.split('_', 1)[0];
           return l.substring(manuscriptName.length + 1);
         }
 
         return {
           thumbUrl: thumbnailUrl,
           title:    extractLabelSubstring($.JsonLd.getTextValue(canvas.label)),
+          tooltip:  canvas.label,
           id:       canvas['@id'],
           width:    width,
           highlight: _this.currentImgIndex === index ? 'highlight' : ''
@@ -33395,7 +33396,7 @@ return paper;
                                  '<ul class="{{listingCssCls}}" role="list" aria-label="Thumbnails">',
                                  '{{#thumbs}}',
                                  '<li class="{{highlight}}" role="listitem" aria-label="Thumbnail">',
-                                 '<img class="thumbnail-image {{highlight}}" title="{{title}}" data-image-id="{{id}}" src="" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
+                                 '<img class="thumbnail-image {{highlight}}" title="{{tooltip}}" data-image-id="{{id}}" src="" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
                                  '<div class="thumb-label">{{title}}</div>',
                                  '</li>',
                                  '{{/thumbs}}',
@@ -34977,8 +34978,10 @@ return paper;
   };
 
   $.getWorkspaceBoundingBox = function(elt) {
-    var manifestInfoHeight = 39,
-        mainMenuHeight = 33,
+    var manifestInfoHeight = jQuery('.manifest-info').height(),
+        workspaceTop = jQuery('.mirador-viewer').offset().top,
+
+        // magic vars because no drag handles may be present at some time
         dragHandleWidth = 100,
         dragHandleHeight = 25,
         dimensions = $.getBrowserViewportDimensions(),
@@ -34986,10 +34989,10 @@ return paper;
         y = dimensions.y;
     if (elt === 'drag-handle.ui-draggable') {
       // must drag drag-handle within browser viewport
-      return [0, mainMenuHeight, x - dragHandleWidth, y - dragHandleHeight];
+      return [0, workspaceTop, x - dragHandleWidth, y - dragHandleHeight];
     } else if (elt === 'layout-slot.ui-draggable') {
       // can drag window horizontally off the screen if desired
-      return [-x, mainMenuHeight, 2*x, y - manifestInfoHeight];
+      return [-x, workspaceTop, 2*x, y - manifestInfoHeight];
     } else {
       throw '$.getWorkspaceBoundingBox: unknown element type "' + elt + '"';
     }
