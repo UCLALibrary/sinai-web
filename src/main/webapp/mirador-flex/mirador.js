@@ -21737,18 +21737,44 @@ return paper;
     },
 
     /*
-     * Calculates the and sets the layout of the workspace.
+     * Calculates and sets the layout of the workspace.
      *
-     * @param {boolean} resetting Passed in from Workspace.resetLayout (not used with flex workspace)
-     * @param {Array} draggedIDs List of slot IDs that have just finished dragging
-     * @param {Array} resizedIDs List of slot IDs that have just finished resizing
+     * This method is made much more complicated due to the requirements of the flexible workspace.
+     * Mirador uses a package called Isfahan (also developed by Stanford University Libraries) to
+     * manage the slot (window) layout of the workspace. In the original code that ships with Mirador,
+     * the workspace slots are laid out in a grid so that each of them always have identical dimensions.
+     *
+     * For the flexible workspace, there is no such requirement of uniformity of dimensions or conformance
+     * to a grid layout. However, Isfahan describes the layout in a way that is expected by many other
+     * parts of the code, so instead of ripping it out completely, I've "sidestepped" the part of it that 
+     * I don't want (specifically, it's setting of position and dimensions of the windows).
+     *
+     * Basically, each time this function is called:
+     *
+     * 1) the subset of nodes in the layoutDescription object whose position and dimensions that we want to
+     * save are saved in the _this.slotCoordinates object
+     * 2) Isfahan is called to alter the layoutDescription object
+     * 3) the subset of nodes in the layoutDescription object whose data we saved in step 1 are restored
+     * using said data
+     *
+     * To make things more complicated, this is not the only function that writes to _this.slotCoordinates (the resizestop and dragstop callbacks for '.layout-slot's also do). The rule is this:
+     *
+     * Whatever is stored in _this.slotCoordinates before Isfahan is called represents what will be the 
+     * end state of the workspace when this function returns.
+     *
+     * @param {boolean} resetting
+     *   Passed in from Workspace.resetLayout (not used with flex workspace)
+     * @param {Array} draggedIDs
+     *   List of slot IDs that have just finished dragging
+     * @param {Array} resizedIDs
+     *   List of slot IDs that have just finished resizing
      */
     calculateLayout: function(resetting, draggedIDs, resizedIDs) {
       var _this = this,
       layout,
       divs,
 
-      // default slot window dimensions
+      // default slot window dimensions, in pixels
       slotX = 50,
       slotY = 50,
       slotDX = 750,
@@ -21758,7 +21784,7 @@ return paper;
       child,
       tscKey,
       
-      // call $.bringToFront() on these
+      // will call $.bringToFront() on these
       newNodesBringToFront = [];
 
       /*
@@ -21768,29 +21794,40 @@ return paper;
        * @param {Object} node A layout node to save the settings of.
        */
       function saveToSlotCoordinates(node) {
-        // save the coordinates
-        tscKey = node.id;
-          if (node.x && node.y && node.dx && node.dy) {
+        var tscKey = node.id,
+        areDragging = draggedIDs !== undefined && draggedIDs.indexOf(tscKey) !== -1,
+        areNotDragging = draggedIDs === undefined || draggedIDs.indexOf(tscKey) === -1,
+        areNotResizing = resizedIDs === undefined || resizedIDs.indexOf(tscKey) === -1;
+
+        if (node.x && node.y && node.dx && node.dy) {
             
-          // assume key to be something meaningful
+          // tscKey is the key to use for _this.slotCoordinates (tsc)
           if (!_this.slotCoordinates[tscKey]) {
             _this.slotCoordinates[tscKey] = {};
           }
-          if (draggedIDs === undefined || draggedIDs.indexOf(tscKey) === -1) {
-            // hasn't been written to slotCoordinates by the caller, so write it
+
+          // if we are dragging, the width and height of the window have not changed,
+          // so save what we already have in the current node of _this.layoutDescription
+          if (areDragging) {
+            _this.slotCoordinates[tscKey].dx = node.dx;
+            _this.slotCoordinates[tscKey].dy = node.dy;
+          }
+
+          // if we are neither resizing or dragging the current node,
+          // _this.layoutDescription already contains the correct data for the current node,
+          // so save all of it
+          if (areNotDragging && areNotResizing) {
             _this.slotCoordinates[tscKey].x = node.x;
             _this.slotCoordinates[tscKey].y = node.y;
-          }
-          if (resizedIDs === undefined || resizedIDs.indexOf(tscKey) === -1) {
-            // hasn't been written to slotCoordinates by the caller, so write it
             _this.slotCoordinates[tscKey].dx = node.dx;
             _this.slotCoordinates[tscKey].dy = node.dy;
           }
         }
       }
 
+      // Step 1
       // if we have already generated a layout, either restoring from localStorage or using the one from
-      // this sessionq
+      // this session
       if ($.DEFAULT_SETTINGS.flexibleWorkspace === true && typeof _this.layoutDescription === 'object') {
         if (!_this.slotCoordinates) {
           // need to initialize in case we are restoring a saved workspace
@@ -21810,6 +21847,7 @@ return paper;
         }
       }
 
+      // Step 2
       // use Isfahan for everything but the slot window dimensions. Will restore them from _this.slotCoordinates
       _this.layout = layout = new Isfahan({
         containerId: _this.element.attr('id'),
@@ -21818,6 +21856,7 @@ return paper;
         padding: 3
       });
 
+      // Step 3
       // if flex workspace is enabled, go through the layout obj and restore the saved coordinates
       if ($.DEFAULT_SETTINGS.flexibleWorkspace === true) {
 
@@ -21910,12 +21949,18 @@ return paper;
             _this.saveSnapGroupState();
           }
         })
-        .resizable().on('resizestop', function(event, ui) {
+        .resizable({
+          handles: "n, e, s, w, ne, nw, se, sw"
+        })
+        .on('resizestop', function(event, ui) {
           // save slot height/width to localstorage, so that they aren't overwritten by calculateLayout
           var id = ui.helper[0].attributes['data-layout-slot-id'].value;
           _this.slotCoordinates[id].dx = ui.size.width;
           _this.slotCoordinates[id].dy = ui.size.height;
-  
+          // save position too since we might be changing the top/left value
+          _this.slotCoordinates[id].x = ui.position.left;
+          _this.slotCoordinates[id].y = ui.position.top;
+
           var slotIDs = [id];
           _this.calculateLayout(undefined, undefined, slotIDs);
 
@@ -22592,8 +22637,30 @@ return paper;
               }
             });
 
-            // add a delete button
+            // add disable/enable zoom buttons and a delete button
             ret
+              .append('button')
+                .attr('type', 'button')
+                .text('Disable Zoom')
+                .on('click', function() {
+                  _this.eventEmitter.publish('TOGGLE_ZOOM_LOCK_ALL', {
+                    enable: false,
+                    groupID: jQuery(this).parent().parent().find('h4').text()
+                  });
+                })
+                .select(function() { return this.parentNode; })
+              .append('button')
+                .attr('type', 'button')
+                .text('Enable Zoom')
+                .on('click', function() {
+                  _this.eventEmitter.publish('TOGGLE_ZOOM_LOCK_ALL', {
+                    enable: true,
+                    groupID: jQuery(this).parent().parent().find('h4').text()
+                  });
+                })
+                .select(function() { return this.parentNode; })
+              .append('br')
+                .select(function() { return this.parentNode; })
               .append('a')
                 .attr('href', 'javascript:;')
                 .classed({'mirador-btn': true, 'mirador-icon-delete-lock-group': true})
@@ -22821,33 +22888,33 @@ return paper;
         '{{/if}}',
         '{{#if showAddWindow}}',
           '<li>',
-            '<a href="javascript:;" class="add-flexible-slot mainmenu button" title="Add Window">',
+            '<a href="javascript:;" class="add-flexible-slot mainmenu-button" title="Add a blank window to the workspace">',
               '<span class="fa fa-th-large fa-lg fa-fw"></span> Add Window',
             '</a>',
           '</li>',
         '{{/if}}',
         '{{#if showAddDragHandle}}',
           '<li>',
-            '<a href="javascript:;" class="add-drag-handle mainmenu-button" title="Add Drag Handle">',
+            '<a href="javascript:;" class="add-drag-handle mainmenu-button" title="Add a new drag handle to the workspace">',
               '<span class="fa fa-suitcase fa-lg fa-fw"></span> Add Drag Handle',
             '</a>',
           '</li>',
         '{{/if}}',
         // lockController
           '<li>',
-            '<a href="javascript:;" class="toggle-lock-groups mainmenu-button" title="Lock Groups">',
+            '<a href="javascript:;" class="toggle-lock-groups mainmenu-button" title="Create, delete, and manage settings of &quot;synchronized window groups&quot;">',
               '<span class="fa fa-lock fa-lg fa-fw"></span> Synchronized Windows',
             '</a>',
           '</li>',
         // end lockController
         '{{#if showWorkspaceDownload}}',
           '<li>',
-            '<a href="javascript:;" class="workspace-download mainmenu-button" title="Download Workspace">',
+            '<a href="javascript:;" class="workspace-download mainmenu-button" title="Save this workspace to your desktop">',
               '<span class="fa fa-download fa-lg fa-fw"></span> Download Workspace',
             '</a>',
           '</li>',
           '<li>',
-            '<a href="javascript:;" class="workspace-upload mainmenu-button" title="Upload Workspace">',
+            '<a href="javascript:;" class="workspace-upload mainmenu-button" title="Restore a previously downloaded workspace">',
               '<span class="fa fa-upload fa-lg fa-fw"></span> Upload Workspace',
             '</a>',
           '</li>',
@@ -27449,6 +27516,13 @@ return paper;
       var _this = this;
 
       /*
+       * Simply sends lock group data.
+       */
+      _this.eventEmitter.subscribe('windowReadyForLockGroups', function(event) {
+        _this.eventEmitter.publish('updateLockGroupMenus', _this.synchronizedWindows);
+      });
+
+      /*
        * Creates a new lock group. Published by lockGroupsPanel.
        *
        * @param {string} name Name of new lock group.
@@ -27626,6 +27700,22 @@ return paper;
           _this.synchronizedWindows.byGroup[groupID].views.push(viewObj);
           _this.eventEmitter.publish('activateLockGroupMenuItem', {windowId: viewObj.windowId, groupId: groupID});
         }
+      });
+
+      /*
+       * Received from the lockGroupsPanel buttons for Disable/Enable Zoom.
+       *
+       * @param {Object} data
+       *   Data used to determine the action to take.
+       * @param {Boolean} data.enable
+       *   Whether or not to enable zooming.
+       * @param {String} data.groupID
+       *   Which group to publish events to.
+       */
+      _this.eventEmitter.subscribe('TOGGLE_ZOOM_LOCK_ALL', function(event, data) {
+        _this.synchronizedWindows.byGroup[data.groupID].views.forEach(function(e) {
+          _this.eventEmitter.publish((data.enable === true ? 'ENABLE' : 'DISABLE') + '_ZOOMING.' + e.windowId);
+        });
       });
     },
 
@@ -28216,6 +28306,7 @@ return paper;
      * @param {Array} items An array of names of lock groups
      */
     // TODO: is this needed?
+    /*
     Handlebars.registerHelper('list2', function(items) {
       var out = ''; 
       for(var i=0, l=items.length; i<l; i++) {
@@ -28223,6 +28314,7 @@ return paper;
       }   
       return out;
     });
+    */
 
     this.init();
     this.bindAnnotationEvents();
@@ -28322,27 +28414,31 @@ return paper;
       templateData.lockGroups = Object.keys(this.lockController.getLockGroupData());
 
       _this.element = jQuery(this.template(templateData)).appendTo(_this.appendTo);
-      this.element.find('.manifest-info .mirador-tooltip').each(function() {
-        jQuery(this).qtip({
-          content: {
-            text: jQuery(this).attr('title'),
-          },
-          position: {
-            my: 'top center',
-            at: 'bottom center',
-            adjust: {
-              method: 'shift',
-              y: -11
-            },
-            container: _this.element,
-            viewport: true
-          },
-          style: {
-            classes: 'qtip-dark qtip-shadow qtip-rounded'
-          }
-        });
+      this.element.find('.manifest-info .mirador-tooltip.mirador-icon-view-type').each(function() {
+        _this.createOrUpdateTooltip(this, 'left');
+      });
+      this.element.find('.manifest-info .mirador-tooltip.mirador-icon-ruler, .manifest-info .mirador-tooltip.mirador-icon-lock-window, .manifest-info .mirador-tooltip.mirador-icon-multi-image').each(function() {
+        _this.createOrUpdateTooltip(this, 'right');
       });
       //TODO: this needs to switch the postion when it is a right to left manifest
+      this.element.find('.manifest-info .contained-tooltip').qtip({
+        content: {
+          text: jQuery(this).attr('title'),
+        },
+        position: {
+          my: 'top center',
+          at: 'bottom center',
+          adjust: {
+            method: 'shift',
+            y: -11
+          },
+          container: _this.element,
+          viewport: true
+        },
+        style: {
+          classes: 'qtip-dark qtip-shadow qtip-rounded'
+        }
+      });
       this.element.find('.manifest-info .window-manifest-title').qtip({
         content: {
           text: jQuery(this).attr('title'),
@@ -28403,11 +28499,34 @@ return paper;
       }
       this.sidePanelVisibility(this.sidePanelVisible, '0s');
 
+      // get initial lock group data
+      this.eventEmitter.publish('windowReadyForLockGroups');
+
       // restore lock group stuff for this window, if we are restoring it
       // sends message to lockController
       if (_this.focusModules[_this.currentImageMode] !== null) {
         _this.eventEmitter.publish('restoreWindowToLockController', _this.focusModules[_this.currentImageMode]);
       }
+    },
+
+    createOrUpdateTooltip: function(selector, horizontalPosition) {
+      var _this = this;
+      jQuery(selector).qtip({
+        content: {
+          text: jQuery(this).attr('title'),
+        },
+        position: {
+          my: 'top ' + (horizontalPosition === 'left' ? 'right': 'left'),
+          at: 'bottom ' + horizontalPosition,
+          container: _this.element
+        },
+        style: {
+          classes: 'qtip-dark qtip-shadow qtip-rounded'
+        },
+        hide: {
+          distance: 5
+        }
+      });
     },
 
     update: function(options) {
@@ -28526,6 +28645,7 @@ return paper;
       // TODO: delete parameter from Handlebars template (not needed)
       _this.eventEmitter.subscribe('updateLockGroupMenus', function(event, data) {
         _this.renderLockGroupMenu(data.keys);
+        _this.createOrUpdateTooltip('.mirador-tooltip.mirador-icon-lock-window', 'right');
       });
 
       /*
@@ -28557,12 +28677,14 @@ return paper;
       _this.eventEmitter.subscribe('imageChoiceReady', function(event, data) {
         if (data.id === _this.id) {
           _this.renderImageChoiceMenu(data.data);
+          _this.createOrUpdateTooltip('.mirador-tooltip.mirador-icon-multi-image', 'right');
         }
       });
 
       _this.eventEmitter.subscribe('noImageChoice', function(event, id) {
         if (id === _this.id) {
           _this.renderImageChoiceMenu([]);
+          _this.createOrUpdateTooltip('.mirador-tooltip.mirador-icon-multi-image', 'right');
         }
       });
 
@@ -28571,6 +28693,20 @@ return paper;
        */
       _this.eventEmitter.subscribe('fitImageChoiceMenu', function(event) {
         _this.fitImageChoiceMenu();
+      });
+
+      /*
+       * Received from lockController.
+       */
+      _this.eventEmitter.subscribe('DISABLE_ZOOMING.' + _this.id, function(event) {
+        _this.toggleZoomLock(_this.element.find('.mirador-icon-zoom-lock'), true);
+      });
+
+      /*
+       * Received from lockController.
+       */
+      _this.eventEmitter.subscribe('ENABLE_ZOOMING.' + _this.id, function(event) {
+        _this.toggleZoomLock(_this.element.find('.mirador-icon-zoom-lock'), false);
       });
     },
 
@@ -28659,6 +28795,34 @@ return paper;
         // to workspace
         _this.eventEmitter.publish('ADD_DUPLICATE_WINDOW', windowConfig);
       });
+
+      // onclick event to toggle zoom enabled/disabled
+      this.element.find('.mirador-icon-zoom-lock').on('click', function(event) {
+        // flips the current value
+        _this.toggleZoomLock(this, !_this.zoomLock);
+      });
+    },
+
+    /*
+     * Sets this window's zoom-lockedness.
+     *
+     * @param {Object} thisObj
+     *   The element with class '.mirador-icon-zoom-lock' to add/remove class from.
+     * @param {Boolean} locked
+     *   Whether to set this window's zoom to enabled (false) or disabled (true),
+     */
+    toggleZoomLock: function(thisObj, locked) {
+      var _this = this;
+      (function(l) {
+        if (l === true) {
+          _this.eventEmitter.publish("DISABLE_OSD_ZOOM." + _this.id);
+          jQuery(this).addClass('selected');
+        } else {
+          _this.eventEmitter.publish("ENABLE_OSD_ZOOM." + _this.id);
+          jQuery(this).removeClass('selected');
+        }
+        _this.zoomLock = !!l;
+      }).call(thisObj, locked);
     },
 
     addToLockGroup: function(elt, replacing) {
@@ -29026,6 +29190,7 @@ return paper;
           .select(function() {
               return this.parentNode; })
         .append('span')
+          .classed({'choice-img-label': true})
           .text(function(d) {
             return d.label; })
           .select(function() {
@@ -29039,7 +29204,7 @@ return paper;
 
           if (label !== undefined) {
             elt = currentSelection.filter(function() {
-              return this.innerHTML === label ? true : false;
+              return jQuery(this).find('.choice-img-label').text() === label ? true : false;
             });
           } else {
             elt = currentSelection.first();
@@ -29365,7 +29530,7 @@ return paper;
         _this.sidePanelVisibility(!_this.sidePanelVisible, '0.3s');
       });
 
-      this.element.find('.new-object-option').on('click', function() {
+      this.element.find('.new-object-option, .mirador-icon-new-object').on('click', function() {
         _this.eventEmitter.publish('ADD_ITEM_FROM_WINDOW', _this.id);
       });
 
@@ -29610,7 +29775,7 @@ return paper;
                                  '<div class="window">',
                                  '<div class="manifest-info">',
                                  '<div class="window-manifest-navigation">',
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-view-type" role="button" title="{{t "viewTypeTooltip"}}" aria-label="{{t "viewTypeTooltip"}}">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-view-type mirador-tooltip" role="button" title="{{t "viewTypeTooltip"}}" aria-label="{{t "viewTypeTooltip"}}">',
                                  '<i class="{{currentFocusClass}}"></i>',
                                  '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown image-list">',
@@ -29629,21 +29794,21 @@ return paper;
                                  '</ul>',
                                  '</a>',
                                  '{{#if MetadataView}}',
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-metadata-view mirador-tooltip" role="button" title="{{t "metadataTooltip"}}" aria-label="{{t "metadataTooltip"}}">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-metadata-view contained-tooltip" role="button" title="{{t "metadataTooltip"}}" aria-label="{{t "metadataTooltip"}}">',
                                  '<i class="fa fa-info-circle fa-lg fa-fw"></i>',
                                  '</a>',
                                  '{{/if}}',
                                  '{{#if showFullScreen}}',
-                                 '<a class="mirador-btn mirador-osd-fullscreen mirador-tooltip" role="button" title="{{t "fullScreenWindowTooltip"}}" aria-label="{{t "fullScreenWindowTooltip"}}">',
+                                 '<a class="mirador-btn mirador-osd-fullscreen contained-tooltip" role="button" title="{{t "fullScreenWindowTooltip"}}" aria-label="{{t "fullScreenWindowTooltip"}}">',
                                  '<i class="fa fa-lg fa-fw fa-expand"></i>',
                                  '</a>',
                                  '{{/if}}',
                                  '</div>',
                                  '{{#if layoutOptions.close}}',
-                                 '<a href="javascript:;" class="mirador-btn mirador-close-window remove-object-option mirador-tooltip" title="{{t "closeTooltip"}}" aria-label="{{t "closeTooltip"}}"><i class="fa fa-times fa-lg fa-fw"></i></a>',
+                                 '<a href="javascript:;" class="mirador-btn mirador-close-window remove-object-option contained-tooltip" title="{{t "closeTooltip"}}" aria-label="{{t "closeTooltip"}}"><i class="fa fa-times fa-lg fa-fw"></i></a>',
                                  '{{/if}}',
                                  '{{#if displayLayout}}',
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-window-menu" title="{{t "changeLayoutTooltip"}}" aria-label="{{t "changeLayoutTooltip"}}"><i class="fa fa-th-large fa-lg fa-fw"></i><i class="fa fa-caret-down"></i>',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-window-menu mirador-tooltip" title="{{t "changeLayoutTooltip"}}" aria-label="{{t "changeLayoutTooltip"}}"><i class="fa fa-th-large fa-lg fa-fw"></i><i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown slot-controls">',
                                  '{{#if layoutOptions.newObject}}',
                                  '<li class="new-object-option"><i class="fa fa-refresh fa-lg fa-fw"></i> {{t "newObject"}}</li>',
@@ -29663,18 +29828,21 @@ return paper;
                                  '{{/if}}',
                                  '</ul>',
                                  '</a>',
+                                 '{{else}}',
+                                 // just have regen object
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-new-object contained-tooltip" title="Choose a new manuscript to load"><i class="fa fa-refresh fa-lg fa-fw"></i></a>',
                                  '{{/if}}',
                                  '{{#if sidePanel}}',
                                  '<a href="javascript:;" class="mirador-btn mirador-icon-toc selected mirador-tooltip" title="{{t "sidePanelTooltip"}}" aria-label="{{t "sidePanelTooltip"}}"><i class="fa fa-bars fa-lg fa-fw"></i></a>',
                                  '{{/if}}',
 
                                  // TODO: hide this ruler UI html if no physical dimensions are available
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-ruler" title="ruler">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-ruler mirador-tooltip" title="Manage this window&#39;s ruler settings">',
                                  '<i class="fa fa-lg fa-fw ruler-icon-grey"></i>',
                                  '<i class="fa fa-lg fa-fw ruler-icon"></i>',
                                  '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown ruler-options-list">',
-                                 '<li class="ruler-hide"><i class="fa fa-ban fa-lg fa-fw"></i> Hide Ruler</li>',
+                                 '<li class="ruler-hide"><i class="fa fa-ban fa-lg fa-fw"></i> (hide ruler)</li>',
                                  '<li class="ruler-horizontal"><i class="fa fa-text-width fa-lg fa-fw"></i> Horizontal Ruler</li>',
                                  '<li class="ruler-vertical"><i class="fa fa-text-height fa-lg fa-fw"></i> Vertical Ruler</li>',
                                  '<li class="ruler-black"><i class="fa fa-square fa-lg fa-fw"></i> Black Lines</li>',
@@ -29692,19 +29860,19 @@ return paper;
                                  // end of ruler UI html
  
                                  // lockController
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-lock-window" title="lock">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-lock-window mirador-tooltip" title="Manage this window&#39;s &quot;synchronized window group&quot; assignment">',
                                  '<i class="fa fa-lock fa-lg fa-fw"></i>',
                                  '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown lock-options-list">',
-                                 '<li class="no-lock remove-from-lock-group"><i class="fa fa-ban fa-lg fa-fw"></i></li>',
-                                 '{{#list2 lockGroups}}{{/list2}}',
+                                 '<li class="no-lock remove-from-lock-group"><i class="fa fa-ban fa-lg fa-fw"></i> (no group)</li>',
+                                 //'{{#list2 lockGroups}}{{/list2}}',
                                  '</ul>',
                                  '</a>',
                                  // end lockController
 
                                  //'{{#if isMultiImageView}}',
                                  // dropdown list for multi
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-multi-image" title="multi-image">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-multi-image mirador-tooltip" title="Choose between the available spectral images">',
                                  '<i class="fa fa-th-list fa-lg fa-fw"></i>',
                                  '<i class="fa fa-caret-down"></i>',
                                  '<ul class="dropdown multi-image-list"></ul>',
@@ -29712,10 +29880,15 @@ return paper;
                                  //'{{/#if}}',
 
                                  // duplicate
-                                 '<a href="javascript:;" class="mirador-btn mirador-icon-duplicate-window" title="duplicate window">',
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-duplicate-window contained-tooltip" title="Duplicate this window">',
                                  '<i class="fa fa-copy fa-lg fa-fw"></i>',
                                  '</a>',
 
+                                 // zoom lock
+                                 '<a href="javascript:;" class="mirador-btn mirador-icon-zoom-lock contained-tooltip" title="Toggle zoom lock on this window">',
+                                 '<i class="fa fa-search fa-lg fa-fw"></i>',
+                                 '<i class="fa fa-lock" style="position:relative;left:-4px;"></i>',
+                                 '</a>',
 
                                  '<h3 class="window-manifest-title" title="{{title}}" aria-label="{{title}}">{{title}}</h3>',
                                  '</div>',
@@ -31426,17 +31599,17 @@ return paper;
                                  '</a>',
                                  '{{/if}}',
                                  '<div class="mirador-osd-context-controls hud-container">',
-                                 '{{#if showAnno}}',
-                                  '<div class="mirador-osd-annotation-controls">',
-                                  '<a class="mirador-osd-annotations-layer hud-control" role="button" aria-label="Toggle annotations">',
-                                  '<i class="fa fa-lg fa-comments"></i>',
-                                  '</a>',
-                                  '</div>',
-                                 '{{/if}}',
                                  '{{#if showImageControls}}',
                                   '<div class="mirador-manipulation-controls">',
                                   '<a class="mirador-manipulation-toggle hud-control" role="button" aria-label="Toggle image manipulation">',
                                   '<i class="material-icons">tune</i>',
+                                  '</a>',
+                                  '</div>',
+                                 '{{/if}}',
+                                 '{{#if showAnno}}',
+                                  '<div class="mirador-osd-annotation-controls">',
+                                  '<a class="mirador-osd-annotations-layer hud-control" role="button" aria-label="Toggle annotations">',
+                                  '<i class="fa fa-lg fa-comments"></i>',
                                   '</a>',
                                   '</div>',
                                  '{{/if}}',
@@ -31578,6 +31751,9 @@ return paper;
       } else {
         _this.eventEmitter.publish('SET_BOTTOM_PANEL_VISIBILITY.' + this.windowId, null);
       }
+
+      // start with the image manip controls showing
+      this.element.find('.mirador-manipulation-toggle').click();
     },
 
     template: Handlebars.compile([
@@ -31685,6 +31861,22 @@ return paper;
             choiceImageIDs: _this.choiceImageIDs
           });
         }
+      });
+
+      /*
+       * Published by the parent window object, which does not have a direct reference to an OSD viewer.
+       */
+      _this.eventEmitter.subscribe('DISABLE_OSD_ZOOM.' + _this.windowId, function(event) {
+        _this.osd.zoomPerClick = 1;
+        _this.osd.zoomPerScroll = 1;
+      });
+
+      /*
+       * Published by the parent window object, which does not have a direct reference to an OSD viewer.
+       */
+      _this.eventEmitter.subscribe('ENABLE_OSD_ZOOM.' + _this.windowId, function(event) {
+        _this.osd.zoomPerClick = 1.1;
+        _this.osd.zoomPerScroll = 1.1;
       });
     },
 
@@ -33396,7 +33588,7 @@ return paper;
                                  '<ul class="{{listingCssCls}}" role="list" aria-label="Thumbnails">',
                                  '{{#thumbs}}',
                                  '<li class="{{highlight}}" role="listitem" aria-label="Thumbnail">',
-                                 '<img class="thumbnail-image {{highlight}}" title="{{tooltip}}" data-image-id="{{id}}" src="" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
+                                 '<img class="thumbnail-image {{highlight}} mirador-tooltip" title="{{tooltip}}" data-image-id="{{id}}" src="" data="{{thumbUrl}}" height="{{../defaultHeight}}" width="{{width}}">',
                                  '<div class="thumb-label">{{title}}</div>',
                                  '</li>',
                                  '{{/thumbs}}',
@@ -34259,7 +34451,14 @@ return paper;
         id: undefined,
         infoJson: undefined,
         uniqueID: undefined,
-        toolbarID: undefined
+        toolbarID: undefined,
+        immediateRender: true,
+        gestureSettingsMouse: {
+          dblClickToZoom: true,
+          clickToZoom: false
+        },
+        zoomPerClick: 1.1,
+        zoomPerScroll: 1.1
       }, options)
 
     );
