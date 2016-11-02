@@ -20,11 +20,11 @@
               {{#each sinai-manuscript-metadata}}
               <li>
                 <span class="helper"></span>
-                <a href="/viewer2/{{urlencode ARK}}">
+                <a href="/viewer/{{urlencode ARK}}">
                   <img class='browse-thumbnail' src="{{imageserver}}/iiif/{{[Thumbnail URL Fragment]}}" alt="{{Title}}">
                 </a>
                 <p>
-                  <a href="/viewer2/{{urlencode ARK}}">{{Title}}</a><br><br>
+                  <a href="/viewer/{{urlencode ARK}}">{{Title}}</a><br><br>
                   <b>Overtext Languages:</b> {{[Overtext Language]}}<br>
                   <b>Overtext Content:</b> {{[Overtext Content]}}<br>
                   <b>Undertext Languages:</b> {{[Undertext Language(s)]}}<br>
