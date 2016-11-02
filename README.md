@@ -45,6 +45,21 @@ Or with both:
 
 You can also supply the `dev.tools` variable in a default Maven profile. See `src/main/resources/settings.xml` for an example.
 
+### Updating Mirador
+
+The Sinai Scholar's site uses [Mirador](http://projectmirador.org/) as its image viewer. We are maintaining a fork [here](https://github.com/UCLALibrary/mirador). The build output of the code on the `develop-prod` branch of that repository is included in this repository (`sinai-web`) by the following process:
+
+    SINAI_PATH=/path/to/sinai-web
+    SINAI_MIRADOR_PATH=${SINAI_PATH}/src/main/webapp/mirador
+    
+    git clone https://github.com/UCLALibrary/mirador
+    cd mirador
+    git checkout -b develop-prod origin/develop-prod
+    grunt && grunt uglify
+    
+    rm -rf ${SINAI_MIRADOR_PATH}
+    cp -r ./mirador ${SINAI_MIRADOR_PATH}
+
 ### Contact
 
 Contact Kevin with any build, etc., questions you have.
