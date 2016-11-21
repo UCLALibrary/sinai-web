@@ -1,88 +1,68 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <link href="/mirador/css/mirador-combined.css" rel="stylesheet" type="text/css">
-      <script src="/mirador/mirador.js"></script>
-      <style type="text/css">
-        body { padding: 0; margin: 0; overflow: hidden; font-size: 70%; }
-        #viewer {
-          background: #333 url(/mirador/images/debut_dark.png) left top repeat;
-          width: 100%; height: 100%; position: fixed;
-        }
-        .window-manifest-title {
-          font-size: 85%;
-        }
-        .manifest-info {
-          overflow: hidden;
-          font-size: .85em;
-        }
-      </style>
-  </head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
+    <!-- for the navbar -->
+    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+
+    <!-- mirador -->
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    <script src="/mirador/mirador.min.js"></script>
+    <link href="/mirador/css/mirador-combined.min.css" rel="stylesheet" type="text/css">
+    <title>Mirador Viewer</title>
+    <style type="text/css">
+     #viewer {  width: 100%; height: 100%; }
+    </style>
+
+</head>
   <body>
-    <div id="viewer"></div>
-    <script type="text/javascript">
-      $(document).ajaxStop(function() {
-        var page = $(".window-manifest-title:not(:contains('ark:'))");
+    {{> templates/main-navbar}}
+    {{#unless error}}
+      <div id="viewer"></div>
 
-        if (page) {
-          $(".window-manifest-title:contains('ark:')").text(page.text() + '_PSH_color');
-        }
-      });
+      <script type="text/javascript">
 
-      $(function() {
-        Mirador({
-          "id": "viewer",
-          "saveSession": false,
-          "showAddFromURLBox": false,
-          "layout": "1x2",
-          "data": [{
-            "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest",
-            "location": "UCLA"
-          },{
-            "manifestUri": "{{imageserver}}/iiif/{{selected}}/manifest",
-            "location": "UCLA"
-          }],
-          "windowObjects": [{
-            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
-            "slotAddress" : "row1.column1",
-            "availableViews": ["ImageView"],
-            "viewType": "ImageView",
-            "annotationLayer": false,
-            "annotationState": "annoOff",
-            "overlay": false,
-            "fullScreen": true,
-            "displayLayout": true,
-            "layoutOptions": {
-              "close": true
-            },
-            "bottomPanel": false,
-            "bottomPanelVisible": false,
-            "sidePanel": false,
-            "sidePanelVisible": false
-          },{
-            "loadedManifest": "{{imageserver}}/iiif/{{selected}}/manifest",
-            "slotAddress" : "row1.column2",
-            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
-            "viewType": "ImageView",
-            "annotationLayer": false,
-            "annotationState": "annoOff",
-            "overlay": false,
-            "fullScreen": true,
-            "displayLayout": true,
-            "layoutOptions": {
-              "newObject": true,
-              "close": true,
-              "slotRight": true,
-              "slotBelow": true
-            },
-            "bottomPanel": true,
-            "bottomPanelVisible": true,
-            "sidePanel": false,
-            "sidePanelVisible": false
-          }]
-        });
-      });
-    </script>
+       $(function() {
+           var anno_token;
+           Mirador({
+            "id": "viewer",
+            "showAddFromURLBox": false,
+            "layout": "1",
+            "data": [
+              {{#each sinai-manuscript-metadata}}
+              {
+                "manifestUri": "{{imageserver}}/iiif/{{urlencode ARK}}/manifest",
+                "location": "UCLA"
+              },
+              {{/each}}
+            ],
+            "windowObjects": [{
+              "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
+              "slotAddress" : "row1",
+              "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
+              "viewType": "ImageView",
+              "annotationLayer": false,
+              "annotationState": "annoOff",
+              "overlay": false,
+              "fullScreen": true,
+              "displayLayout": true,
+              "layoutOptions": {
+                "newObject": true,
+                "close": true,
+              },
+              "bottomPanel": true,
+              "bottomPanelVisible": true,
+              "sidePanel": false,
+              "sidePanelVisible": false
+            }]
+          });
+       });
+      </script>
+    {{else}}
+      <p>There was an error loading Mirador. Please contact the system administrator.</p>
+    {{/unless}}
   </body>
-
 </html>
