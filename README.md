@@ -59,6 +59,24 @@ The Sinai Scholar's site uses [Mirador](http://projectmirador.org/) as its image
     
     rm -rf ${SINAI_MIRADOR_PATH}
     cp -r ./mirador ${SINAI_MIRADOR_PATH}
+    
+### Propagating Changes
+
+The current workflow for propagating code changes is as follows:
+* All changes start out on branch `develop`. These changes may be directly committed on `develop`, or merged in from another branch via pull request.
+* Both `stage` and `master` may only be updated with a pull request, and may **not** be pushed to directly. The convention is to create a new branch for the pull request that is deleted after the pull requst is complete. For example, one would create a `stage-pr` branch for a pull request on `stage`, a `master-pr` branch for a pull request on `master`, etc. The procedure is as follows:
+
+        git checkout stage
+        git checkout -b stage-pr
+        git merge develop
+        git push origin stage-pr
+        
+        # submit PR and wait for completion
+        
+        git branch -D stage-pr
+        git push --delete origin stage-pr
+        
+* **NOTE**: so that `master` is not polluted with merge commits, all `{name}-pr` branches must contain new commits from `develop` only (i.e., when preparing `master-pr`, merge in `develop`, not `stage`)
 
 ### Contact
 
