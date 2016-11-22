@@ -63,7 +63,7 @@ The Sinai Scholar's site uses [Mirador](http://projectmirador.org/) as its image
 ### Propagating Changes
 
 The current workflow for propagating code changes is as follows:
-* All changes start out on branch `develop`. These changes may be directly committed on `develop`, or merged in from another branch via pull request.
+* All changes start out on branch `develop`. These changes may be directly committed on `develop`, or merged in from another branch via pull request. These changes should be well-formed, using `git rebase` on your local copy to squash commits as necessary.
 * Both `stage` and `master` may only be updated with a pull request, and may **not** be pushed to directly. The convention is to create a new branch for the pull request that is deleted after the pull requst is complete. For example, one would create a `stage-pr` branch for a pull request on `stage`, a `master-pr` branch for a pull request on `master`, etc. The procedure is as follows:
 
         git checkout stage
@@ -80,4 +80,4 @@ The current workflow for propagating code changes is as follows:
 
 ### Contact
 
-Contact Kevin with any build, etc., questions you have.
+Contact Kevin or Mark with any build, etc., questions you have.
