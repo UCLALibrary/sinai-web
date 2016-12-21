@@ -45,15 +45,15 @@
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1cz37hq/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
-      "ARK": "ark:/21198/z18c9x9s",
-      "Title": "CPA NF Fragment 16",
+      "ARK": "ark:/21198/z1ht2zc3",
+      "Title": "CPA NF Fragment 7",
       "Overtext Language": "Christian Palestinian Aramaic",
-      "Overtext Content": "Gospel of Luke 18",
-      "Undertext Language(s)": "Christian Palestinian Aramaic, Georgian",
-      "Date": "7th c. CE",
-      "Extent": "2ff",
-      "Form": "Folia",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1fq9wzw/1022,0,6132,6132/150,150/0/default.jpg"
+      "Overtext Content": "John Chrysostom, Homily on the Prodigal Son",
+      "Undertext Language(s)": "Christian Palestinian Aramaic",
+      "Date": "10th c. CE",
+      "Extent": "7ff",
+      "Form": "Codex",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz11v5fkq/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1x356gz",
@@ -67,6 +67,17 @@
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz11v5h2t/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
+      "ARK": "ark:/21198/z1ft92mh",
+      "Title": "CPA NF fragment 13",
+      "Overtext Language": "Arabic",
+      "Overtext Content": "Not yet identified",
+      "Undertext Language(s)": "Christian Palestinian Aramaic",
+      "Date": "1252",
+      "Extent": "2 ff",
+      "Form": "Bifolium",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1q248j3/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
       "ARK": "ark:/21198/z1sb4fr7",
       "Title": "CPA NF Fragment 14",
       "Overtext Language": "Christian Palestinian Aramaic",
@@ -78,6 +89,17 @@
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz15d8sc2/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
+      "ARK": "ark:/21198/z18c9x9s",
+      "Title": "CPA NF Fragment 16",
+      "Overtext Language": "Christian Palestinian Aramaic",
+      "Overtext Content": "Gospel of Luke 18",
+      "Undertext Language(s)": "Christian Palestinian Aramaic, Georgian",
+      "Date": "7th c. CE",
+      "Extent": "2ff",
+      "Form": "Folia",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1fq9wzw/1022,0,6132,6132/150,150/0/default.jpg"
+    },
+    {
       "ARK": "ark:/21198/z1nk3q1x",
       "Title": "CPA NF Fragment 17",
       "Overtext Language": "Christian Palestinian Aramaic",
@@ -87,17 +109,6 @@
       "Extent": "2ff",
       "Form": "Bifolia",
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1319wgm/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z1ht2zc3",
-      "Title": "CPA NF Fragment 7",
-      "Overtext Language": "Christian Palestinian Aramaic",
-      "Overtext Content": "John Chrysostom, Homily on the Prodigal Son",
-      "Undertext Language(s)": "Christian Palestinian Aramaic",
-      "Date": "10th c. CE",
-      "Extent": "7ff",
-      "Form": "Codex",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz11v5fkq/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1d50wzn",
@@ -122,6 +133,17 @@
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1p84d1s/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
+      "ARK": "ark:/21198/r2sf2t3c",
+      "Title": "Georgian NF fragment 73a",
+      "Overtext Language": "Georgian",
+      "Overtext Content": "Not yet identified",
+      "Undertext Language(s)": "Armenian, Greek majuscule",
+      "Date": "Not yet identified",
+      "Extent": "4 ff",
+      "Form": "Folia",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz10293t0/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
       "ARK": "ark:/21198/z14m9dms",
       "Title": "Georgian NF 84",
       "Overtext Language": "Georgian",
@@ -131,28 +153,6 @@
       "Extent": "7ff",
       "Form": "Bifolia",
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1qz2cw1/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z10v8nt5",
-      "Title": "Greek NF M 130",
-      "Overtext Language": "Greek",
-      "Overtext Content": "Troparia",
-      "Undertext Language(s)": "Greek",
-      "Date": "12th-13th c. CE",
-      "Extent": "1f",
-      "Form": "Folio",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz16110vp/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z1w385bk",
-      "Title": "Greek NF M 98",
-      "Overtext Language": "Greek",
-      "Overtext Content": "Liturgical Canons of the Parakletike",
-      "Undertext Language(s)": "Greek",
-      "Date": "First half 13th c. CE (Cavallo); 12th-13th c. CE (Greek New Finds).",
-      "Extent": "2ff",
-      "Form": "Bifolium",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz14t6jxd/1022,0,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1kp8b5g",
@@ -175,6 +175,39 @@
       "Extent": "21ff",
       "Form": "Codex",
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1d79dk1/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1b289w3",
+      "Title": "Greek NF M 90",
+      "Overtext Language": "Greek",
+      "Overtext Content": "Horologion",
+      "Undertext Language(s)": "Ethiopic",
+      "Date": "13th c. CE",
+      "Extent": "17 ff",
+      "Form": "Quires",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz19z9hdb/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1w385bk",
+      "Title": "Greek NF M 98",
+      "Overtext Language": "Greek",
+      "Overtext Content": "Liturgical Canons of the Parakletike",
+      "Undertext Language(s)": "Greek",
+      "Date": "First half 13th c. CE (Cavallo); 12th-13th c. CE (Greek New Finds).",
+      "Extent": "2ff",
+      "Form": "Bifolium",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz14t6jxd/1022,0,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z10v8nt5",
+      "Title": "Greek NF M 130",
+      "Overtext Language": "Greek",
+      "Overtext Content": "Troparia",
+      "Undertext Language(s)": "Greek",
+      "Date": "12th-13th c. CE",
+      "Extent": "1f",
+      "Form": "Folio",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz16110vp/0,1022,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1rb7dmv",
@@ -210,15 +243,59 @@
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1zk5gvb/0,902,5412,5412/150,150/0/default.jpg"
     },
     {
-      "ARK": "ark:/21198/z10v8dvq",
-      "Title": "Syriac NF Fragment 53",
+      "ARK": "ark:/21198/z1qc0k41",
+      "Title": "Syriac 7",
       "Overtext Language": "Syriac",
-      "Overtext Content": "Life of Ephrem",
-      "Undertext Language(s)": "Syriac",
-      "Date": "10th c. CE",
-      "Extent": "5ff",
+      "Overtext Content": "Gospel lectionary, liturgical texts",
+      "Undertext Language(s)": "Armenian, Greek majuscule",
+      "Date": "12th c. CE",
+      "Extent": "73 ff",
       "Form": "Codex",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1b56k4t/0,1022,6132,6132/150,150/0/default.jpg"
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1v98jds/0,902,5412,5412/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/r1vd6wc9",
+      "Title": "Syriac NF 11",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Cyril of Scythopolis, Life of Sabas (Syriac)",
+      "Undertext Language(s)": "Christian Palestinian Aramaic",
+      "Date": "9th c. CE",
+      "Extent": "112ff",
+      "Form": "Codex",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1cf9rf4/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z13n2cd2",
+      "Title": "Syriac NF Fragment 28",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "John Chrysostom\\, Commentary on John\\, Homily 20 (end)",
+      "Undertext Language(s)": "Syriac",
+      "Date": "8th-9th c. CE",
+      "Extent": "5ff",
+      "Form": "Quire",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1qf8tzd/1022,0,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1gx4mjp",
+      "Title": "Syriac NF 37",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Evangrius Ponticus, On prayer",
+      "Undertext Language(s)": "Syriac",
+      "Date": "7th c. CE",
+      "Extent": "6ff",
+      "Form": "Codex",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1xd12b3/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1kk9tdr",
+      "Title": "Syriac NF 39",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "The Hundred Chapters (Diadochos of Photiki)",
+      "Undertext Language(s)": "Syriac",
+      "Date": "9th c. CE",
+      "Extent": "18 ff",
+      "Form": "Quires",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1hx1p2d/0,1022,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1c53vvq",
@@ -230,6 +307,72 @@
       "Extent": "8ff",
       "Form": "Quire",
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1jw8g2j/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1zw1vxc",
+      "Title": "Syriac NF Fragment 46",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Life of St. Mary of Egypt",
+      "Undertext Language(s)": "Syriac",
+      "Date": "9th-10th c. CE",
+      "Extent": "1f",
+      "Form": "Fragment",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1474bdk/1022,0,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z10v8dvq",
+      "Title": "Syriac NF Fragment 53",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Life of Ephrem",
+      "Undertext Language(s)": "Syriac",
+      "Date": "10th c. CE",
+      "Extent": "5ff",
+      "Form": "Codex",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1b56k4t/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z17d3457",
+      "Title": "Syriac NF 56",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Gospel Lectionary",
+      "Undertext Language(s)": "Christian Palestinian Aramaic",
+      "Date": "933",
+      "Extent": "121ff",
+      "Form": "Codex",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1ng4x3n/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1v4146r",
+      "Title": "Syriac NF Fragment 63",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Triodion",
+      "Undertext Language(s)": "Syriac",
+      "Date": "11th c. CE",
+      "Extent": "1f",
+      "Form": "Folio",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1cz38h4/0,1022,6132,6132/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1xw51dx",
+      "Title": "Syriac NF 64",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Genesis (Peshitta)",
+      "Undertext Language(s)": "Christian Palestinian Aramaic, Greek",
+      "Date": "Not yet identified",
+      "Extent": "4 ff",
+      "Form": "Bifolia",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1fx7pgf/0,902,5412,5412/150,150/0/default.jpg"
+    },
+    {
+      "ARK": "ark:/21198/z1t448qz",
+      "Title": "Syriac NF frag 65",
+      "Overtext Language": "Syriac",
+      "Overtext Content": "Parakletike (Book of Supplication)",
+      "Undertext Language(s)": "Syriac",
+      "Date": "11th c. CE",
+      "Extent": "1 f",
+      "Form": "Folio",
+      "Thumbnail URL Fragment": "ark:%2F21198%2Fz11c28x5/0,902,5412,5412/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1w37xcr",
@@ -252,72 +395,6 @@
       "Extent": "1f",
       "Form": "Fragment",
       "Thumbnail URL Fragment": "ark:%2F21198%2Fz1gb24c1/1022,0,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/r1vd6wc9",
-      "Title": "Syriac NF 11",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "Cyril of Scythopolis, Life of Sabas (Syriac)",
-      "Undertext Language(s)": "Christian Palestinian Aramaic",
-      "Date": "9th c. CE",
-      "Extent": "112ff",
-      "Form": "Codex",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1cf9rf4/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z1gx4mjp",
-      "Title": "Syriac NF 37",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "Evangrius Ponticus, On prayer",
-      "Undertext Language(s)": "Syriac",
-      "Date": "7th c. CE",
-      "Extent": "6ff",
-      "Form": "Codex",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1xd12b3/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z17d3457",
-      "Title": "Syriac NF 56",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "Gospel Lectionary",
-      "Undertext Language(s)": "Christian Palestinian Aramaic",
-      "Date": "933",
-      "Extent": "121ff",
-      "Form": "Codex",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1ng4x3n/0,1022,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z13n2cd2",
-      "Title": "Syriac NF Fragment 28",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "John Chrysostom\\, Commentary on John\\, Homily 20 (end)",
-      "Undertext Language(s)": "Syriac",
-      "Date": "8th-9th c. CE",
-      "Extent": "5ff",
-      "Form": "Quire",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1qf8tzd/1022,0,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z1zw1vxc",
-      "Title": "Syriac NF Fragment 46",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "Life of St. Mary of Egypt",
-      "Undertext Language(s)": "Syriac",
-      "Date": "9th-10th c. CE",
-      "Extent": "1f",
-      "Form": "Fragment",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1474bdk/1022,0,6132,6132/150,150/0/default.jpg"
-    },
-    {
-      "ARK": "ark:/21198/z1v4146r",
-      "Title": "Syriac NF Fragment 63",
-      "Overtext Language": "Syriac",
-      "Overtext Content": "Triodion",
-      "Undertext Language(s)": "Syriac",
-      "Date": "11th c. CE",
-      "Extent": "1f",
-      "Form": "Folio",
-      "Thumbnail URL Fragment": "ark:%2F21198%2Fz1cz38h4/0,1022,6132,6132/150,150/0/default.jpg"
     },
     {
       "ARK": "ark:/21198/z1qc0cjx",
