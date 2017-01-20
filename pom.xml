@@ -22,7 +22,7 @@
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
-    <vertx.version>3.1.0</vertx.version>
+    <vertx.version>3.3.2</vertx.version>
     <javatuples.version>1.2</javatuples.version>
     <freelib.utils.version>0.6.1-SNAPSHOT</freelib.utils.version>
     <handlebars.version>2.2.3</handlebars.version>
@@ -127,6 +127,11 @@
       <artifactId>vertx-unit</artifactId>
       <version>${vertx.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.4.1</version>
     </dependency>
   </dependencies>
 

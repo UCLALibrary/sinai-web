@@ -59,8 +59,6 @@ public interface Constants {
 
     public static final String SINAI_ARRAY = "sinai.json.array";
 
-    public static final String OAUTH_USERS = "sinai.oauth.users";
-
     /* Message values */
 
     public static final String SUCCESS_RESPONSE = "success";

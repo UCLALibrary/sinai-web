@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    <script src="/js/login.js" defer="true"></script>
+  </head>
+  <body class="sinai-body">
+    {{> templates/header}}
+    <div id="main" class="text-bg">
+      <div>
+        <h1>Sinai Scholars Site - Manage Users</h1>
+        <table id="user_table">
+          <thead>
+            <tr>
+               <!--
+              <th>Name</th>
+              -->
+              <th>Email</th>
+              <th>Admin?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each users}}
+            <tr>
+              <!--
+              <td>name-goes-here</td>
+              -->
+              <td>{{email}}</td>
+              {{#if is_admin}}
+              <td class="is_admin_yes">yes</td>
+              {{else}}
+              <td class="is_admin_no">no</td>
+              {{/if}}
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        <form method="post" action="/admin">
+          Email address (new address to add user, existing address to update):
+          <input type="text" name="email"><br>
+          Admin privileges (check to grant, uncheck to revoke):
+          <input type="checkbox" name="is_admin" value="yes"><br>
+          <input type="submit" value="Add or Update User">
+        </form>
+      </div>
+    </div>
+    {{> templates/footer}}
+  </body>
+</html>
