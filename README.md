@@ -77,7 +77,7 @@ The current workflow for propagating code changes is as follows:
         git push --delete origin stage-pr
         
 * **NOTE**: so that `master` is not polluted with merge commits, all `{name}-pr` branches must contain new commits from `develop` only (i.e., when preparing `master-pr`, merge in `develop`, not `stage`)
-* **NOTE**: so that `master` and `stage` are always identical, the PR branches for each are always to be prepared at the same time
+* **NOTE**: so that whenever `master` is updated it becomes identical to `stage`, the PR branches for each are always to be prepared at the same time
 
 ### Contact
 
