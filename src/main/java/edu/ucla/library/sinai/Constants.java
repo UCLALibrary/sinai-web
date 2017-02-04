@@ -23,6 +23,8 @@ public interface Constants {
 
     public static final String SOLR_SERVER_PROP = "sinai.solr.server";
 
+    public static final String MANUSCRIPT_METADATA_URL_PROP = "sinai.manuscript.metadata.url";
+
     public static final String LOG_LEVEL_PROP = "sinai.log.level";
 
     public static final String KEY_PASS_PROP = "sinai.key.pass";
@@ -30,8 +32,6 @@ public interface Constants {
     public static final String JCEKS_PROP = "sinai.jceks";
 
     public static final String JKS_PROP = "sinai.jks";
-
-    public static final String MANUSCRIPT_METADATA_PROP = "sinai.manuscript.metadata";
 
     public static final String METRICS_REG_PROP = "sinai.metrics";
 

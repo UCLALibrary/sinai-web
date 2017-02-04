@@ -1,13 +1,16 @@
 
 package edu.ucla.library.sinai;
 
+import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
 import static edu.ucla.library.sinai.Constants.FACEBOOK_OAUTH_CLIENT_ID;
 import static edu.ucla.library.sinai.Constants.GOOGLE_OAUTH_CLIENT_ID;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
+import static edu.ucla.library.sinai.Constants.MANUSCRIPT_METADATA_URL_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 import static edu.ucla.library.sinai.Constants.OAUTH_USERS;
+import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
 import static edu.ucla.library.sinai.Constants.URL_SCHEME_PROP;
@@ -19,12 +22,25 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.naming.ConfigurationException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.sinai.handlers.LoginHandler;
+import edu.ucla.library.sinai.Metadata;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
@@ -51,6 +67,8 @@ public class Configuration implements Shareable {
 
     private static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinai";
 
+    private static final String DEFAULT_MANUSCRIPT_METADATA_URL = "http://localhost:8001/sinai-manuscript-metadata.json";
+
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
     private final int myPort;
@@ -71,13 +89,18 @@ public class Configuration implements Shareable {
 
     private final String[] myUsers;
 
+    private ObjectNode myManuscriptMetadata;
+
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
      *
      * @param aConfig A JSON configuration
      * @throws ConfigurationException If there is trouble reading or setting a configuration option
      */
-    public Configuration(final JsonObject aConfig) throws ConfigurationException, IOException {
+    public Configuration(final JsonObject aConfig, final Vertx aVertx,
+            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException, JsonProcessingException {
+        final Future<Configuration> result = Future.future();
+
         myTempDir = setTempDir(aConfig);
         myPort = setPort(aConfig);
         myRedirectPort = setRedirectPort(aConfig);
@@ -87,6 +110,87 @@ public class Configuration implements Shareable {
         myGoogleClientID = setGoogleClientID(aConfig);
         myFacebookClientID = setFacebookClientID(aConfig);
         myUsers = setUsers(aConfig);
+
+        if (aHandler != null) {
+            result.setHandler(aHandler);
+
+            setManuscriptMetadata(aConfig, aVertx, manuscriptMetadataHandler -> {
+                if (manuscriptMetadataHandler.failed()) {
+                    result.fail(manuscriptMetadataHandler.cause());
+                } else {
+                    aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
+                    result.complete(this);
+                }
+            });
+        }
+    }
+
+    public ObjectNode getManuscriptMetadata() {
+        return myManuscriptMetadata;
+    }
+
+    private void setManuscriptMetadata(final JsonObject aConfig, final Vertx aVertx, final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException, JsonProcessingException {
+        final Properties properties = System.getProperties();
+        final Future<Configuration> result = Future.future();
+
+        if (aHandler != null) {
+            result.setHandler(aHandler);
+
+            // Choose which URL to use: default, or parameter
+            final String manuscriptMetadataUrl = properties.getProperty(MANUSCRIPT_METADATA_URL_PROP,
+                    aConfig.getString(MANUSCRIPT_METADATA_URL_PROP, DEFAULT_MANUSCRIPT_METADATA_URL));
+
+            if (LOGGER.isDebugEnabled() && properties.containsKey(MANUSCRIPT_METADATA_URL_PROP)) {
+                LOGGER.debug("Found {} set in system properties", MANUSCRIPT_METADATA_URL_PROP);
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Looking for manuscript metadata at: {}", manuscriptMetadataUrl);
+            }
+
+            try {
+                // Just test that URL is properly formed, no need to store the result
+                new URL(manuscriptMetadataUrl);
+
+                // Retrieve metadata from the URL
+                final ObjectMapper mapper = new ObjectMapper();
+                final HttpClient httpClient = aVertx.createHttpClient();
+
+                httpClient.getAbs(manuscriptMetadataUrl, response -> {
+                    if (response.statusCode() == 200) {
+                        response.bodyHandler(body -> {
+                            final String errormsg;
+                            try {
+                                // Save metadata to config property
+                                myManuscriptMetadata = (ObjectNode) mapper.readTree(body.toString());
+                                LOGGER.info("Using Sinai manuscript metadata located at: {}", manuscriptMetadataUrl);
+                                result.complete(this);
+                            } catch (IOException e) {
+                                errormsg = "Something went wrong while unpacking the manuscript metadata. ERROR: " + e.toString();
+                                if (LOGGER.isDebugEnabled()) {
+                                    LOGGER.debug("{} " + errormsg, getClass().getSimpleName());
+                                }
+                                result.fail(e);
+                            }
+                        });
+                    } else {
+                        final String errorMessage = "HTTP " + String.valueOf(response.statusCode()) + ": " + manuscriptMetadataUrl;
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
+                        }
+                        result.fail(new ConfigurationException(errorMessage));
+                    }
+                }).exceptionHandler(exceptionHandler -> {
+                    //httpClient.close();
+                    result.fail(new ConfigurationException("Couldn't connect to manuscript metadata host: [ " + exceptionHandler.getMessage() + " ]"));
+                }).putHeader(Metadata.CONTENT_TYPE, Metadata.JSON_MIME_TYPE).end();
+
+                httpClient.close();
+            } catch (final MalformedURLException details) {
+                result.fail(new ConfigurationException("Manuscript metadata URL is not well-formed: " + manuscriptMetadataUrl));
+            }
+        } else {
+            result.fail(new ConfigurationException("No handler was passed to setManuscriptMetadata"));
+        }
     }
 
     private String[] setUsers(final JsonObject aConfig) {

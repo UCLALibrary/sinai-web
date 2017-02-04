@@ -3,13 +3,11 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
-import static edu.ucla.library.sinai.Constants.MANUSCRIPT_METADATA_PROP;
 
 import java.net.URISyntaxException;
 
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import info.freelibrary.util.LoggerFactory;
@@ -34,29 +32,13 @@ public class MiradorHandler extends SinaiHandler {
     @Override
     public void handle(final RoutingContext aContext) {
         final String selected = aContext.request().getParam("selected");
-        final ObjectMapper mapper = new ObjectMapper();
-        ObjectNode jsonNode;
         final String requestPath = aContext.request().uri();
         final int index = requestPath.indexOf("?");
         final String path;
-        String errorMessage;
 
-        // load manifest metadata from file
-        try {
-            String metadataFilePath = System.getProperty(MANUSCRIPT_METADATA_PROP);
-            InputStream in = getClass().getResourceAsStream(metadataFilePath); 
-            BufferedReader metadataFile = new BufferedReader(new InputStreamReader(in));
-            jsonNode = (ObjectNode) mapper.readTree(metadataFile);
-        } catch (Exception e) {
-            errorMessage = "Something went wrong while loading the manuscript metadata. ERROR: " + e.toString();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
-            }
-
-            jsonNode = mapper.createObjectNode();
-            jsonNode.put("error", errorMessage);
-        }
-
+        // Need all the metadata so that all manuscripts are loaded into Mirador
+        ObjectNode jsonNode = myConfig.getManuscriptMetadata();
+        
         if (index != -1) {
             path = requestPath.substring(0, index);
         } else {
@@ -81,8 +63,6 @@ public class MiradorHandler extends SinaiHandler {
         } else {
             skip = 1;
         }
-
-
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Getting item page for : {} ({})", id, path);
