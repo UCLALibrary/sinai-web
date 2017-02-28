@@ -8,6 +8,8 @@ import static edu.ucla.library.sinai.Constants.JKS_PROP;
 import static edu.ucla.library.sinai.Constants.KEY_PASS_PROP;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +29,12 @@ import edu.ucla.library.sinai.handlers.PageHandler;
 import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
@@ -50,7 +57,25 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
     private Configuration myConfig;
 
     @Override
-    public void start(final Future<Void> aFuture) throws ConfigurationException, IOException {
+    public void start(final Future<Void> aFuture) throws ConfigurationException, IOException, JsonProcessingException {
+        new Configuration(config(), vertx, configHandler -> {
+            if (configHandler.succeeded()) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("App configured successfully");
+                }
+                myConfig = configHandler.result();
+                initializeMainVerticle(aFuture);
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    // Log the error
+                    LOGGER.error("App configuration failed: [ " + configHandler.cause().toString() + " ]");
+                }
+                aFuture.fail(configHandler.cause());
+            }
+        });
+    }
+
+    private void initializeMainVerticle(final Future<Void> aFuture) {
         final SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
         final TemplateEngine templateEngine = HandlebarsTemplateEngine.create();
         final TemplateHandler templateHandler = TemplateHandler.create(templateEngine);
@@ -59,7 +84,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         final JWTAuth jwtAuth;
 
         // Store our parsed configuration so we can access it when needed
-        myConfig = new Configuration(config());
         vertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, myConfig);
 
         // Set the port on which we want to listen for connections
@@ -85,7 +109,11 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                 final InputStream inStream = getClass().getResourceAsStream("/" + jksProperty);
 
                 if (inStream != null) {
-                    jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
+                    try {
+                        jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
+                    } catch (final IOException details) {
+                        throw new RuntimeException(details);
+                    }
                 } else {
                     LOGGER.debug("Trying to use the build's default JKS: {}", jksProperty);
                     jksOptions.setPath("target/classes/" + jksProperty);
@@ -116,14 +144,14 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Serve static files like images, scripts, css, etc.
         router.getWithRegex(STATIC_FILES_RE).handler(StaticHandler.create());
 
-        // Put everything behind an authentication check
+        // Authentication check
         if (jwtAuth != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Using the JWT authentication handler");
             }
 
             router.route().handler(UserSessionHandler.create(jwtAuth));
-            router.route().handler(JWTAuthHandler.create(jwtAuth, "/login-response"));
+            router.getWithRegex(AUTHENTICATION_CHECK_RE).handler(JWTAuthHandler.create(jwtAuth));
         }
 
         // Login and logout routes
