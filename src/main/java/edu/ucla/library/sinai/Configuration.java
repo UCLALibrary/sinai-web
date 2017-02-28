@@ -7,7 +7,7 @@ import static edu.ucla.library.sinai.Constants.GOOGLE_OAUTH_CLIENT_ID;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
-import static edu.ucla.library.sinai.Constants.MANUSCRIPT_METADATA_URL_PROP;
+import static edu.ucla.library.sinai.Constants.METADATA_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 import static edu.ucla.library.sinai.Constants.OAUTH_USERS;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
@@ -137,11 +137,12 @@ public class Configuration implements Shareable {
             result.setHandler(aHandler);
 
             // Choose which URL to use: default, or parameter
-            final String manuscriptMetadataUrl = properties.getProperty(MANUSCRIPT_METADATA_URL_PROP,
-                    aConfig.getString(MANUSCRIPT_METADATA_URL_PROP, DEFAULT_MANUSCRIPT_METADATA_URL));
+            final String manuscriptMetadataUrl = properties.getProperty(METADATA_SERVER_PROP,
+                    aConfig.getString(METADATA_SERVER_PROP, DEFAULT_MANUSCRIPT_METADATA_URL)) + "/sinai-manuscript-metadata.json";
+            // TODO: move metadata string to constant?
 
-            if (LOGGER.isDebugEnabled() && properties.containsKey(MANUSCRIPT_METADATA_URL_PROP)) {
-                LOGGER.debug("Found {} set in system properties", MANUSCRIPT_METADATA_URL_PROP);
+            if (LOGGER.isDebugEnabled() && properties.containsKey(METADATA_SERVER_PROP)) {
+                LOGGER.debug("Found {} set in system properties", METADATA_SERVER_PROP);
             }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Looking for manuscript metadata at: {}", manuscriptMetadataUrl);

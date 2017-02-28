@@ -14,7 +14,7 @@ JDWP_AGENTLIB="-agentlib:jdwp=transport=dt_socket,address=9003,server=y,suspend=
 JMXREMOTE="-Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.authenticate=false"
 JMXREMOTE="$JMXREMOTE -Dcom.sun.management.jmxremote.ssl=false"
 # Metadata for browse page
-SINAI_MANUSCRIPT_METADATA_URL="-Dsinai.manuscript.metadata.url=${sinai.manuscript.metadata.url}"
+SINAI_METADATA_SERVER="-Dsinai.metadata.server=${sinai.metadata.server}"
 AUTHBIND=""
 SINAI_CONFIG=""
 
@@ -39,5 +39,5 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_MANUSCRIPT_METADATA_URL \
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER \
   $JMX_METRICS $1 -jar target/sinai-web-${project.version}-exec.jar $SINAI_CONFIG
