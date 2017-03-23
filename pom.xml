@@ -18,11 +18,11 @@
     <!-- These are samples for testing purposes only ... DO NOT USE THEM IN PRODUCTION!!! -->
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
     <!-- Metadata that is used to build the 'browse' page -->
-    <sinai.manuscript.metadata>/sinai-manuscript-metadata.json</sinai.manuscript.metadata>
+    <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
-    <vertx.version>3.1.0</vertx.version>
+    <vertx.version>3.3.2</vertx.version>
     <javatuples.version>1.2</javatuples.version>
     <freelib.utils.version>0.6.1-SNAPSHOT</freelib.utils.version>
     <handlebars.version>2.2.3</handlebars.version>

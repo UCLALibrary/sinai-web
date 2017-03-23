@@ -152,7 +152,7 @@ public class LoginHandler extends SinaiHandler {
 
             try {
                 final JsonObject jwt = extractJWT(new JsonObject(aBody.toString()));
-                final JWTOptions jwtOptions = new JWTOptions().setExpiresInMinutes(120);
+                final JWTOptions jwtOptions = new JWTOptions().setExpiresInMinutes(new Long(120));
                 final String token = myJwtAuth.generateToken(jwt, jwtOptions);
 
                 if (LOGGER.isDebugEnabled()) {
