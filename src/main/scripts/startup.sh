@@ -6,6 +6,8 @@ KEY_PASS_CONFIG="-Dsinai.key.pass=${sinai.key.pass}"
 SINAI_TEMP_DIR="-Dsinai.temp.dir=${sinai.temp.dir}"
 SINAI_PORT="-Dsinai.port=${sinai.port} -Dsinai.redirect.port=${sinai.redirect.port}"
 IMAGE_SERVER="-Dsinai.image.server=${sinai.image.server}"
+# Metadata for browse page
+SINAI_MANUSCRIPT_METADATA="-Dsinai.manuscript.metadata=${sinai.manuscript.metadata}"
 DROPWIZARD_METRICS="-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=sinai.metrics"
 JMX_METRICS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true"
 # For tools like Eclipse's Debugging
@@ -13,8 +15,6 @@ JDWP_AGENTLIB="-agentlib:jdwp=transport=dt_socket,address=9003,server=y,suspend=
 # For tools like visualvm or jconsole (Note: only for use on dev's localhost since there is no configured security)
 JMXREMOTE="-Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.authenticate=false"
 JMXREMOTE="$JMXREMOTE -Dcom.sun.management.jmxremote.ssl=false"
-# Metadata for browse page
-SINAI_METADATA_SERVER="-Dsinai.metadata.server=${sinai.metadata.server}"
 AUTHBIND=""
 SINAI_CONFIG=""
 
@@ -39,5 +39,5 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER \
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_MANUSCRIPT_METADATA \
   $JMX_METRICS $1 -jar target/sinai-web-${project.version}-exec.jar $SINAI_CONFIG

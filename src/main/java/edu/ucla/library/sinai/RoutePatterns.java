@@ -50,10 +50,4 @@ public interface RoutePatterns {
      */
     public static final String STATIC_FILES_RE =
             ".*(\\.txt|\\.js|\\.css|\\.ico|\\.png|\\.gif|\\.ttf|\\.eot|\\.svg|\\.woff|\\.woff2|\\.jpg|translation\\.json|\\.map)$";
-
-    /**
-     * A regex that matches route patterns that are to be placed behind an authentication check.
-     */
-    public static final String AUTHENTICATION_CHECK_RE =
-            METRICS_RE + "|" + STATUS + "|" + BROWSE + "|" + VIEWER_RE;
 }
