@@ -12,6 +12,7 @@
     <div id="main" class="text-bg">
       <div>
         <h1>Sinai Scholars Site - Manage Users</h1>
+        <p>NOTE: After adding or updating a user, please allow a few seconds for Solr to re-index, then refresh this page to allow changes to appear.</p>
         <table id="user_table">
           <thead>
             <tr>
@@ -41,12 +42,14 @@
         <form method="post" action="/admin">
           Email address (new address to add user, existing address to update):
           <input type="text" name="email"><br>
-          Admin privileges (check to grant, uncheck to revoke):
-          <input type="checkbox" name="is_admin" value="yes"><br>
+          Admin privileges:<br>
+          <input type="radio" name="is_admin" value="true"> Yes<br>
+          <input type="radio" name="is_admin" value="false" checked="checked"> No<br>
           <input type="submit" value="Add or Update User">
         </form>
       </div>
     </div>
     {{> templates/footer}}
+    </script>
   </body>
 </html>

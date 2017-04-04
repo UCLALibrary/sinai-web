@@ -40,7 +40,7 @@ public class AdminHandler extends SinaiHandler {
 
         if (method == HttpMethod.GET) {
             // Get all user records
-            final JsonObject solrQuery = new JsonObject().put("q", "record_type:user").put("rows", 10000000);
+            final JsonObject solrQuery = new JsonObject().put("q", "record_type:user").put("rows", 10000000).put("sort", "email%20asc");
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Constructing new Solr query: {}", solrQuery);
             }
@@ -63,6 +63,8 @@ public class AdminHandler extends SinaiHandler {
             });
         } else if (method == HttpMethod.POST) {
         	final String email = aContext.request().getFormAttribute("email");
+            final String formIsAdmin = aContext.request().getFormAttribute("is_admin");
+
         	final boolean isAdmin;
 
             // Validate user input
@@ -74,10 +76,17 @@ public class AdminHandler extends SinaiHandler {
                 aContext.put(ERROR_MESSAGE, msg("Invalid email address: {}", email));
                 aContext.fail(400);
             } else {
-                if ((aContext.request().getFormAttribute("is_admin") != null) && (aContext.request().getFormAttribute("is_admin").equals("yes"))) {
+                if (formIsAdmin.equals("true")) {
                     isAdmin = true;
-                } else {
+                } else if (formIsAdmin.equals("false")) {
                     isAdmin = false;
+                } else {
+                    LOGGER.error("Invalid is_admin value: {}", formIsAdmin);
+
+                    aContext.put(ERROR_HEADER, "Form Submission Error");
+                    aContext.put(ERROR_MESSAGE, msg("Invalid is_admin value: {}", formIsAdmin));
+                    aContext.fail(400);
+                    return;
                 }
     
                 // User input all good, so construct query to add a new user record
@@ -106,7 +115,7 @@ public class AdminHandler extends SinaiHandler {
             }
         }
         else {
-            LOGGER.warn("Received a {} request but only POST and GET are supported", method.name());
+            LOGGER.error("Received a {} request but only POST and GET are supported", method.name());
             aContext.response().headers().add("Allow", "GET, POST");
             aContext.fail(405);
         }
