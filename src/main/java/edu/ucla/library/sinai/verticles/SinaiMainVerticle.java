@@ -13,6 +13,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.naming.ConfigurationException;
 
@@ -20,6 +22,7 @@ import info.freelibrary.util.IOUtils;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.RoutePatterns;
+import edu.ucla.library.sinai.handlers.AdminHandler;
 import edu.ucla.library.sinai.handlers.FailureHandler;
 import edu.ucla.library.sinai.handlers.LoginHandler;
 import edu.ucla.library.sinai.handlers.LogoutHandler;
@@ -64,10 +67,16 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                     LOGGER.debug("App configured successfully");
                 }
                 myConfig = configHandler.result();
-                initializeMainVerticle(aFuture);
+
+                deploySinaiVerticles(deployHandler -> {
+                    if (deployHandler.succeeded()) {
+                        initializeMainVerticle(aFuture);
+                    } else {
+                        aFuture.fail(deployHandler.cause());
+                    }
+                });
             } else {
                 if (LOGGER.isDebugEnabled()) {
-                    // Log the error
                     LOGGER.error("App configuration failed: [ " + configHandler.cause().toString() + " ]");
                 }
                 aFuture.fail(configHandler.cause());
@@ -102,18 +111,22 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
             jceksConfig.put("path", JCEKS_PROP).put("type", "jceks").put("password", ksPassword);
             jwtAuth = JWTAuth.create(vertx, new JsonObject().put("keyStore", jceksConfig));
 
+            // Get JKS from an external configuration file
             if (jksFile.exists()) {
                 LOGGER.info("Using a system JKS configuration: {}", jksFile);
                 jksOptions.setPath(jksFile.getAbsolutePath());
             } else {
                 final InputStream inStream = getClass().getResourceAsStream("/" + jksProperty);
 
+                // Get JKS configuration from a configuration file in the jar file
                 if (inStream != null) {
+                    LOGGER.debug("Loading JKS configuration from jar file");
+                	
                     try {
                         jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
-                    } catch (final IOException details) {
-                        throw new RuntimeException(details);
-                    }
+	                } catch (final IOException details) {
+	                    throw new RuntimeException(details);
+	                }
                 } else {
                     LOGGER.debug("Trying to use the build's default JKS: {}", jksProperty);
                     jksOptions.setPath("target/classes/" + jksProperty);
@@ -140,6 +153,8 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
         final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
+        final AdminHandler adminHandler = new AdminHandler(myConfig);
+        final PageHandler pageHandler = new PageHandler(myConfig);
 
         // Serve static files like images, scripts, css, etc.
         router.getWithRegex(STATIC_FILES_RE).handler(StaticHandler.create());
@@ -152,6 +167,9 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
             router.route().handler(UserSessionHandler.create(jwtAuth));
             router.getWithRegex(AUTHENTICATION_CHECK_RE).handler(JWTAuthHandler.create(jwtAuth));
+            //router.route().handler(JWTAuthHandler.create(jwtAuth, "/login-response"));
+            router.get(ADMIN).handler(JWTAuthHandler.create(jwtAuth).addAuthority("role:admin"));
+            //router.get(ADMIN).handler(JWTAuthHandler.create(jwtAuth, "/login-response").addAuthority("role:admin"));
         }
 
         // Login and logout routes
@@ -168,7 +186,10 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
 
         // We just use the generic handler for browse page
-        router.get(BROWSE).handler(new PageHandler(myConfig));
+        router.get(BROWSE).handler(pageHandler);
+
+        router.get(ADMIN).handler(adminHandler);
+        router.post(ADMIN).handler(adminHandler);
 
         // Create a catch-all that passes content to the template handler
         router.get().handler(templateHandler).failureHandler(failureHandler);
@@ -192,6 +213,60 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                 aFuture.fail(response.cause());
             }
         });
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void deploySinaiVerticles(final Handler<AsyncResult<Void>> aHandler) {
+        final DeploymentOptions workerOptions = new DeploymentOptions().setWorker(true).setMultiThreaded(true);
+        final DeploymentOptions options = new DeploymentOptions();
+        final List<Future> futures = new ArrayList<Future>();
+        final Future<Void> future = Future.future();
+
+        if (aHandler != null) {
+            future.setHandler(aHandler);
+
+            futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
+
+            // Confirm all our verticles were successfully deployed
+            CompositeFuture.all(futures).setHandler(handler -> {
+                if (handler.succeeded()) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("All verticles were deployed successfully");
+                    }
+                    future.complete();
+                } else {
+                    LOGGER.error("One or more verticles failed to deploy");
+                    future.fail(handler.cause());
+                }
+            });
+        }
+    }
+
+    /**
+     * Deploys a particular verticle.
+     *
+     * @param aVerticleName The name of the verticle to deploy
+     * @param aOptions Any deployment options that should be considered
+     */
+    private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
+            final Future<Void> aFuture) {
+        vertx.deployVerticle(aVerticleName, aOptions, response -> {
+            try {
+                final String name = Class.forName(aVerticleName).getSimpleName();
+
+                if (response.succeeded()) {
+                    LOGGER.debug("Successfully deployed {} [{}]", name, response.result());
+                    aFuture.complete();
+                } else {
+                    LOGGER.error("Failed to launch {}", name, response.cause());
+                    aFuture.fail(response.cause());
+                }
+            } catch (final ClassNotFoundException details) {
+                aFuture.fail(details);
+            }
+        });
+
+        return aFuture;
     }
 
     /**
@@ -223,5 +298,4 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // FIXME: Accidentally connecting to http port with a https connection fails badly
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=479488
     }
-
 }

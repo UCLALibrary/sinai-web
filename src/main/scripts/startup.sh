@@ -15,6 +15,7 @@ JMXREMOTE="-Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremo
 JMXREMOTE="$JMXREMOTE -Dcom.sun.management.jmxremote.ssl=false"
 # Metadata for browse page
 SINAI_METADATA_SERVER="-Dsinai.metadata.server=${sinai.metadata.server}"
+SINAI_SOLR_SERVER="-Dsinai.solr.server=${sinai.solr.server}"
 AUTHBIND=""
 SINAI_CONFIG=""
 
@@ -39,5 +40,5 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER \
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER $SINAI_SOLR_SERVER \
   $JMX_METRICS $1 -jar target/sinai-web-${project.version}-exec.jar $SINAI_CONFIG

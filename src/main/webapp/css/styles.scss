@@ -6,10 +6,10 @@ $black-transparent: rgba(0, 0, 0, 0.8);
 $beige-transparent: rgba(255, 247, 233, 0.8);
 
 @mixin font-settings {
-	font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-	font-size: 1em;
-	font-weight: 300;
-	line-height: 1.538;
+    font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1em;
+    font-weight: 300;
+    line-height: 1.538;
 }
 
 /*
@@ -18,70 +18,70 @@ $beige-transparent: rgba(255, 247, 233, 0.8);
 
 body.sinai-body {
     @include font-settings;
-	background-color: $beige;
-	background-image: url("../images/bg-header.jpg");
-	background-repeat: no-repeat;
-	background-position: center top;
-	margin: 0;
+    background-color: $beige;
+    background-image: url("../images/bg-header.jpg");
+    background-repeat: no-repeat;
+    background-position: center top;
+    margin: 0;
     padding: 0;
     height: 100%;
 
     ul {
-	    list-style: outside none none;
-	    margin: 0;
-	    padding: 0;
+        list-style: outside none none;
+        margin: 0;
+        padding: 0;
     }
 
     img {
-	    border: none;
+        border: none;
     }
 
     a {
-	    text-decoration: none;
+        text-decoration: none;
     }
 }
 
 .center-fixed-width {
-	margin: auto;
-	max-width: 1366px;
-	padding-left: 20px;
-	padding-right: 20px;
+    margin: auto;
+    max-width: 1366px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .navbar {
     @include font-settings;
-	> ul {
-		@extend .center-fixed-width;
-		color: white;
-		text-align: center;
+    > ul {
+        @extend .center-fixed-width;
+        color: white;
+        text-align: center;
 
-		> li {
-			color: inherit;
-			display: inline-block;
-		    font-weight: 300;
-	
-			> a {
-				color: inherit;
-				display: inline-block;
-				padding: 10px 10px;	
-			}
-	
-			&:hover	{
-				color: #AAA;
-			}
-		}
-	}
+        > li {
+            color: inherit;
+            display: inline-block;
+            font-weight: 300;
+
+            > a {
+                color: inherit;
+                display: inline-block;
+                padding: 10px 10px;
+            }
+
+            &:hover {
+                color: #AAA;
+            }
+        }
+    }
 }
 
 .maroon-button {
-	background-color: $maroon;
-	border: none;
-	color: white;
-	padding: 10px;
+    background-color: $maroon;
+    border: none;
+    color: white;
+    padding: 10px;
 
-	&:hover {
-		color: #AAA;
-	}
+    &:hover {
+        color: #AAA;
+    }
 }
 
 /*
@@ -89,96 +89,96 @@ body.sinai-body {
  */
 
 #banner {
-	background-color: $beige-transparent;
+    background-color: $beige-transparent;
 
-	> div {
-		@extend .center-fixed-width;
+    > div {
+        @extend .center-fixed-width;
 
-		> ul {
-			text-align: right;
+        > ul {
+            text-align: right;
 
-			> li {
-				display: inline-block;
-				margin-left: 10px;
-				margin-top: 10px;
-			}
-	
-		}
+            > li {
+                display: inline-block;
+                margin-left: 10px;
+                margin-top: 10px;
+            }
 
-		> div {
-			overflow: hidden;
+        }
 
-			> span {
-				float: right;
-				text-align: right;
-	
-				> a, span {
-					color: $maroon;
-					font-weight: bold;
-				}
-			}
-		}
+        > div {
+            overflow: hidden;
 
-		> a > img {
-			display: block;
-			width: 100%;
-			max-width: 940px;
-			margin: 0 auto;
-			padding: 20px 0;
-		}
-	}
+            > span {
+                float: right;
+                text-align: right;
+
+                > a, span {
+                    color: $maroon;
+                    font-weight: bold;
+                }
+            }
+        }
+
+        > a > img {
+            display: block;
+            width: 100%;
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+    }
 }
 
 #main-navbar {
-	@extend .navbar;
-	background-color: $maroon;
-	text-transform: uppercase;
+    @extend .navbar;
+    background-color: $maroon;
+    text-transform: uppercase;
 }
 
 #sub-navbar {
-	@extend .navbar;
-	background-color: $black-transparent;
-	//visibility: hidden;
+    @extend .navbar;
+    background-color: $black-transparent;
+    //visibility: hidden;
 }
 
 #main {
 
-	> div {
-		@extend .center-fixed-width;
-		padding-top: 10px;
-		padding-bottom: 35px;
+    > div {
+        @extend .center-fixed-width;
+        padding-top: 10px;
+        padding-bottom: 35px;
 
-		#browse-main-content {
-			overflow: hidden;
+        #browse-main-content {
+            overflow: hidden;
 
-			#search-results {
-				width: 75%;
-				float: left;
+            #search-results {
+                width: 75%;
+                float: left;
 
-				ul > li {
-					border-bottom: 1px solid $maroon;
-					padding-top: 20px;
+                ul > li {
+                    border-bottom: 1px solid $maroon;
+                    padding-top: 20px;
 
-					.helper {
-						display: inline-block;
-						height: 100%;
-						vertical-align: middle;
-					}
+                    .helper {
+                        display: inline-block;
+                        height: 100%;
+                        vertical-align: middle;
+                    }
 
-					img.browse-thumbnail {
-						//vertical-align: top;
-						float: left;
-					}
+                    img.browse-thumbnail {
+                        //vertical-align: top;
+                        float: left;
+                    }
 
-					p {
-						//display: inline-block;
-						overflow: hidden;
-						width: auto;
-						padding: 0px 20px;
-						margin-top: 0px;
+                    p {
+                        //display: inline-block;
+                        overflow: hidden;
+                        width: auto;
+                        padding: 0px 20px;
+                        margin-top: 0px;
 
-					}
-                    
+                    }
+
                     a.beta {
                         color: #003CC9;
                         margin-left: 50px;
@@ -191,9 +191,9 @@ body.sinai-body {
                             vertical-align: middle;
                         }
                     }
-				}
-			}
-		}
+                }
+            }
+        }
 
         #browse-error {
             code.error-code {
@@ -201,58 +201,79 @@ body.sinai-body {
             }
         }
 
-		p > a {
-			color: $maroon;
-			font-weight: bold;
-		}
-	
-		form {
-			input[type="text"] {
-				
-			}
-	
-			input[type="submit"] {
-				@extend .maroon-button;
-			}
-		}
-	}
+        p > a {
+            color: $maroon;
+            font-weight: bold;
+        }
+
+        form {
+            padding: 20px;
+
+            input[type="text"] {
+
+            }
+
+            input[type="submit"] {
+                @extend .maroon-button;
+            }
+        }
+
+        table#user_table {
+            border-collapse: collapse;
+            border-spacing: 0px;
+        }
+
+        table#user_table, table#user_table th, table#user_table td {
+            border: 1px solid black;
+            padding: 5px;
+
+            td.is_admin_yes {
+                color: green;
+                font-weight: bold;
+            }
+            td.is_admin_no {
+                color: red;
+                font-weight: bold;
+            }
+        }
+    }
 }
 
 .viewer-bg {
-	background-color: $beige-transparent;
+    background-color: $beige-transparent;
 }
 
 .text-bg {
-	background-color: $beige;
+    background-color: $beige;
 
-	> div {
-		background-color: white;
-		box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
-	}	
+    > div {
+        background-color: white;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+    }
 }
 
 #login-form {
-	@extend .center-fixed-width;
-	background-color: $tan;
-	border: 1px solid $brown;
+    @extend .center-fixed-width;
+    background-color: $tan;
+    border: 1px solid $brown;
 
-	min-width: 298px;
-	padding: 0;
-	position: fixed;
-	visibility: hidden;
+    min-width: 298px;
+    padding: 0;
+    position: fixed;
+    visibility: hidden;
 
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
-	div {
-		margin: 20px;
-		text-align: center;
-	}
+    div {
+        margin: 20px;
+        text-align: center;
+    }
 
-	p {
-		margin: 0;
-	}
+    p {
+        margin: 0;
+    }
 }
 
 /*
@@ -264,70 +285,70 @@ body.sinai-body {
 */
 
 #footer-navbar {
-	@extend .navbar;
-	background-color: $maroon;
+    @extend .navbar;
+    background-color: $maroon;
 }
 
 #sponsors {
-	background-color: $tan;
+    background-color: $tan;
 
-	> ul {
-		@extend .center-fixed-width;
-		text-align: center;
-		padding: 35px 0px;
+    > ul {
+        @extend .center-fixed-width;
+        text-align: center;
+        padding: 35px 0px;
 
-		> li {
-			display: inline-block;
-			font-size: 13px;
-			font-weight: 400;
-			padding: 0 2.5%;
-			vertical-align: middle;
-			width: 28%;
-	
-			> a {
-				color: #333;
+        > li {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 400;
+            padding: 0 2.5%;
+            vertical-align: middle;
+            width: 28%;
 
-				&:hover
-				{
-					color: $maroon;
-				}
+            > a {
+                color: #333;
 
-				> img {
-					display: inline-block;
-				}
+                &:hover
+                {
+                    color: $maroon;
+                }
 
-				> p {
-					margin: 0 15%;
-				}
-			}
-		}
+                > img {
+                    display: inline-block;
+                }
 
-		> li.border-left {
-			border-left: 1px solid $brown;
-		}	
+                > p {
+                    margin: 0 15%;
+                }
+            }
+        }
 
-		> li.border-right {
-			border-right: 1px solid $brown;
-		}	
-	}
+        > li.border-left {
+            border-left: 1px solid $brown;
+        }
+
+        > li.border-right {
+            border-right: 1px solid $brown;
+        }
+    }
 }
 
 #thumbnail-wrapper:after{content:""; display: inline-block; width: 100%; height: 0;}
 
 #copyright
 {
-	color: white;
-	background-color: black;
-	padding: 10px;
+    color: white;
+    background-color: black;
+    padding: 10px;
 
-	> span
-	{
-		display: table;
-		margin: auto;
-	}
+    > span
+    {
+        display: table;
+        margin: auto;
+    }
 
-	img
-	{
-		vertical-align: text-bottom;
-	}
+    img
+    {
+        vertical-align: text-bottom;
+    }
 }

@@ -3,6 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.FAILURE_RESPONSE;
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
+import static edu.ucla.library.sinai.Constants.SOLR_SERVICE_KEY;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Metadata.CONTENT_TYPE;
 import static edu.ucla.library.sinai.Metadata.TEXT_MIME_TYPE;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.sinai.Configuration;
+import edu.ucla.library.sinai.services.SolrService;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -49,9 +51,12 @@ public class LoginHandler extends SinaiHandler {
     // TODO: check JSON service aud to make sure it matches the client ID
     private final JWTAuth myJwtAuth;
 
+    private final String mySolrServer;
+
     public LoginHandler(final Configuration aConfig, final JWTAuth aJwtAuth) {
         super(aConfig);
         myJwtAuth = aJwtAuth;
+        mySolrServer = aConfig.getSolrServer().toString();
     }
 
     @Override
@@ -153,32 +158,58 @@ public class LoginHandler extends SinaiHandler {
             try {
                 final JsonObject jwt = extractJWT(new JsonObject(aBody.toString()));
                 final JWTOptions jwtOptions = new JWTOptions().setExpiresInMinutes(new Long(120));
-                final String token = myJwtAuth.generateToken(jwt, jwtOptions);
+                final String userName = jwt.getString("email");
+                final SolrService service = SolrService.createProxy(myContext.vertx(), SOLR_SERVICE_KEY);
+                final JsonObject solrQuery = new JsonObject().put("q", "record_type:user").put("fq", "email:" + userName).put("rows", 1);
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Token's decoded JSON contents: {}", aBody.toString());
-                }
+                // Query Solr for the user data corresponding to userName
+                service.search(solrQuery, handler -> {
+                    final Boolean isAdmin;
+                    if (handler.succeeded()) {
+                        final JsonObject solrJson = handler.result();
+                        isAdmin = solrJson.getJsonObject("response").getJsonArray("docs").getJsonObject(0).getBoolean("is_admin", false);
 
-                // Authenticating will give us a user which we can put into the session
-                myJwtAuth.authenticate(new JsonObject().put("jwt", token), authHandler -> {
-                    final HttpServerResponse response = myContext.response();
-
-                    if (authHandler.succeeded()) {
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("User successfully validated");
+                            LOGGER.debug("Solr response: {}", solrJson.toString());
                         }
-
-                        myContext.setUser(authHandler.result());
-                        response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
-                        response.end("success");
                     } else {
-                        LOGGER.error(authHandler.cause(), "Authentication did not succeed");
-                        response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
-                        response.end("failure");
+                        isAdmin = false;
                     }
 
-                    myClient.close();
+                    if (isAdmin) {
+                        LOGGER.debug("The current user has admin privileges");
+                        jwtOptions.addPermission("role:admin");
+                    } else {
+                        LOGGER.debug("The current user does not have admin privileges");
+                    }
+                    final String token = myJwtAuth.generateToken(jwt, jwtOptions);
+
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Token's decoded JSON contents: {}", aBody.toString());
+                    }
+
+                    // Authenticating will give us a user which we can put into the session
+                    myJwtAuth.authenticate(new JsonObject().put("jwt", token), authHandler -> {
+                        final HttpServerResponse response = myContext.response();
+
+                        if (authHandler.succeeded()) {
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("User successfully validated");
+                            }
+
+                            myContext.setUser(authHandler.result());
+                            response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
+                            response.end("success");
+                        } else {
+                            LOGGER.error(authHandler.cause(), "Authentication did not succeed");
+                            response.putHeader(CONTENT_TYPE, TEXT_MIME_TYPE);
+                            response.end("failure");
+                        }
+
+                        myClient.close();
+                    });
                 });
+
             } catch (final FailedLoginException details) {
                 final HttpServerResponse response = myContext.response();
                 String loggerMessage;
@@ -225,35 +256,16 @@ public class LoginHandler extends SinaiHandler {
             }
         }
 
+        /**
+         * Returns the email address in the "email" field of the JWT, and name if one exists.
+         */
         private JsonObject extractJWT(final JsonObject aJsonObject) throws FailedLoginException {
             final JsonObject jsonObject = new JsonObject();
             final String email = aJsonObject.getString("email", "");
-            final String[] users = myConfig.getUsers();
 
-            // If we don't have any configured users, we allow all
-            if (users.length != 0) {
-                boolean found = false;
-
-                for (int index = 0; index < users.length; index++) {
-                    if (users[index].equals(email)) {
-                        found = true;
-                    }
-                }
-
-                if (!found) {
-                    if (email.equals("")) {
-                        // TODO: might want to pass JSON instead of a string, for consistency with
-                        // the 'else' block below
-                        throw new FailedLoginException("No email was retrieved from OAuth");
-                    } else {
-                        // Use the extant JsonObject
-                        jsonObject.put("message", "Not an allowed email");
-                        jsonObject.put("email", email);
-                        throw new FailedLoginException(jsonObject.toString());
-                    }
-                }
+            if (email.equals("")) {
+                throw new FailedLoginException("No email was retrieved from OAuth");
             }
-
             jsonObject.put("email", email);
 
             if (aJsonObject.containsKey("name")) {
