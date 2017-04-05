@@ -19,6 +19,7 @@
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
     <!-- Metadata that is used to build the 'browse' page -->
     <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
+    <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaiusers</sinai.solr.server>
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
@@ -127,6 +128,11 @@
       <artifactId>vertx-unit</artifactId>
       <version>${vertx.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.4.1</version>
     </dependency>
   </dependencies>
 
