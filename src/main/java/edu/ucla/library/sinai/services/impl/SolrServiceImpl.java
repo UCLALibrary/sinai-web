@@ -4,6 +4,8 @@ package edu.ucla.library.sinai.services.impl;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 import static edu.ucla.library.sinai.Constants.SINAI_ARRAY;
 
+import java.util.Iterator;
+
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -34,9 +36,29 @@ public class SolrServiceImpl implements SolrService {
         myVertx = aVertx;
     }
 
+    /**
+     * Query Solr with the query params supplied in aJsonObject.
+     */
     @Override
     public void search(final JsonObject aJsonObject, final Handler<AsyncResult<JsonObject>> aHandler) {
-        final String solr = myConfig.getSolrServer().toExternalForm() + "/query";
+        String solr = myConfig.getSolrServer().toExternalForm() + "/query";
+        String queryString = "?";
+        Iterator<String> keys = aJsonObject.fieldNames().iterator();
+
+        int queryCounter = 0;
+        while(keys.hasNext()) {
+            String key = (String)keys.next();
+            String value;
+            try {
+                value = aJsonObject.getString(key);
+            } catch (ClassCastException e) {
+                value = aJsonObject.getInteger(key).toString();
+            }
+            queryString += ((queryCounter == 0) ? "" : "&") + key + "=" + value;
+            queryCounter++;
+        }
+        solr += queryString;
+
         final HttpClient client = myVertx.createHttpClient();
         final HttpClientRequest request;
 
@@ -56,14 +78,16 @@ public class SolrServiceImpl implements SolrService {
             aHandler.handle(Future.failedFuture(exceptionHandler));
         });
 
-        request.putHeader(Metadata.CONTENT_TYPE, Metadata.JSON_MIME_TYPE);
-        request.end(aJsonObject.toString());
+        request.end();
         client.close();
     }
 
+    /**
+     * Update Solr with the params supplied in aJsonObject.
+     */
     @Override
     public void index(final JsonObject aJsonObject, final Handler<AsyncResult<String>> aHandler) {
-        final String solr = myConfig.getSolrServer().toExternalForm() + "/update/json?commit=true";
+        String solr = myConfig.getSolrServer().toExternalForm() + "/update?json.command=false&commit=true";
         final HttpClient client = myVertx.createHttpClient();
         final HttpClientRequest request;
 
@@ -78,13 +102,7 @@ public class SolrServiceImpl implements SolrService {
         });
 
         request.putHeader(Metadata.CONTENT_TYPE, Metadata.JSON_MIME_TYPE);
-
-        if (aJsonObject.size() == 1 && aJsonObject.containsKey(SINAI_ARRAY)) {
-            request.end(aJsonObject.getJsonArray(SINAI_ARRAY).toString());
-        } else {
-            request.end(aJsonObject.toString());
-        }
-
+        request.end(aJsonObject.toString());
         client.close();
     }
 
