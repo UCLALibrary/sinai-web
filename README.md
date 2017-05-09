@@ -1,4 +1,4 @@
-## The skeleton for the Sinai Scholars Website
+## The Sinai Scholars Website
 
 ### To build locally (without Vagrant)
 
@@ -64,6 +64,10 @@ The Sinai Scholar's site uses [Mirador](http://projectmirador.org/) as its image
 
 The current workflow for propagating code changes is as follows:
 * All changes start out on branch `develop`. These changes may be directly committed on `develop`, or merged in from another branch via pull request. These changes should be well-formed, using `git rebase` on your local copy to squash commits as necessary.
+* Each branch has a slightly different `pom.xml`, so be sure that the merge strategy defined in `.gitattributes` is turned on:
+
+        git config --local merge.ours.driver true
+
 * Both `stage` and `master` may only be updated with a pull request, and may **not** be pushed to directly. The convention is to create a new branch for the pull request that is deleted after the pull requst is complete. For example, one would create a `stage-pr` branch for a pull request on `stage`, a `master-pr` branch for a pull request on `master`, etc. The procedure is as follows:
 
         git checkout stage
