@@ -1,0 +1,8 @@
+# Each branch points to a separate image server, metadata server, and Solr 
+# server, as defined in the pom.xml. We want to prevent changes to the pom 
+# from moving across branches, unless intended. To turn off this merge 
+# protection, do:
+#
+# $ git config --local merge.ours.driver false
+
+pom.xml merge=ours
