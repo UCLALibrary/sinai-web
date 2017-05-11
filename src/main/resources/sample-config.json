@@ -1,5 +1,4 @@
 {
   "sinai.oauth.google.clientId": "587760109846-8ctkp2qbuag2n7kh0lnd0vv8ur5u1os9.apps.googleusercontent.com",
-  "sinai.oauth.facebook.clientId": "403322423208635",
-  "sinai.oauth.users": ["ksclarke@gmail.com", "kristian.j.allen@gmail.com", "stassewright@gmail.com", "kirschbombe@gmail.com", "damian07@gmail.com", "parinita.ghorpade@gmail.com", "markamatney@gmail.com", "todd.grappone@gmail.com", "andy.rutkowski@gmail.com", "sinai.arcadia@gmail.com", "marta2abril@gmail.com", "azaroth42@gmail.com", "bustillom@gmail.com", "maja.kominko@gmail.com", "alegaeta3@gmail.com", "mphelps@emelibrary.org", "maura.nolan@gmail.com", "sinai.uclalibrary@gmail.com"]
+  "sinai.oauth.facebook.clientId": "403322423208635"
 }
