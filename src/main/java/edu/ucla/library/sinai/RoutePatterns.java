@@ -39,10 +39,18 @@ public interface RoutePatterns {
     public static final String BROWSE = "/browse";
 
     /**
+     * A path for managing user accounts and other administrative tasks.
+     */
+    public static final String ADMIN = "/admin";
+
+    /**
      * A generic path for Web application metrics.
      */
     public static final String STATUS = "/status/*";
 
+    /**
+     * A generic path for the Mirador viewer.
+     */
     public static final String VIEWER_RE = "/viewer/.*";
 
     /**
@@ -55,5 +63,5 @@ public interface RoutePatterns {
      * A regex that matches route patterns that are to be placed behind an authentication check.
      */
     public static final String AUTHENTICATION_CHECK_RE =
-            METRICS_RE + "|" + STATUS + "|" + BROWSE + "|" + VIEWER_RE;
+            METRICS_RE + "|" + STATUS + "|" + BROWSE + "|" + ADMIN + "|" + VIEWER_RE;
 }

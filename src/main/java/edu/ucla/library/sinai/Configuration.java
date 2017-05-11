@@ -9,7 +9,6 @@ import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
 import static edu.ucla.library.sinai.Constants.METADATA_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
-import static edu.ucla.library.sinai.Constants.OAUTH_USERS;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
@@ -79,16 +78,14 @@ public class Configuration implements Shareable {
 
     private final File myTempDir;
 
-    private final URL mySolrServer;
+    private URL mySolrServer;
 
     private final String myURLScheme;
 
     private final String myGoogleClientID;
 
     private final String myFacebookClientID;
-
-    private final String[] myUsers;
-
+    
     private ObjectNode myManuscriptMetadata;
 
     /**
@@ -105,11 +102,9 @@ public class Configuration implements Shareable {
         myPort = setPort(aConfig);
         myRedirectPort = setRedirectPort(aConfig);
         myHost = setHost(aConfig);
-        mySolrServer = setSolrServer(aConfig);
         myURLScheme = setURLScheme(aConfig);
         myGoogleClientID = setGoogleClientID(aConfig);
         myFacebookClientID = setFacebookClientID(aConfig);
-        myUsers = setUsers(aConfig);
 
         if (aHandler != null) {
             result.setHandler(aHandler);
@@ -118,8 +113,14 @@ public class Configuration implements Shareable {
                 if (manuscriptMetadataHandler.failed()) {
                     result.fail(manuscriptMetadataHandler.cause());
                 } else {
-                    aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
-                    result.complete(this);
+                    setSolrServer(aConfig, solrServerHandler -> {
+                        if (solrServerHandler.failed()) {
+                            result.fail(solrServerHandler.cause());
+                        }
+
+                        aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
+                        result.complete(this);
+                    });
                 }
             });
         }
@@ -192,21 +193,6 @@ public class Configuration implements Shareable {
         } else {
             result.fail(new ConfigurationException("No handler was passed to setManuscriptMetadata"));
         }
-    }
-
-    private String[] setUsers(final JsonObject aConfig) {
-        final List<?> list = aConfig.getJsonArray(OAUTH_USERS, new JsonArray()).getList();
-        final String[] users = new String[list.size()];
-
-        for (int index = 0; index < list.size(); index++) {
-            users[index] = list.get(index).toString();
-        }
-
-        return users;
-    }
-
-    public String[] getUsers() {
-        return myUsers;
     }
 
     public String setGoogleClientID(final JsonObject aConfig) {
@@ -387,29 +373,6 @@ public class Configuration implements Shareable {
         }
     }
 
-    private URL setSolrServer(final JsonObject aConfig) throws ConfigurationException {
-        final Properties properties = System.getProperties();
-        final String solrServer;
-
-        // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(SOLR_SERVER_PROP)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Found {} set in system properties", SOLR_SERVER_PROP);
-            }
-
-            solrServer = properties.getProperty(SOLR_SERVER_PROP);
-        } else {
-            solrServer = aConfig.getString(SOLR_SERVER_PROP, DEFAULT_SOLR_SERVER);
-        }
-
-        // Check that it's a proper URL; we'll let the verticle test whether it's up and functioning
-        try {
-            return new URL(solrServer);
-        } catch (final MalformedURLException details) {
-            throw new ConfigurationException("Solr server URL is not well-formed: " + solrServer);
-        }
-    }
-
     /**
      * Sets the host at which Sinai listens.
      *
@@ -552,5 +515,33 @@ public class Configuration implements Shareable {
         }
 
         return uploadsDir;
+    }
+
+    private void setSolrServer(final JsonObject aConfig, final Handler<AsyncResult<Configuration>> aHandler) {
+        final Properties properties = System.getProperties();
+        final Future<Configuration> result = Future.future();
+
+        if (aHandler != null) {
+            result.setHandler(aHandler);
+
+            final String solrServer = properties.getProperty(SOLR_SERVER_PROP, aConfig.getString(SOLR_SERVER_PROP,
+                    DEFAULT_SOLR_SERVER));
+
+            if (LOGGER.isDebugEnabled() && properties.containsKey(SOLR_SERVER_PROP)) {
+                LOGGER.debug("Found {} set in system properties", SOLR_SERVER_PROP);
+            }
+            LOGGER.debug(solrServer);
+
+            try {
+                // TODO: Actually ping the server here too?
+                mySolrServer = new URL(solrServer);
+                LOGGER.debug(solrServer);
+                result.complete(this);
+            } catch (final MalformedURLException details) {
+                result.fail(new ConfigurationException("Solr server URL is not well-formed: " + solrServer));
+            }
+        } else {
+            result.fail(new ConfigurationException("No handler was passed to setSolrServer"));
+        }
     }
 }
