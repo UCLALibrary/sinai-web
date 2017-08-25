@@ -12,8 +12,8 @@
 	        </a>
 	      </li>
 	    </ul>
-		<div>
-			<span id="greeting">welcome, please <a href="/" id="show-login">login</a></span>
+		<div id="loginLink">
+			<span id="greeting">Welcome, please <a id="loginLinkURL" href="https://emel-id.org/authorize?key={{sinaiauthkey}}&callback_url=https://{{sinaihost}}/login-response&token=" id="show-login">login</a></span>
 		</div>
 	    <a href="/">
 	      <img src="/images/logo.png">
@@ -23,10 +23,22 @@
 
 {{> templates/main-navbar }}
 
+<script>
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+var uuid = uuidv4();
+var href = $("#loginLinkURL").attr("href");
+
+$("#loginLinkURL").attr("href", href + uuid);
+document.cookie = "token=" + uuid;
+</script>
 {{#if logged-in}}
 <script>
-$(document).ready(function() {
-	constructGreetingBanner(localStorage['sinai-scholars-username']);
-});
+  $("#loginLink").remove();
 </script>
 {{/if}}
