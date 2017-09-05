@@ -352,3 +352,30 @@ body.sinai-body {
         vertical-align: text-bottom;
     }
 }
+
+#loginLink {
+  float: right;
+}
+
+.inline {
+  display: inline;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: $maroon;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.link-button:focus {
+  outline: none;
+}
+
+.link-button:active {
+  color:$maroon;
+}
