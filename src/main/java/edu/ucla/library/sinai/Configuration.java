@@ -2,13 +2,11 @@
 package edu.ucla.library.sinai;
 
 import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
-import static edu.ucla.library.sinai.Constants.FACEBOOK_OAUTH_CLIENT_ID;
-import static edu.ucla.library.sinai.Constants.GOOGLE_OAUTH_CLIENT_ID;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
-import static edu.ucla.library.sinai.Constants.METADATA_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
+import static edu.ucla.library.sinai.Constants.METADATA_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
@@ -18,29 +16,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Properties;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import javax.naming.ConfigurationException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-
-import edu.ucla.library.sinai.handlers.LoginHandler;
-import edu.ucla.library.sinai.Metadata;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -62,11 +53,12 @@ public class Configuration implements Shareable {
 
     public static final int RETRY_COUNT = 10;
 
-    public static final long DEFAULT_SESSION_TIMEOUT = 7200000L; // two hours
+    public static final long DEFAULT_SESSION_TIMEOUT = Long.MAX_VALUE; // 7200000L; // two hours
 
     private static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinai";
 
-    private static final String DEFAULT_MANUSCRIPT_METADATA_URL = "http://localhost:8001/sinai-manuscript-metadata.json";
+    private static final String DEFAULT_MANUSCRIPT_METADATA_URL =
+            "http://localhost:8001/sinai-manuscript-metadata.json";
 
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
@@ -82,10 +74,6 @@ public class Configuration implements Shareable {
 
     private final String myURLScheme;
 
-    private final String myGoogleClientID;
-
-    private final String myFacebookClientID;
-    
     private ObjectNode myManuscriptMetadata;
 
     /**
@@ -95,7 +83,8 @@ public class Configuration implements Shareable {
      * @throws ConfigurationException If there is trouble reading or setting a configuration option
      */
     public Configuration(final JsonObject aConfig, final Vertx aVertx,
-            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException, JsonProcessingException {
+            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException,
+            JsonProcessingException {
         final Future<Configuration> result = Future.future();
 
         myTempDir = setTempDir(aConfig);
@@ -103,8 +92,6 @@ public class Configuration implements Shareable {
         myRedirectPort = setRedirectPort(aConfig);
         myHost = setHost(aConfig);
         myURLScheme = setURLScheme(aConfig);
-        myGoogleClientID = setGoogleClientID(aConfig);
-        myFacebookClientID = setFacebookClientID(aConfig);
 
         if (aHandler != null) {
             result.setHandler(aHandler);
@@ -130,7 +117,9 @@ public class Configuration implements Shareable {
         return myManuscriptMetadata;
     }
 
-    private void setManuscriptMetadata(final JsonObject aConfig, final Vertx aVertx, final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException, JsonProcessingException {
+    private void setManuscriptMetadata(final JsonObject aConfig, final Vertx aVertx,
+            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException,
+            JsonProcessingException {
         final Properties properties = System.getProperties();
         final Future<Configuration> result = Future.future();
 
@@ -138,8 +127,8 @@ public class Configuration implements Shareable {
             result.setHandler(aHandler);
 
             // Choose which URL to use: default, or parameter
-            final String manuscriptMetadataUrl = properties.getProperty(METADATA_SERVER_PROP,
-                    aConfig.getString(METADATA_SERVER_PROP, DEFAULT_MANUSCRIPT_METADATA_URL)) + "/sinai-manuscript-metadata.json";
+            final String manuscriptMetadataUrl = properties.getProperty(METADATA_SERVER_PROP, aConfig.getString(
+                    METADATA_SERVER_PROP, DEFAULT_MANUSCRIPT_METADATA_URL)) + "/sinai-manuscript-metadata.json";
             // TODO: move metadata string to constant?
 
             if (LOGGER.isDebugEnabled() && properties.containsKey(METADATA_SERVER_PROP)) {
@@ -166,8 +155,9 @@ public class Configuration implements Shareable {
                                 myManuscriptMetadata = (ObjectNode) mapper.readTree(body.toString());
                                 LOGGER.info("Using Sinai manuscript metadata located at: {}", manuscriptMetadataUrl);
                                 result.complete(this);
-                            } catch (IOException e) {
-                                errormsg = "Something went wrong while unpacking the manuscript metadata. ERROR: " + e.toString();
+                            } catch (final IOException e) {
+                                errormsg = "Something went wrong while unpacking the manuscript metadata. ERROR: " + e
+                                        .toString();
                                 if (LOGGER.isDebugEnabled()) {
                                     LOGGER.debug("{} " + errormsg, getClass().getSimpleName());
                                 }
@@ -175,80 +165,27 @@ public class Configuration implements Shareable {
                             }
                         });
                     } else {
-                        final String errorMessage = "HTTP " + String.valueOf(response.statusCode()) + ": " + manuscriptMetadataUrl;
+                        final String errorMessage = "HTTP " + String.valueOf(response.statusCode()) + ": " +
+                                manuscriptMetadataUrl;
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
                         }
                         result.fail(new ConfigurationException(errorMessage));
                     }
                 }).exceptionHandler(exceptionHandler -> {
-                    //httpClient.close();
-                    result.fail(new ConfigurationException("Couldn't connect to manuscript metadata host: [ " + exceptionHandler.getMessage() + " ]"));
+                    // httpClient.close();
+                    result.fail(new ConfigurationException("Couldn't connect to manuscript metadata host: [ " +
+                            exceptionHandler.getMessage() + " ]"));
                 }).putHeader(Metadata.CONTENT_TYPE, Metadata.JSON_MIME_TYPE).end();
 
                 httpClient.close();
             } catch (final MalformedURLException details) {
-                result.fail(new ConfigurationException("Manuscript metadata URL is not well-formed: " + manuscriptMetadataUrl));
+                result.fail(new ConfigurationException("Manuscript metadata URL is not well-formed: " +
+                        manuscriptMetadataUrl));
             }
         } else {
             result.fail(new ConfigurationException("No handler was passed to setManuscriptMetadata"));
         }
-    }
-
-    public String setGoogleClientID(final JsonObject aConfig) {
-        final Properties properties = System.getProperties();
-
-        // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(GOOGLE_OAUTH_CLIENT_ID)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Found {} set in system properties", GOOGLE_OAUTH_CLIENT_ID);
-            }
-
-            return properties.getProperty(GOOGLE_OAUTH_CLIENT_ID);
-        } else {
-            return aConfig.getString(GOOGLE_OAUTH_CLIENT_ID, "");
-        }
-    }
-
-    public String setFacebookClientID(final JsonObject aConfig) {
-        final Properties properties = System.getProperties();
-
-        // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(FACEBOOK_OAUTH_CLIENT_ID)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Found {} set in system properties", FACEBOOK_OAUTH_CLIENT_ID);
-            }
-
-            return properties.getProperty(FACEBOOK_OAUTH_CLIENT_ID);
-        } else {
-            return aConfig.getString(FACEBOOK_OAUTH_CLIENT_ID, "");
-        }
-    }
-
-    public String getOAuthClientID(final String aService) {
-        final String service = aService.toLowerCase();
-
-        if (service.equals(LoginHandler.GOOGLE)) {
-            return myGoogleClientID;
-        } else if (service.equals(LoginHandler.FACEBOOK)) {
-            return myFacebookClientID;
-        }
-
-        // FIXME: something better than a RuntimeException
-        throw new RuntimeException("Unsupported OAuth service");
-    }
-
-    public String getOAuthClientSecretKey(final String aService) {
-        final String service = aService.toLowerCase();
-
-        if (service.equals(LoginHandler.GOOGLE)) {
-            return "";
-        } else if (service.equals(LoginHandler.FACEBOOK)) {
-            return "";
-        }
-
-        // FIXME: something better than a RuntimeException
-        throw new RuntimeException("Unsupported OAuth service");
     }
 
     /**

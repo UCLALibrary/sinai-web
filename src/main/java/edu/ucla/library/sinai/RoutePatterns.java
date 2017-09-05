@@ -29,11 +29,6 @@ public interface RoutePatterns {
     public static final String ROOT = "/";
 
     /**
-     * A path for logouts from the administrative interface.
-     */
-    public static final String LOGOUT = "/logout";
-
-    /**
      * A path for the browse page.
      */
     public static final String BROWSE = "/browse";
@@ -62,6 +57,6 @@ public interface RoutePatterns {
     /**
      * A regex that matches route patterns that are to be placed behind an authentication check.
      */
-    public static final String AUTHENTICATION_CHECK_RE =
-            METRICS_RE + "|" + STATUS + "|" + BROWSE + "|" + ADMIN + "|" + VIEWER_RE;
+    public static final String AUTHENTICATION_CHECK_RE = METRICS_RE + "|" + STATUS + "|" + BROWSE + "|" + ADMIN +
+            "|" + VIEWER_RE;
 }

@@ -5,16 +5,10 @@ import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.RoutePatterns.BROWSE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.ucla.library.sinai.Configuration;
 import io.vertx.ext.web.RoutingContext;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.lang.Exception;
 
 /**
  * A generic page handler.
