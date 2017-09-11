@@ -14,12 +14,12 @@
     <sinai.port>8443</sinai.port>
     <sinai.redirect.port>8000</sinai.redirect.port>
     <sinai.jks>sinai.jks</sinai.jks>
-    <sinai.image.server>https://test-sinai-images.library.ucla.edu</sinai.image.server>
+    <sinai.image.server>https://stage-sinai-images.library.ucla.edu</sinai.image.server>
     <!-- These are samples for testing purposes only ... DO NOT USE THEM IN PRODUCTION!!! -->
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
     <!-- Metadata that is used to build the 'browse' page -->
-    <sinai.metadata.server>http://test-sinai-meta.s3-us-west-2.amazonaws.com</sinai.metadata.server>
-    <sinai.solr.server>http://test-solr.library.ucla.edu/solr/sinaiusers</sinai.solr.server>
+    <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
+    <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaistageusers</sinai.solr.server>
     <sinai.id.key>OVERRIDE_THIS_VALUE_WITH_THE_REAL_KEY</sinai.id.key>
     <dev.tools></dev.tools>
 
