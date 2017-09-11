@@ -20,6 +20,7 @@
     <!-- Metadata that is used to build the 'browse' page -->
     <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
     <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaistageusers</sinai.solr.server>
+    <sinai.id.key>OVERRIDE_THIS_VALUE_WITH_THE_REAL_KEY</sinai.id.key>
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->

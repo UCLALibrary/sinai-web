@@ -8,8 +8,6 @@ import static edu.ucla.library.sinai.Constants.JKS_PROP;
 import static edu.ucla.library.sinai.Constants.KEY_PASS_PROP;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +16,8 @@ import java.util.List;
 
 import javax.naming.ConfigurationException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import info.freelibrary.util.IOUtils;
 
 import edu.ucla.library.sinai.Configuration;
@@ -25,14 +25,11 @@ import edu.ucla.library.sinai.RoutePatterns;
 import edu.ucla.library.sinai.handlers.AdminHandler;
 import edu.ucla.library.sinai.handlers.FailureHandler;
 import edu.ucla.library.sinai.handlers.LoginHandler;
-import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.MiradorHandler;
 import edu.ucla.library.sinai.handlers.PageHandler;
-import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
@@ -60,7 +57,8 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
     private Configuration myConfig;
 
     @Override
-    public void start(final Future<Void> aFuture) throws ConfigurationException, IOException, JsonProcessingException {
+    public void start(final Future<Void> aFuture) throws ConfigurationException, IOException,
+            JsonProcessingException {
         new Configuration(config(), vertx, configHandler -> {
             if (configHandler.succeeded()) {
                 if (LOGGER.isDebugEnabled()) {
@@ -121,12 +119,12 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                 // Get JKS configuration from a configuration file in the jar file
                 if (inStream != null) {
                     LOGGER.debug("Loading JKS configuration from jar file");
-                	
+
                     try {
                         jksOptions.setValue(Buffer.buffer(IOUtils.readBytes(inStream)));
-	                } catch (final IOException details) {
-	                    throw new RuntimeException(details);
-	                }
+                    } catch (final IOException details) {
+                        throw new RuntimeException(details);
+                    }
                 } else {
                     LOGGER.debug("Trying to use the build's default JKS: {}", jksProperty);
                     jksOptions.setPath("target/classes/" + jksProperty);
@@ -144,7 +142,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
         // Some reused handlers
         final FailureHandler failureHandler = new FailureHandler(myConfig, templateEngine);
-        final SearchHandler searchHandler = new SearchHandler(myConfig);
 
         // Configure some basics
         router.route().handler(BodyHandler.create().setUploadsDirectory(myConfig.getTempDir().getAbsolutePath()));
@@ -152,7 +149,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.route().handler(sessionHandler);
 
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
-        final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
         final AdminHandler adminHandler = new AdminHandler(myConfig);
         final PageHandler pageHandler = new PageHandler(myConfig);
 
@@ -167,15 +163,9 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
             router.route().handler(UserSessionHandler.create(jwtAuth));
             router.getWithRegex(AUTHENTICATION_CHECK_RE).handler(JWTAuthHandler.create(jwtAuth));
-            //router.route().handler(JWTAuthHandler.create(jwtAuth, "/login-response"));
-            router.get(ADMIN).handler(JWTAuthHandler.create(jwtAuth).addAuthority("role:admin"));
-            //router.get(ADMIN).handler(JWTAuthHandler.create(jwtAuth, "/login-response").addAuthority("role:admin"));
         }
 
-        // Login and logout routes
-        router.get(LOGOUT).handler(logoutHandler);
         router.get(ROOT).handler(loginHandler);
-        router.post(ROOT).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(templateHandler).failureHandler(failureHandler);
 
@@ -217,7 +207,6 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
     @SuppressWarnings("rawtypes")
     private void deploySinaiVerticles(final Handler<AsyncResult<Void>> aHandler) {
-        final DeploymentOptions workerOptions = new DeploymentOptions().setWorker(true).setMultiThreaded(true);
         final DeploymentOptions options = new DeploymentOptions();
         final List<Future> futures = new ArrayList<Future>();
         final Future<Void> future = Future.future();
