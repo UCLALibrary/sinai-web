@@ -16,9 +16,6 @@ public class StatusHandler extends SinaiHandler {
     /* The okay flag as expected by our Nagios script */
     private final String OK = "OK_";
 
-    /* The warning flag as expected by our Nagios script */
-    private final String WARNING = "WARNING_";
-
     /* The unknown flag as expected by our Nagios script */
     private final String UNKNOWN = "UNKNOWN_";
 

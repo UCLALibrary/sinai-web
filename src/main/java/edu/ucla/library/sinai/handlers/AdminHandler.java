@@ -3,25 +3,21 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVICE_KEY;
-import static edu.ucla.library.sinai.RoutePatterns.ROOT;
 import static edu.ucla.library.sinai.RoutePatterns.ADMIN;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
 import static edu.ucla.library.sinai.util.SolrUtils.DOCS;
 import static edu.ucla.library.sinai.util.SolrUtils.RESPONSE;
 
+import org.apache.commons.validator.routines.EmailValidator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.apache.commons.validator.routines.EmailValidator;
-
-import info.freelibrary.util.StringUtils;
-
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -35,12 +31,13 @@ public class AdminHandler extends SinaiHandler {
 
     @Override
     public void handle(final RoutingContext aContext) {
-    	final SolrService service = SolrService.createProxy(aContext.vertx(), SOLR_SERVICE_KEY);
-    	final HttpMethod method = aContext.request().method();
+        final SolrService service = SolrService.createProxy(aContext.vertx(), SOLR_SERVICE_KEY);
+        final HttpMethod method = aContext.request().method();
 
         if (method == HttpMethod.GET) {
             // Get all user records
-            final JsonObject solrQuery = new JsonObject().put("q", "record_type:user").put("rows", 10000000).put("sort", "email%20asc");
+            final JsonObject solrQuery = new JsonObject().put("q", "record_type:user").put("rows", 10000000).put(
+                    "sort", "email%20asc");
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Constructing new Solr query: {}", solrQuery);
             }
@@ -62,10 +59,10 @@ public class AdminHandler extends SinaiHandler {
                 }
             });
         } else if (method == HttpMethod.POST) {
-        	final String email = aContext.request().getFormAttribute("email");
+            final String email = aContext.request().getFormAttribute("email");
             final String formIsAdmin = aContext.request().getFormAttribute("is_admin");
 
-        	final boolean isAdmin;
+            final boolean isAdmin;
 
             // Validate user input
             final boolean isEmailValid = EmailValidator.getInstance().isValid(email);
@@ -88,9 +85,10 @@ public class AdminHandler extends SinaiHandler {
                     aContext.fail(400);
                     return;
                 }
-    
+
                 // User input all good, so construct query to add a new user record
-        	    final JsonObject solrQuery = new JsonObject().put("email", email).put("is_admin", isAdmin).put("record_type", "user");
+                final JsonObject solrQuery = new JsonObject().put("email", email).put("is_admin", isAdmin).put(
+                        "record_type", "user");
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Constructing new Solr query: {}", solrQuery);
                 }
@@ -98,7 +96,7 @@ public class AdminHandler extends SinaiHandler {
                 service.index(solrQuery, handler -> {
                     if (handler.succeeded()) {
                         final String solrJson = handler.result();
-    
+
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("Solr response: {}", solrJson);
                         }
@@ -107,14 +105,13 @@ public class AdminHandler extends SinaiHandler {
                         aContext.put(ERROR_HEADER, "Index Error");
                         aContext.put(ERROR_MESSAGE, msg("Solr index failed: {}", handler.cause().getMessage()));
                     }
-                
+
                     // Redirect to Admin
                     final HttpServerResponse response = aContext.response();
                     response.setStatusCode(303).putHeader("Location", ADMIN).end();
                 });
             }
-        }
-        else {
+        } else {
             LOGGER.error("Received a {} request but only POST and GET are supported", method.name());
             aContext.response().headers().add("Allow", "GET, POST");
             aContext.fail(405);
@@ -135,9 +132,9 @@ public class AdminHandler extends SinaiHandler {
             final JsonObject jsonObject = docs.getJsonObject(index);
             final ObjectNode objNode = mapper.createObjectNode();
 
-            objNode.put("email",  jsonObject.getString("email"));
+            objNode.put("email", jsonObject.getString("email"));
             objNode.put("is_admin", jsonObject.getBoolean("is_admin"));
-            
+
             userArray.add(objNode);
         }
         return jsonNode;

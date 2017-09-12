@@ -16,11 +16,6 @@ import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.util.PathUtils;
 import io.vertx.ext.web.RoutingContext;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.lang.Exception;
-
 public class MiradorHandler extends SinaiHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MiradorHandler.class);
@@ -37,8 +32,8 @@ public class MiradorHandler extends SinaiHandler {
         final String path;
 
         // Need all the metadata so that all manuscripts are loaded into Mirador
-        ObjectNode jsonNode = myConfig.getManuscriptMetadata();
-        
+        final ObjectNode jsonNode = myConfig.getManuscriptMetadata();
+
         if (index != -1) {
             path = requestPath.substring(0, index);
         } else {
