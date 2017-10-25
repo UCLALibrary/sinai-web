@@ -19,6 +19,11 @@ public interface RoutePatterns {
     public static final String LOGIN = "/login";
 
     /**
+     * A path for log-outs to the administrative interface.
+     */
+    public static final String LOGOUT = "/logout";
+
+    /**
      * A path for administrative interface login responses.
      */
     public static final String LOGIN_RESPONSE_RE = "\\/login-response";
