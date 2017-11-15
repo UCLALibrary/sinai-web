@@ -43,4 +43,4 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
 fi
 
 $AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER $SINAI_SOLR_SERVER \
-  $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $1 -jar target/sinai-web-${project.version}-exec.jar $SINAI_CONFIG
+  $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG
