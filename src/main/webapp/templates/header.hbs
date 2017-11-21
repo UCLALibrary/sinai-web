@@ -12,6 +12,9 @@
     </a>
    </li>
   </ul>
+  <div id="logoutLink">
+    <a id="logout" title="logout" href="https://{{sinaihost}}/logout" class="link-button">logout</a>
+  </div>
   <div id="loginLink">
    <form method="post" action="https://sinai-id.org/authorize" class="inline">
     <input type="hidden" name="callback_url" value="https://{{sinaihost}}/login-response">
@@ -41,8 +44,10 @@
   document.cookie = "token=" + uuid;
 </script>
 
-{{#if logged-in}}
 <script>
-  $("#loginLink").remove();
+  {{#if logged-in}}
+    $("#loginLink").remove();
+  {{else}}
+    $("#logoutLink").remove();
+  {{/if}}
 </script>
-{{/if}}

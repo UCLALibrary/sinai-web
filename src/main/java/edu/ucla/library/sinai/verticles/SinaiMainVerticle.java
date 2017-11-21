@@ -25,6 +25,7 @@ import edu.ucla.library.sinai.RoutePatterns;
 import edu.ucla.library.sinai.handlers.AdminHandler;
 import edu.ucla.library.sinai.handlers.FailureHandler;
 import edu.ucla.library.sinai.handlers.LoginHandler;
+import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.MiradorHandler;
 import edu.ucla.library.sinai.handlers.PageHandler;
@@ -149,6 +150,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.route().handler(sessionHandler);
 
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
+        final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
         final AdminHandler adminHandler = new AdminHandler(myConfig);
         final PageHandler pageHandler = new PageHandler(myConfig);
 
@@ -168,6 +170,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.get(ROOT).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(loginHandler);
         router.getWithRegex(LOGIN_RESPONSE_RE).handler(templateHandler).failureHandler(failureHandler);
+        router.get(LOGOUT).handler(logoutHandler);
 
         // Route for Mirador viewing
         router.getWithRegex(VIEWER_RE).handler(new MiradorHandler(myConfig));
