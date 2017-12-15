@@ -7,12 +7,14 @@ env:
   global:
     - secure: "mmpiOeV/SG3/9lnWAG+3BvBQMZ37KzxhpckS158XdBJ1rYQFlTVsFAlmsnfDJbpJUQzyjJXCvIQQr7gXjv1yyXPu04ePeZ0YrtvcUNOdfDi83sf/XFv6H2A9/ZanApXbljX++6l98aUGxat3tXDLwsWeiyG+B/qr233nM1kl5n7CbRlUZZ5OnfBp/pieOspaa3QFqysV3lj9R1n7bSkP794txjU82shV7nYPZ1pl3OTE6x6kS/hemzyALFDZq5ZquP03X9e3SkpuRdNuN9/qZ7ZEfiWhqeLffsMxoo/CV2wKfceTHj0gBuYCSH3DleClpQCkZ91wIswwMYdSRtDCnCJOd9OS7fC6pe0hvYsJSwr3DYRHLnpZQXrxOfDDEzT6dK8M9dYW/8carU8Ju5AYeQ4XTOhalIQwlaiZWcE6/4epeVAUV1wglSUFI7P8ubzecvnWbSATj0DIfGw7bWi1TfRqAmFUwM1nl2Pit8EXLE6sObMc4auR+glkPw7wzNr5zaUVFynHKhcVtO3vLVe5Qun5CjWWGXOTVM2PADFpDmtkmtbakowyR2i8CzHQRIMsPdYXX06xI38F0qN/WnXXuAeVIgLD88S8SlOUU7FsGvtBJ9nRFQ1wnlmBv6IIb+t1ZspPHufXnFsatMCQ38lJDJnVq3hGbExinCQJuo6rfkU="
     - secure: "E84kf8XbuImThAukQi+QSFEkErkwi9WYBcWVEjWeC/CsoeLgi+nJ1DlNfnr9RvSUjSUAjDYXW/eK1i7VI4H+jOFYVopnKCYOFvT5ZKcfw7DlfN6b0ylrh/tCbGFOt1rx0oQMpWFGAg2PZAsoL/Fb6nAlAEUaJpDdui3XI17wjXO4pe3cH69YvOXgfRNiz4Llg9uEcMJRiJPcKs3ayMTawe2u1ws9mAzuGx4aQV7BJDsvkkyr90D7kJCVpNr+QyryCX72Ly/H3Daq4WhIHv73LLU1UpspMZwlJj/cs6v4zIzaqwdj0Qf/E2JN+Q6IDQEKpoUVhhr4gyFFXxhYPUWlN80zaUkybrexN15oUmL8O4Q6ZwlCNrNws8o9Thm92aAt3yeDtF2IH7yhq4ydDFkPzWZoHWDd6thWxI1CvePq0sHrzTKvXTX7JtjR23iifVv6zaybcYBOnbrRwQeevUF7E5zeAXA++iFwUn87mtoknhyVmoNmQMoZZZDfnPbD7fBYXTg7Nziqs3B2BBZJV6Qykvo/VqRD4N3kPPOpGzNbnqFxmmx2n/V81IrqLeqTa+orxJpBqcmrHbAo1/ibqQb7j/9cnDT0R8FD7nPrMDlzjaEMqMPkxiE1vxLG91oIRg4SF94cIl3LWF8pI+daEJstHTardyuBFzRw/bUcx7wqR/M="
+    # SINAI_ID_KEY (not super secret but encryted anyway)
+    - secure: "Ck5bgGWCJVqOCTtd/iyV/5HoEO+Nta6DxVhdqnLYfFg9/oEqysRBFnj65IWozt4jRqRTjedDQND6mclpTK/GBzv2bTbit1oEB68Con3LunyMYt0DN99Xnm46q5En55v73RUd1FcM4FcCtByploF4td/T8DhR2FxNVjzjksoSLgdo+b2Lzpk2KdDT0Zqv4O35JBdTveHIupARAjUx3BdsI+JqJXAV7IB55XvT3DNrJBjl3UMWWY3t5qMCWc0mQK9n+w1nHML6aoWOIH0qAOD6mZxEpv7vSAlg7CHPsyTTJ3nqd0cTtfBO/4PY0j8SwCRuIRftDjAM8BNpYZq/rnbzSvjEcJMSEFdAn2mEd1wHbQfhmhKOt+rGdxCUtaA6nDnZ6/wcBhQjdJ9pgNJAB5/IwYhsdAEet81whUJi5XgvMm6yHII1mixKqDCs15zW/Mq3TIFcevhu1ZDthjAwbiO4WrLj5nsZwgcmXabagPVrfE6jkfNTJpLvNsyLLx7KXX0ESib7v5NnhaTPhboIIQzD17Mw6EovLd7YaFFgvCOPTpooWTsDI8/hVXMDKOLyiPvhg69iC6UUUyY6/jBRuuA0BFCCT1HhnRjta9shSQViOzwqjk3bJgjelXy9EX3FOyLTtenRyGWSl/zvo5pdonQ0120FXl7v1E1un6D0tjtlXWY="
 
 install:
   mvn validate
 
 script:
-  mvn package
+  mvn package -Dsinai.logs.dir=/var/log/sinai -Dsinai.id.key="$SINAI_ID_KEY"
 
 deploy:
   - provider: s3
@@ -20,12 +22,34 @@ deploy:
     secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
     bucket: "build-artifacts.library.ucla.edu"
     local_dir: target/build-artifact
-    upload_dir: sinai-web
+    upload_dir: sinai-web/develop
     skip_cleanup: true
     acl: public_read
     region: us-west-2
     on:
       branch: develop
+  - provider: s3
+    access_key_id: "${AWS_ACCESS_KEY_ID}"
+    secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    bucket: "build-artifacts.library.ucla.edu"
+    local_dir: target/build-artifact
+    upload_dir: sinai-web/stage
+    skip_cleanup: true
+    acl: public_read
+    region: us-west-2
+    on:
+      branch: stage
+  - provider: s3
+    access_key_id: "${AWS_ACCESS_KEY_ID}"
+    secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    bucket: "build-artifacts.library.ucla.edu"
+    local_dir: target/build-artifact
+    upload_dir: sinai-web/master
+    skip_cleanup: true
+    acl: public_read
+    region: us-west-2
+    on:
+      branch: master
   - provider: s3
     access_key_id: "${AWS_ACCESS_KEY_ID}"
     secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
