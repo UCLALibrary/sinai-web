@@ -45,7 +45,8 @@ public class FailureHandler extends SinaiHandler {
                     break;
                 case 401:
                     jsonObject.put(ERROR_HEADER, errorHeader == null ? "Unauthorized" : errorHeader);
-                    jsonObject.put(ERROR_MESSAGE, "Please login to access this page");
+                    jsonObject.put(ERROR_MESSAGE,
+                            "Please login to access this page. If you do not have an account, click the login link to register.");
                     break;
                 case 403:
                     jsonObject.put(ERROR_HEADER, errorHeader == null ? "Forbidden" : errorHeader);

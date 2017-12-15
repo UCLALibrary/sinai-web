@@ -22,7 +22,7 @@
     <appender-ref ref="FILE" />
   </logger>
 
-  <logger name="edu.ucla.library.sinai.templates.impl.HandlebarsTemplateEngineImpl" level="WARN">
+  <logger name="edu.ucla.library.sinai.templates.impl.HandlebarsTemplateEngineImpl" level="INFO">
     <appender-ref ref="FILE" />
   </logger>
 
