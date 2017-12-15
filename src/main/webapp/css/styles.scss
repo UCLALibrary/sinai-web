@@ -289,6 +289,12 @@ body.sinai-body {
     background-color: $maroon;
 }
 
+#ucla-library-logo {
+  margin-bottom: 45px;
+  width: 100%;
+  height: 100%;
+}
+
 #sponsors {
     background-color: $tan;
 
@@ -303,7 +309,7 @@ body.sinai-body {
             font-weight: 400;
             padding: 0 2.5%;
             vertical-align: middle;
-            width: 28%;
+            width: 15%;
 
             > a {
                 color: #333;
@@ -351,4 +357,31 @@ body.sinai-body {
     {
         vertical-align: text-bottom;
     }
+}
+
+#loginLink, #logoutLink {
+  float: right;
+}
+
+.inline {
+  display: inline;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: $maroon;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.link-button:focus {
+  outline: none;
+}
+
+.link-button:active {
+  color:$maroon;
 }

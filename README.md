@@ -83,6 +83,14 @@ The current workflow for propagating code changes is as follows:
 * **NOTE**: so that `master` is not polluted with merge commits, all `{name}-pr` branches must contain new commits from `develop` only (i.e., when preparing `master-pr`, merge in `develop`, not `stage`)
 * **NOTE**: so that whenever `master` is updated it becomes identical to `stage`, the PR branches for each are always to be prepared at the same time
 
+### Using a DDNS Domain with the startup.sh Script
+
+If you want to login with the new EMEL auth system and a DDNS service, you can supply the Sinai host variable at the point of running the test startup script; for instance:
+
+    SINAI_HOST=lisforge.ddns.net target/startup.sh
+
+This is probably only relevant to developers testing the system using an allowed domain name. When supplying the host in this fashion, it's assumed the service is running at port 443 rather than at the out of the box testing default, 8443.
+
 ### Contact
 
 Contact Kevin or Mark with any build, etc., questions you have.

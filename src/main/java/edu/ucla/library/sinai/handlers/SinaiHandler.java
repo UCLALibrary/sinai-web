@@ -37,7 +37,14 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
      * @return A Handlebars context that can be passed to the template engine
      */
     Context toHbsContext(final ObjectNode aJsonObject, final RoutingContext aContext) {
+        final String host = System.getProperty("sinai.host", "localhost");
+        final String port = System.getProperty("sinai.port", "8443");
+
         aJsonObject.put("imageserver", System.getProperty("sinai.image.server"));
+        aJsonObject.put("sinaiauthkey", System.getProperty("sinai.id.key", ""));
+
+        // Add a workaround for developers testing on their machines
+        aJsonObject.put("sinaihost", host.equals("localhost") ? host + ":" + port : host);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("{} JSON passed to template page: {}", getClass().getSimpleName(), aJsonObject.toString());
