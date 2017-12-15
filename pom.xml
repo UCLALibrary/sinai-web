@@ -20,6 +20,7 @@
     <!-- Metadata that is used to build the 'browse' page -->
     <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
     <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaiusers</sinai.solr.server>
+    <sinai.id.key>OVERRIDE_THIS_VALUE_WITH_THE_REAL_KEY</sinai.id.key>
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
@@ -456,7 +457,7 @@
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
               </transformers>
               <artifactSet> </artifactSet>
-              <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-exec.jar</outputFile>
+              <outputFile>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</outputFile>
             </configuration>
           </execution>
         </executions>
@@ -479,7 +480,7 @@
                 <argument>-Dsinai.file.uploads=java.io.tmpdir</argument>
                 <argument>-Dsinai.port=${http.port}</argument>
                 <argument>-jar</argument>
-                <argument>${basedir}/target/${project.artifactId}-${project.version}-exec.jar</argument>
+                <argument>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</argument>
               </arguments>
             </configuration>
           </execution>
