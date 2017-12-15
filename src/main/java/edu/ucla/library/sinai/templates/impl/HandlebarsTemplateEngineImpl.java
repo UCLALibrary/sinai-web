@@ -20,10 +20,13 @@ import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.net.URLEncoder;
-import java.io.UnsupportedEncodingException;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
@@ -64,11 +67,13 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
          * URL-encodes a string.
          */
         myHandlebars.registerHelper("urlencode", new Helper<String>() {
-            public String apply(String str, Options options) {
+
+            @Override
+            public String apply(final String str, final Options options) {
                 try {
                     // do not want to encode colons
                     return URLEncoder.encode(str, "UTF-8").replace("%3A", ":");
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("{} UTF-8 is unsupported: {}", HandlebarsTemplateEngineImpl.class, e.toString());
                     }
@@ -103,23 +108,33 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
     }
 
     @Override
+    public void render(final RoutingContext aContext, final String aTemplateDirName, final String aTemplateFileName,
+            final Handler<AsyncResult<Buffer>> aHandler) {
+        render(aContext, Paths.get(aTemplateDirName, aTemplateFileName).toString(), aHandler);
+    }
+
+    @Override
     public void render(final RoutingContext aContext, final String aTemplateFileName,
             final Handler<AsyncResult<Buffer>> aHandler) {
         final Object skip = aContext.data().get(HBS_PATH_SKIP_KEY);
         final String templateFileName;
 
         if (skip != null) {
-            final String[] pathParts = aTemplateFileName.split("/");
-            final StringBuilder pathBuilder = new StringBuilder();
+            try {
+                final String[] pathParts = URLDecoder.decode(aTemplateFileName, "UTF-8").split(File.separator);
+                final StringBuilder pathBuilder = new StringBuilder();
 
-            for (int index = 0; index < pathParts.length - (int) skip; index++) {
-                pathBuilder.append(pathParts[index]).append('/');
-            }
+                for (int index = 0; index < (pathParts.length - (int) skip); index++) {
+                    pathBuilder.append(pathParts[index]).append(File.separatorChar);
+                }
 
-            templateFileName = pathBuilder.deleteCharAt(pathBuilder.length() - 1).toString();
+                templateFileName = pathBuilder.deleteCharAt(pathBuilder.length() - 1).toString();
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Using skip paths ({}) to get template file: {}", skip, aTemplateFileName);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Using skip paths ({}) to get template file: {}", skip, aTemplateFileName);
+                }
+            } catch (final UnsupportedEncodingException details) {
+                throw new RuntimeException("JVM doesn't support UTF-8?!", details);
             }
         } else {
             templateFileName = aTemplateFileName;
