@@ -68,6 +68,14 @@
           mirador.viewer.eventEmitter.subscribe('windowAdded', function(event, window) {
             // Watch until OSD has opened (not loaded, but good enough)
             mirador.viewer.eventEmitter.subscribe('osdOpen.' + window.id, function() {
+              // Attach MouseEnter to 'Add Window' link so we can load other manifests
+              $(".add-flexible-slot").mouseenter(function() {
+                // Mirador will ignore manifests that already exist so this is okay
+                for (var index = 0; index < manifests.length; index++) {
+                  mirador.viewer.addManifestFromUrl(manifests[index]);
+                }
+              });
+
               // Attach MouseEnter to popup that opens the list of other manifests
               $(".mirador-icon-window-menu ul li").mouseenter(function() {
                 // Mirador will ignore manifests that already exist so this is okay
