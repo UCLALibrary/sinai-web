@@ -3,6 +3,11 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.JsonNodeValueResolver;
@@ -12,6 +17,7 @@ import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.sinai.Configuration;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 abstract class SinaiHandler implements Handler<RoutingContext> {
@@ -32,11 +38,11 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
     /**
      * Prepares the supplied JSON object for use in the Handlebars context.
      *
-     * @param aJsonNode A JSON object
+     * @param aJsonObject A JSON object
      * @param aContext A context with the current session information
      * @return A Handlebars context that can be passed to the template engine
      */
-    Context toHbsContext(final ObjectNode aJsonObject, final RoutingContext aContext) {
+    Context toHbsContext(final JsonObject aJsonObject, final RoutingContext aContext) throws IOException, JsonParseException, JsonMappingException {
         final String host = System.getProperty("sinai.host", "localhost");
         final String port = System.getProperty("sinai.port", "8443");
 
@@ -50,7 +56,7 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
             LOGGER.debug("{} JSON passed to template page: {}", getClass().getSimpleName(), aJsonObject.toString());
         }
 
-        return Context.newBuilder(aJsonObject).resolver(JsonNodeValueResolver.INSTANCE).build();
+        return Context.newBuilder(new ObjectMapper().readValue(aJsonObject.toString(), ObjectNode.class)).resolver(JsonNodeValueResolver.INSTANCE).build();
     }
 
     /**

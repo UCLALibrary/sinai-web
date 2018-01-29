@@ -2,8 +2,9 @@
 package edu.ucla.library.sinai.services.impl;
 
 import static edu.ucla.library.sinai.Constants.MESSAGES;
-import static edu.ucla.library.sinai.Constants.SINAI_ARRAY;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Iterator;
 
 import info.freelibrary.util.Logger;
@@ -41,24 +42,28 @@ public class SolrServiceImpl implements SolrService {
      */
     @Override
     public void search(final JsonObject aJsonObject, final Handler<AsyncResult<JsonObject>> aHandler) {
-        String solr = myConfig.getSolrServer().toExternalForm() + "/query";
+        String solr = myConfig.getSolrServer().getBaseURL() + "/query";
         String queryString = "?";
         Iterator<String> keys = aJsonObject.fieldNames().iterator();
 
         int queryCounter = 0;
         while(keys.hasNext()) {
-            String key = (String)keys.next();
+            String key = keys.next();
             String value;
             try {
                 value = aJsonObject.getString(key);
             } catch (ClassCastException e) {
                 value = aJsonObject.getInteger(key).toString();
             }
-            queryString += ((queryCounter == 0) ? "" : "&") + key + "=" + value;
+            try {
+                queryString += ((queryCounter == 0) ? "" : "&") + key + "=" + URLEncoder.encode(value, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                aHandler.handle(Future.failedFuture("Cannot encode Solr query URL"));
+            }
             queryCounter++;
         }
-        solr += queryString;
 
+        solr += queryString;
         final HttpClient client = myVertx.createHttpClient();
         final HttpClientRequest request;
 
@@ -80,6 +85,7 @@ public class SolrServiceImpl implements SolrService {
 
         request.end();
         client.close();
+
     }
 
     /**
@@ -87,7 +93,7 @@ public class SolrServiceImpl implements SolrService {
      */
     @Override
     public void index(final JsonObject aJsonObject, final Handler<AsyncResult<String>> aHandler) {
-        String solr = myConfig.getSolrServer().toExternalForm() + "/update?json.command=false&commit=true";
+        String solr = myConfig.getSolrServer().getBaseURL() + "/update?json.command=false&commit=true";
         final HttpClient client = myVertx.createHttpClient();
         final HttpClientRequest request;
 
