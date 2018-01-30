@@ -10,31 +10,40 @@
     {{> templates/header}}
     <div id="main" class="text-bg">
       <div>
-        <h1>Browse Manuscripts by Shelfmark</h1>
-
+        <h1>Search and Browse Manuscripts</h1>
+        <!-- if there are no records in Solr, show message indicating that the list is being refreshed -->
         {{#unless error}}
         <div id="browse-main-content">
-          <div id="search-results">
-            <ul>
-              {{#each sinai-manuscript-metadata}}
-              <li>
-                <span class="helper"></span>
-                <a href="/viewer/{{urlencode ARK}}">
-                  <img class='browse-thumbnail' src="{{imageserver}}/iiif/{{[Thumbnail URL Fragment]}}" alt="{{Title}}">
-                </a>
-                <p>
-                  <a href="/viewer/{{urlencode ARK}}">{{Title}}</a><br><br>
-                  <b>Overtext Languages:</b> {{[Overtext Language]}}<br>
-                  <b>Overtext Content:</b> {{[Overtext Content]}}<br>
-                  <b>Undertext Languages:</b> {{[Undertext Language(s)]}}<br>
-                  <b>Date:</b> {{Date}}<br>
-                  <b>Extent:</b> {{Extent}}<br>
-                  <b>Form:</b> {{Form}}<br>
-                </p>
-              </li>
-              {{/each}}
-            </ul>
+          <div id="search-bar">
+            <form action="/browse" method="get">
+            <label for="search-query">Keywords:</label>
+            <input id="search-query" name="search" type="text">
+            <input type="submit" value="Search">
+            </form>
           </div>
+
+          <div id="search-results">
+            {{#if searchResults}}
+            <ul id="search-results-list">
+              {{#each searchResults}}
+              <li>
+                <a href="/viewer/{{urlencode manuscript.ark}}">
+                  <img class="browse-thumbnail" src="{{imageserver}}/iiif/{{manuscript.thumbnail_identifier}}" alt="{{manuscript.shelf_mark_s}}">
+                </a>
+                <div>
+                  {{formatManuscript manuscript}}
+
+                  <h2 class="undertexts-header">Undertexts</h2>
+                  {{formatUndertextObjects undertext_objects}}
+                </div>
+	          </li>
+	          {{/each}}
+	        </ul>
+	        {{else}}
+	        <p>No results!</p>
+	        {{/if}}
+          </div>
+
         </div>
         {{else}}
         <div id="browse-error">
@@ -43,6 +52,7 @@
           <code class="error-code">{{error}}</code>
         </div>
         {{/unless}}
+
       </div>
     </div>
     {{> templates/footer}}

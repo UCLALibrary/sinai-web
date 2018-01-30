@@ -21,29 +21,39 @@ import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Handlebars.SafeString;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 
+import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-
-import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.impl.CachingTemplateEngine;
 
@@ -78,6 +88,239 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         LOGGER.debug("{} UTF-8 is unsupported: {}", HandlebarsTemplateEngineImpl.class, e.toString());
                     }
                     return "";
+                }
+            }
+        });
+
+        myHandlebars.registerHelper("formatManuscript", new Helper<ObjectNode>() {
+
+            /**
+             * Returns a <p> element that contains all of a manuscript's metadata fields.
+             *
+             * @param an {ObjectNode} - a Solr doc representing the manuscript
+             * @returns {SafeString}
+             */
+            @Override
+            public SafeString apply(final ObjectNode on, final Options options) {
+
+                try {
+                    // get a vertx JsonObject to make things easier
+                    final JsonObject json = new JsonObject(new ObjectMapper().writeValueAsString(on));
+
+                    final String ark = StringEscapeUtils.escapeHtml4(json.getString("ark", ""));
+                    final String shelfMark = StringEscapeUtils.escapeHtml4(json.getString("shelf_mark_s", ""));
+                    final String title = StringEscapeUtils.escapeHtml4(json.getString("title_s", ""));
+                    final String primaryLanguage = StringEscapeUtils.escapeHtml4(json.getString("primary_language_s", ""));
+                    final String script = StringEscapeUtils.escapeHtml4(json.getString("script_s", ""));
+                    final String dateText = StringEscapeUtils.escapeHtml4(json.getString("date_text_s", ""));
+                    final Integer dateOfOriginStart = json.getInteger("date_of_origin_start_i");
+                    final Integer dateOfOriginEnd = json.getInteger("date_of_origin_end_i");
+                    final String supportMaterial = StringEscapeUtils.escapeHtml4(json.getString("support_material_s", ""));
+                    final Integer folioCount = json.getInteger("folio_count_i");
+
+                    // first row: shelf mark, should always be present
+                    String p = "";
+                    p += "<p>";
+                    p += "<span class=\"bold\">"
+                        + "<a class=\"shelf-mark-link\" href=\"/viewer/" + URLEncoder.encode(ark, "UTF-8").replace("%3A", ":") + "\">" + shelfMark + "</a>"
+                        + "</span>"
+                        + ". "
+                        + "<span>"
+                        + "St. Catherine's Monastery of the Sinai, Egypt." + " " + (Pattern.matches(".* NF .*", shelfMark) ? "New Finds" : "Old Collection") + "."
+                        + "</span>"
+                        + "<br>";
+
+                    // second row: title, primaryLanguage, script
+                    // (do not show a field if the get function returned "")
+                    if (!title.equals("") || !primaryLanguage.equals("") || !script.equals("")) {
+                        p += "<span>";
+                        if (!title.equals("")) {
+                            p += title + ".";
+                        }
+                        if (!primaryLanguage.equals("")) {
+                            if (!title.equals("")) {
+                                p += " ";
+                            }
+                            p += primaryLanguage + ".";
+                        }
+                        if (!script.equals("")) {
+                            if (!title.equals("") || !primaryLanguage.equals("")) {
+                                p += " ";
+                            }
+                            p += "Script: " + script + ".";
+                        }
+                        p += "</span>"
+                            + "<br>";
+                    }
+
+                    // third row: dateText, dateOfOriginStart, dateOfOriginEnd
+                    // (start and end dates must both be present for the range to be displayed)
+                    if (!dateText.equals("") || (dateOfOriginStart != null && dateOfOriginEnd != null)) {
+                        p += "<span>";
+                        if (!dateText.equals("")) {
+                            p += dateText;
+                        }
+                        if (dateOfOriginStart != null && dateOfOriginEnd != null) {
+                            if (!dateText.equals("")) {
+                                p += " ";
+                            }
+                            p += "(" + dateOfOriginStart.toString() + " to " + dateOfOriginEnd.toString() + ")";
+                        }
+                        p += ".";
+                        p += "</span>"
+                            + "<br>";
+                    }
+
+                    // fourth row: supportMaterial, folioCount
+                    if (!supportMaterial.equals("") || folioCount != null) {
+                        p += "<span>";
+                        if (!supportMaterial.equals("")) {
+                            p += supportMaterial;
+                        }
+                        if (folioCount != null) {
+                            if (!supportMaterial.equals("")) {
+                                p += ", ";
+                            }
+                            p += folioCount.toString() + " folios";
+                        }
+                        p += ".";
+                        p += "<span>"
+                            + "<br>";
+                    }
+                    p += "</p>";
+
+                    return new Handlebars.SafeString(p);
+                } catch (IOException e) {
+                    return new Handlebars.SafeString("<span>Error processing JSON for browse page manuscript template: " + e.getMessage() + "</span>");
+                }
+            }
+        });
+
+        myHandlebars.registerHelper("formatUndertextObjects", new Helper<ArrayNode>() {
+
+            /**
+             * Returns a <ul> element that lists all of a manuscript's undertext objects.
+             *
+             * @param an {ArrayNode} - an array of Solr docs, each representing one UTO
+             * @returns {SafeString}
+             */
+            @Override
+            public SafeString apply(final ArrayNode an, final Options options) {
+                try {
+                    // get a vertx JsonArray to make things easier
+                    final JsonArray jsonArray = new JsonArray(new ObjectMapper().writeValueAsString(an));
+
+                    String ul = "";
+                    ul += "<ul class=\"undertext-objects-list\">";
+
+                    Iterator<Object> it = jsonArray.iterator();
+                    while (it.hasNext()) {
+                        JsonObject json = (JsonObject) it.next();
+
+                        final String author = json.getString("author_s", "");
+                        final String work = json.getString("work_s", "");
+                        final String genre = json.getString("genre_s", "");
+                        final String primaryLanguage = json.getString("primary_language_s", "");
+                        final String scriptName = json.getString("script_name_s", "");
+                        final String scriptDateText = json.getString("script_date_text_s", "");
+                        final Integer scriptDateStart = json.getInteger("script_date_start_i");
+                        final Integer scriptDateEnd = json.getInteger("script_date_end_i");
+                        final JsonArray scholarNames = json.getJsonArray("scholar_name_s", new JsonArray());
+
+                        // whatever the first row is gets a hanging indent
+                        Boolean hanging = false;
+
+                        // first row: author, work, genre
+                        String li = "";
+                        li += "<li>";
+
+                        if (!author.equals("") || !work.equals("") || !genre.equals("")) {
+                            li += "<span>";
+                            hanging = true;
+
+                            if (!author.equals("")) {
+                                li += author;
+                            }
+                            if (!work.equals("")) {
+                                if (!author.equals("")) {
+                                    li += ", ";
+                                }
+                                li += work;
+                            }
+                            if (!genre.equals("")) {
+                                if (!author.equals("") || !work.equals("")) {
+                                    li += ". ";
+                                }
+                                li += genre;
+                            }
+                            li += ".";
+                            li += "</span>"
+                                + "<br>";
+                        }
+
+                        // second row: primaryLanguage, scriptName
+                        if (!primaryLanguage.equals("") || !scriptName.equals("")) {
+                            if (hanging == false) {
+                                li += "<span>";
+                                hanging = true;
+                            } else {
+                                li += "<span class=\"indent\">";
+                            }
+                            if (!primaryLanguage.equals("")) {
+                                li += primaryLanguage + ".";
+                            }
+                            if (!scriptName.equals("")) {
+                                if (!primaryLanguage.equals("")) {
+                                    li += " ";
+                                }
+                                li += "Script: " + scriptName + ".";
+                            }
+                            li += "</span>"
+                                + "<br>";
+                        }
+
+                        // third row: scriptDateText, scriptDateStart, scriptDateEnd
+                        if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
+                            if (hanging == false) {
+                                li += "<span>";
+                                hanging = true;
+                            } else {
+                                li += "<span class=\"indent\">";
+                            }
+                            if (!scriptDateText.equals("")) {
+                                li += scriptDateText;
+                            }
+                            if (scriptDateStart != null && scriptDateEnd != null) {
+                                if (!scriptDateText.equals("")) {
+                                    li += " ";
+                                }
+                                li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
+                            }
+                            li += ".";
+                            li += "</span>"
+                                + "<br>";
+                        }
+
+                        if (!scholarNames.isEmpty()) {
+                            if (hanging == false) {
+                                li += "<span>";
+                                hanging = true;
+                            } else {
+                                li += "<span class=\"indent\">";
+                            }
+                            li += String.join("; ", scholarNames.getList());
+                            li += "</span>"
+                                + "<br>";
+                        }
+
+                        li += "</li>";
+                        ul += li;
+                    }
+                    ul += "</ul>";
+
+                    return new Handlebars.SafeString(ul);
+                } catch (IOException e) {
+                    return new Handlebars.SafeString("<span>Error processing JSON for browse page undertext object template: " + e.getMessage() + "</span>");
                 }
             }
         });

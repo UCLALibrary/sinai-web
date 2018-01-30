@@ -55,8 +55,8 @@
         });
 
         var manifests = [
-          {{#each sinai-manuscript-metadata}}
-            "{{imageserver}}/iiif/{{urlencode ARK}}/manifest",
+          {{#each manifests}}
+            "{{imageserver}}/iiif/{{urlencode ark}}/manifest",
           {{/each}}
         ];
 

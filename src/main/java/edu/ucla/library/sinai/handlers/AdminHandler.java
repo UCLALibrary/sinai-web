@@ -6,20 +6,15 @@ import static edu.ucla.library.sinai.Constants.SOLR_SERVICE_KEY;
 import static edu.ucla.library.sinai.RoutePatterns.ADMIN;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
-import static edu.ucla.library.sinai.util.SolrUtils.DOCS;
-import static edu.ucla.library.sinai.util.SolrUtils.RESPONSE;
+
+import java.io.IOException;
 
 import org.apache.commons.validator.routines.EmailValidator;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -50,12 +45,17 @@ public class AdminHandler extends SinaiHandler {
                         LOGGER.debug("Solr response: {}", solrJson.toString());
                     }
 
-                    aContext.data().put(HBS_DATA_KEY, toHbsContext(toJsonNode(solrJson), aContext));
-                    aContext.next();
+                    try {
+                        aContext.data().put(HBS_DATA_KEY, toHbsContext(solrJson, aContext));
+                        aContext.next();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 } else {
-                    fail(aContext, handler.cause());
                     aContext.put(ERROR_HEADER, "Search Error");
                     aContext.put(ERROR_MESSAGE, msg("Solr search failed: {}", handler.cause().getMessage()));
+                    fail(aContext, handler.cause());
                 }
             });
         } else if (method == HttpMethod.POST) {
@@ -101,9 +101,9 @@ public class AdminHandler extends SinaiHandler {
                             LOGGER.debug("Solr response: {}", solrJson);
                         }
                     } else {
-                        fail(aContext, handler.cause());
                         aContext.put(ERROR_HEADER, "Index Error");
                         aContext.put(ERROR_MESSAGE, msg("Solr index failed: {}", handler.cause().getMessage()));
+                        fail(aContext, handler.cause());
                     }
 
                     // Redirect to Admin
@@ -116,27 +116,5 @@ public class AdminHandler extends SinaiHandler {
             aContext.response().headers().add("Allow", "GET, POST");
             aContext.fail(405);
         }
-    }
-
-    /* FIXME: We need a better way to work with all this JSON -- a Solr object(?) */
-    private ObjectNode toJsonNode(final JsonObject aJsonObject) {
-        final JsonObject emptyObject = new JsonObject();
-        final JsonObject response = aJsonObject.getJsonObject(RESPONSE, emptyObject);
-        final JsonArray docs = response.getJsonArray(DOCS, new JsonArray());
-        final ObjectMapper mapper = new ObjectMapper();
-        final ObjectNode jsonNode = mapper.createObjectNode();
-        final ArrayNode userArray = jsonNode.putArray("users");
-
-        // Return the list of users to display on the page
-        for (int index = 0; index < docs.size(); index++) {
-            final JsonObject jsonObject = docs.getJsonObject(index);
-            final ObjectNode objNode = mapper.createObjectNode();
-
-            objNode.put("email", jsonObject.getString("email"));
-            objNode.put("is_admin", jsonObject.getBoolean("is_admin"));
-
-            userArray.add(objNode);
-        }
-        return jsonNode;
     }
 }

@@ -4,14 +4,13 @@ package edu.ucla.library.sinai.handlers;
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
+import java.io.IOException;
 
 import edu.ucla.library.sinai.Configuration;
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.TemplateEngine;
 
@@ -32,7 +31,7 @@ public class FailureHandler extends SinaiHandler {
 
     @Override
     public void handle(final RoutingContext aContext) {
-        final ObjectNode jsonObject = new ObjectMapper().createObjectNode();
+        final JsonObject jsonObject = new JsonObject();
 
         if (aContext.failed()) {
             final String errorHeader = (String) aContext.get(ERROR_HEADER);
@@ -105,17 +104,22 @@ public class FailureHandler extends SinaiHandler {
             }
         }
 
-        aContext.data().put(HBS_DATA_KEY, toHbsContext(jsonObject, aContext));
+        try {
+            aContext.data().put(HBS_DATA_KEY, toHbsContext(jsonObject, aContext));
+            myTemplateEngine.render(aContext, "templates/error", handler -> {
+                if (handler.succeeded()) {
+                    final HttpServerResponse response = aContext.response();
 
-        myTemplateEngine.render(aContext, "templates/error", handler -> {
-            if (handler.succeeded()) {
-                final HttpServerResponse response = aContext.response();
+                    // Pass through the output of templating process
+                    response.end(handler.result());
+                    response.close();
+                }
+            });
 
-                // Pass through the output of templating process
-                response.end(handler.result());
-                response.close();
-            }
-        });
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
