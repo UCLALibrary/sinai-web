@@ -152,11 +152,26 @@ body.sinai-body {
             overflow: hidden;
 
             #search-results {
+
+                .undertexts-header {
+                    font-size: 1em;
+                }
+                .shelf-mark-link {
+                    color: black;
+                    font-size: 1.25em;
+                }
+                .bold {
+                    font-weight: bold;
+                }
+                .italic {
+                    font-style: italic;
+                }
+
                 width: 75%;
                 float: left;
 
-                ul > li {
-                    border-bottom: 1px solid $maroon;
+                #search-results-list > li {
+                    border-top: 1px solid $maroon;
                     padding-top: 20px;
 
                     .helper {
@@ -170,7 +185,7 @@ body.sinai-body {
                         float: left;
                     }
 
-                    p {
+                    div {
                         //display: inline-block;
                         overflow: hidden;
                         width: auto;
@@ -190,6 +205,14 @@ body.sinai-body {
                         img {
                             vertical-align: middle;
                         }
+                    }
+
+                    .indent {
+                        margin-left: 50px;
+                    }
+
+                    .undertext-objects-list > li {
+                        border-top: 1px solid $maroon;
                     }
                 }
             }

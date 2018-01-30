@@ -3,7 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.Metadata;
@@ -48,7 +48,7 @@ public class LoginHandler extends SinaiHandler {
                         }
 
                         aContext.setUser(authHandler.result());
-                        aContext.reroute(RoutePatterns.BROWSE);
+                        aContext.reroute(RoutePatterns.BROWSE_RE);
                     } else {
                         LOGGER.error(authHandler.cause(), "Authentication did not succeed");
                         response.putHeader(Metadata.CONTENT_TYPE, Metadata.TEXT_MIME_TYPE);
@@ -61,8 +61,14 @@ public class LoginHandler extends SinaiHandler {
                 aContext.response().putHeader(Metadata.CONTENT_TYPE, Metadata.TEXT_MIME_TYPE).end(message);
             }
         } else {
-            aContext.data().put(HBS_DATA_KEY, toHbsContext(new ObjectMapper().createObjectNode(), aContext));
-            aContext.next();
+            try {
+                aContext.data().put(HBS_DATA_KEY, toHbsContext(new JsonObject(), aContext));
+                aContext.next();
+            } catch (IOException e) {
+                e.printStackTrace();
+                LOGGER.error(e.getMessage());
+            }
+
         }
     }
 }
