@@ -19,7 +19,7 @@
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
     <!-- Metadata that is used to build the 'browse' page -->
     <sinai.metadata.server>http://sinai-meta.s3-eu-west-1.amazonaws.com</sinai.metadata.server>
-    <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaiusers</sinai.solr.server>
+    <sinai.solr.server>http://solr.library.ucla.edu/solr/sinaimeta</sinai.solr.server>
     <sinai.id.key>OVERRIDE_THIS_VALUE_WITH_THE_REAL_KEY</sinai.id.key>
     <dev.tools></dev.tools>
 
@@ -29,6 +29,8 @@
     <freelib.utils.version>0.7.0</freelib.utils.version>
     <handlebars.version>2.2.3</handlebars.version>
     <scribe.version>1.3.7</scribe.version>
+    <postgresql.version>42.1.4</postgresql.version>
+    <solrj.version>4.10.0</solrj.version>
 
     <!-- Versions of plugins managed in this POM -->
     <maven.shade.plugin.version>2.4.1</maven.shade.plugin.version>
@@ -133,6 +135,16 @@
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
       <version>1.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>solr-solrj</artifactId>
+      <groupId>org.apache.solr</groupId>
+      <version>${solrj.version}</version>
     </dependency>
   </dependencies>
 
