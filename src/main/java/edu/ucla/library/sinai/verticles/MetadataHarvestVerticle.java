@@ -225,8 +225,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
         MetadataHarvestHandler handler = new MetadataHarvestHandler();
 
-        // set period to once per week
-        final Integer period = 1000 * 60 * 60 * 24 * 7;
+        // set period to once per day
+        final Integer period = 1000 * 60 * 60 * 24;
         myTimerId = vertx.setPeriodic(period, handler);
 
         aFuture.complete();
