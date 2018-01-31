@@ -98,17 +98,17 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     doc.addField("record_type", doctype);
                     for (int i = 0; i < fields.length; i++) {
 
-                        String fieldName;
-                        Object fieldValue;
+                        String solrFieldName;
+                        Object solrFieldValue;
 
                         if (fields[i].name.equals("uuid") || fields[i].name.equals("id") || fields[i].name.equals("manuscript_id")) {
-                            fieldName = fields[i].name;
+                            solrFieldName = fields[i].name;
                         } else {
 
                             if (fields[i].type.equals("string")) {
-                                fieldName = fields[i].name + "_s";
+                                solrFieldName = fields[i].name + "_s";
                             } else if (fields[i].type.equals("int")) {
-                                fieldName = fields[i].name + "_i";
+                                solrFieldName = fields[i].name + "_i";
                             } else {
                                 errorMessage = "Solr field type must be either string or int";
                                 LOGGER.error(errorMessage);
@@ -117,21 +117,30 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                         }
 
                         if (fields[i].type.equals("string")) {
-                            if (fields[i].multiValued) {
-                                fieldValue = Arrays.asList(rs.getString(fields[i].name).split(multiValuedFieldDelimiter));
-                            } else {
-                                fieldValue = rs.getString(fields[i].name);
-                            }
-                            doc.setField(fieldName, fieldValue);
-                        } else if (fields[i].type.equals("int")) {
+                            final String strVal = rs.getString(fields[i].name);
 
-                            // Disallow representing multi-valued fields with ints
-                            if (fields[i].multiValued) {
-                                errorMessage = "Solr multiValued field must only be derived from strings";
-                                LOGGER.error(errorMessage);
-                                throw new Error(errorMessage);
-                            } else {
-                                doc.setField(fieldName, rs.getInt(fields[i].name));
+                            // Only put in Solr if not null and not empty
+                            if (rs.wasNull() == false && (strVal != null && !strVal.equals(""))) {
+                                if (fields[i].multiValued) {
+                                    solrFieldValue = Arrays.asList(strVal.split(multiValuedFieldDelimiter));
+                                } else {
+                                    solrFieldValue = strVal;
+                                }
+                                doc.setField(solrFieldName, solrFieldValue);
+                            }
+                        } else if (fields[i].type.equals("int")) {
+                            final Integer intVal = rs.getInt(fields[i].name);
+
+                            if (rs.wasNull() == false) {
+                                // Disallow representing multi-valued fields with ints
+                                if (fields[i].multiValued) {
+                                    errorMessage = "Solr multiValued field must only be derived from strings";
+                                    LOGGER.error(errorMessage);
+                                    throw new Error(errorMessage);
+                                } else {
+                                    solrFieldValue = intVal;
+                                }
+                                doc.setField(solrFieldName, solrFieldValue);
                             }
                         } else {
                             errorMessage = "Solr field type must be either string or int";
@@ -188,16 +197,16 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 // Add UTOs
                 final MetadataHarvestDBFields[] utoFields = {
-                    new MetadataHarvestDBFields("uuid", "u.uuid", "string", false),
-                    new MetadataHarvestDBFields("manuscript_id", "t.manuscript_id", "int", false),
-                    new MetadataHarvestDBFields("author", "u.author", "string", false),
-                    new MetadataHarvestDBFields("work", "u.work", "string", false),
-                    new MetadataHarvestDBFields("genre", "u.genre", "string", false),
-                    new MetadataHarvestDBFields("primary_language", "u.primary_language", "string", false),
-                    new MetadataHarvestDBFields("script_name", "u.script_name", "string", false),
-                    new MetadataHarvestDBFields("script_date_text", "u.script_date_text", "string", false),
-                    new MetadataHarvestDBFields("script_date_start", "u.script_date_start", "int", false),
-                    new MetadataHarvestDBFields("script_date_end", "u.script_date_end", "int", false),
+                    new MetadataHarvestDBFields("uuid", "uto.uuid", "string", false),
+                    new MetadataHarvestDBFields("manuscript_id", "tlg.manuscript_id", "int", false),
+                    new MetadataHarvestDBFields("author", "uto.author", "string", false),
+                    new MetadataHarvestDBFields("work", "uto.work", "string", false),
+                    new MetadataHarvestDBFields("genre", "uto.genre", "string", false),
+                    new MetadataHarvestDBFields("primary_language", "uto.primary_language", "string", false),
+                    new MetadataHarvestDBFields("script_name", "uto.script_name", "string", false),
+                    new MetadataHarvestDBFields("script_date_text", "uto.script_date_text", "string", false),
+                    new MetadataHarvestDBFields("script_date_start", "uto.script_date_start", "int", false),
+                    new MetadataHarvestDBFields("script_date_end", "uto.script_date_end", "int", false),
                     new MetadataHarvestDBFields("scholar_name", "x.scholar_name", "string", true)
                 };
                 final String utoSql = "SELECT " + String.join(",", Arrays.stream(utoFields).map(s -> {
@@ -206,7 +215,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     } else {
                         return s.alias;
                     }
-                }).toArray(String[]::new)) + " FROM undertext_objects as u, text_layer_groupings as t, manuscripts as m, (SELECT y.text_layer_grouping_id, string_agg(y.last_name, ',') as scholar_name from (select ga.text_layer_grouping_id, u.last_name from grouping_assignments as ga, users as u where ga.scholar_id = u.id order by u.last_name ) as y group by text_layer_grouping_id ) as x WHERE u.text_layer_grouping_id = t.id AND t.manuscript_id = m.id AND t.id = x.text_layer_grouping_id";
+                }).toArray(String[]::new)) + " FROM undertext_objects AS uto INNER JOIN text_layer_groupings AS tlg ON uto.text_layer_grouping_id = tlg.id INNER JOIN manuscripts AS m ON tlg.manuscript_id = m.id LEFT OUTER JOIN( SELECT y.text_layer_grouping_id, STRING_AGG( y.last_name, ',' ) AS scholar_name FROM ( SELECT ga.text_layer_grouping_id, u.last_name FROM grouping_assignments AS ga INNER JOIN users AS u ON ga.scholar_id = u.id ORDER BY u.last_name) AS y GROUP BY text_layer_grouping_id ) AS x ON tlg.id = x.text_layer_grouping_id";
                 updateSolr("undertext_object", utoFields, utoSql, conn, multiValuedFieldDelimiter);
 
                 conn.close();
