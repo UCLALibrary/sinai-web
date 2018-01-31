@@ -31,6 +31,7 @@ import edu.ucla.library.sinai.handlers.MiradorHandler;
 import edu.ucla.library.sinai.handlers.PageHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
@@ -179,7 +180,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
 
         // We just use the generic handler for browse page
-        router.get(BROWSE).handler(pageHandler);
+        router.getWithRegex(BROWSE_RE).handler(pageHandler);
 
         router.get(ADMIN).handler(adminHandler);
         router.post(ADMIN).handler(adminHandler);
@@ -218,6 +219,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
             future.setHandler(aHandler);
 
             futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
+            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
 
             // Confirm all our verticles were successfully deployed
             CompositeFuture.all(futures).setHandler(handler -> {

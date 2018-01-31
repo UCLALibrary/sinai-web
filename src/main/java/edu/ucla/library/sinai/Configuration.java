@@ -5,8 +5,14 @@ import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
+import static edu.ucla.library.sinai.Constants.KATIKON_DATABASE;
+import static edu.ucla.library.sinai.Constants.KATIKON_HOST;
+import static edu.ucla.library.sinai.Constants.KATIKON_PASSWORD;
+import static edu.ucla.library.sinai.Constants.KATIKON_PORT;
+import static edu.ucla.library.sinai.Constants.KATIKON_SSL;
+import static edu.ucla.library.sinai.Constants.KATIKON_SSLFACTORY;
+import static edu.ucla.library.sinai.Constants.KATIKON_USER;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
-import static edu.ucla.library.sinai.Constants.METADATA_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SOLR_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.TEMP_DIR_PROP;
@@ -14,24 +20,20 @@ import static edu.ucla.library.sinai.Constants.URL_SCHEME_PROP;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
 import javax.naming.ConfigurationException;
 
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -55,10 +57,7 @@ public class Configuration implements Shareable {
 
     public static final long DEFAULT_SESSION_TIMEOUT = Long.MAX_VALUE; // 7200000L; // two hours
 
-    private static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinai";
-
-    private static final String DEFAULT_MANUSCRIPT_METADATA_URL =
-            "http://localhost:8001/sinai-manuscript-metadata.json";
+    public static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinaimeta";
 
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
@@ -70,11 +69,11 @@ public class Configuration implements Shareable {
 
     private final File myTempDir;
 
-    private URL mySolrServer;
+    private HttpSolrServer mySolrServer;
+
+    private JsonObject myPostgreSQLProperties;
 
     private final String myURLScheme;
-
-    private ObjectNode myManuscriptMetadata;
 
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
@@ -92,100 +91,41 @@ public class Configuration implements Shareable {
         myRedirectPort = setRedirectPort(aConfig);
         myHost = setHost(aConfig);
         myURLScheme = setURLScheme(aConfig);
+        myPostgreSQLProperties = setPostgreSQLProperties(aConfig);
 
         if (aHandler != null) {
             result.setHandler(aHandler);
 
-            setManuscriptMetadata(aConfig, aVertx, manuscriptMetadataHandler -> {
-                if (manuscriptMetadataHandler.failed()) {
-                    result.fail(manuscriptMetadataHandler.cause());
-                } else {
-                    setSolrServer(aConfig, solrServerHandler -> {
-                        if (solrServerHandler.failed()) {
-                            result.fail(solrServerHandler.cause());
-                        }
-
-                        aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
-                        result.complete(this);
-                    });
+            setSolrServer(aConfig, solrServerHandler -> {
+                if (solrServerHandler.failed()) {
+                    result.fail(solrServerHandler.cause());
                 }
+                aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
+                result.complete(this);
             });
         }
     }
 
-    public ObjectNode getManuscriptMetadata() {
-        return myManuscriptMetadata;
+    /**
+     * Reads the PostgreSQL properties from a JSON configuration file.
+     * @param aConfig
+     * @return The JsonObject to be used by MetadataHarvestHandler
+     */
+    private JsonObject setPostgreSQLProperties(JsonObject aConfig) {
+        final JsonObject props = new JsonObject();
+        props.put("host", aConfig.getString(KATIKON_HOST));
+        props.put("port", String.valueOf(aConfig.getInteger(KATIKON_PORT)));
+        props.put("database", aConfig.getString(KATIKON_DATABASE));
+        props.put("user", aConfig.getString(KATIKON_USER));
+        props.put("password", aConfig.getString(KATIKON_PASSWORD));
+        props.put("ssl", String.valueOf(aConfig.getBoolean(KATIKON_SSL)));
+        props.put("sslfactory", aConfig.getString(KATIKON_SSLFACTORY));
+
+        return props;
     }
 
-    private void setManuscriptMetadata(final JsonObject aConfig, final Vertx aVertx,
-            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException,
-            JsonProcessingException {
-        final Properties properties = System.getProperties();
-        final Future<Configuration> result = Future.future();
-
-        if (aHandler != null) {
-            result.setHandler(aHandler);
-
-            // Choose which URL to use: default, or parameter
-            final String manuscriptMetadataUrl = properties.getProperty(METADATA_SERVER_PROP, aConfig.getString(
-                    METADATA_SERVER_PROP, DEFAULT_MANUSCRIPT_METADATA_URL)) + "/sinai-manuscript-metadata.json";
-            // TODO: move metadata string to constant?
-
-            if (LOGGER.isDebugEnabled() && properties.containsKey(METADATA_SERVER_PROP)) {
-                LOGGER.debug("Found {} set in system properties", METADATA_SERVER_PROP);
-            }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Looking for manuscript metadata at: {}", manuscriptMetadataUrl);
-            }
-
-            try {
-                // Just test that URL is properly formed, no need to store the result
-                new URL(manuscriptMetadataUrl);
-
-                // Retrieve metadata from the URL
-                final ObjectMapper mapper = new ObjectMapper();
-                final HttpClient httpClient = aVertx.createHttpClient();
-
-                httpClient.getAbs(manuscriptMetadataUrl, response -> {
-                    if (response.statusCode() == 200) {
-                        response.bodyHandler(body -> {
-                            final String errormsg;
-                            try {
-                                // Save metadata to config property
-                                myManuscriptMetadata = (ObjectNode) mapper.readTree(body.toString());
-                                LOGGER.info("Using Sinai manuscript metadata located at: {}", manuscriptMetadataUrl);
-                                result.complete(this);
-                            } catch (final IOException e) {
-                                errormsg = "Something went wrong while unpacking the manuscript metadata. ERROR: " + e
-                                        .toString();
-                                if (LOGGER.isDebugEnabled()) {
-                                    LOGGER.debug("{} " + errormsg, getClass().getSimpleName());
-                                }
-                                result.fail(e);
-                            }
-                        });
-                    } else {
-                        final String errorMessage = "HTTP " + String.valueOf(response.statusCode()) + ": " +
-                                manuscriptMetadataUrl;
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("{} " + errorMessage, getClass().getSimpleName());
-                        }
-                        result.fail(new ConfigurationException(errorMessage));
-                    }
-                }).exceptionHandler(exceptionHandler -> {
-                    // httpClient.close();
-                    result.fail(new ConfigurationException("Couldn't connect to manuscript metadata host: [ " +
-                            exceptionHandler.getMessage() + " ]"));
-                }).putHeader(Metadata.CONTENT_TYPE, Metadata.JSON_MIME_TYPE).end();
-
-                httpClient.close();
-            } catch (final MalformedURLException details) {
-                result.fail(new ConfigurationException("Manuscript metadata URL is not well-formed: " +
-                        manuscriptMetadataUrl));
-            }
-        } else {
-            result.fail(new ConfigurationException("No handler was passed to setManuscriptMetadata"));
-        }
+    public JsonObject getPostgreSQLProperties() {
+        return myPostgreSQLProperties;
     }
 
     /**
@@ -257,8 +197,30 @@ public class Configuration implements Shareable {
      *
      * @return The Solr server that Sinai should be able to use
      */
-    public URL getSolrServer() {
+    public HttpSolrServer getSolrServer() {
         return mySolrServer;
+    }
+
+    private void setSolrServer(final JsonObject aConfig, final Handler<AsyncResult<Configuration>> aHandler) {
+        final Properties properties = System.getProperties();
+        final Future<Configuration> result = Future.future();
+
+        if (aHandler != null) {
+            result.setHandler(aHandler);
+
+            final String solrServer = properties.getProperty(SOLR_SERVER_PROP, aConfig.getString(SOLR_SERVER_PROP,
+                    DEFAULT_SOLR_SERVER));
+
+            if (LOGGER.isDebugEnabled() && properties.containsKey(SOLR_SERVER_PROP)) {
+                LOGGER.debug("Found {} set in system properties", SOLR_SERVER_PROP);
+            }
+
+            mySolrServer = new HttpSolrServer(solrServer);
+            LOGGER.debug(solrServer);
+            result.complete(this);
+        } else {
+            result.fail(new ConfigurationException("No handler was passed to setSolrServer"));
+        }
     }
 
     /**
@@ -452,33 +414,5 @@ public class Configuration implements Shareable {
         }
 
         return uploadsDir;
-    }
-
-    private void setSolrServer(final JsonObject aConfig, final Handler<AsyncResult<Configuration>> aHandler) {
-        final Properties properties = System.getProperties();
-        final Future<Configuration> result = Future.future();
-
-        if (aHandler != null) {
-            result.setHandler(aHandler);
-
-            final String solrServer = properties.getProperty(SOLR_SERVER_PROP, aConfig.getString(SOLR_SERVER_PROP,
-                    DEFAULT_SOLR_SERVER));
-
-            if (LOGGER.isDebugEnabled() && properties.containsKey(SOLR_SERVER_PROP)) {
-                LOGGER.debug("Found {} set in system properties", SOLR_SERVER_PROP);
-            }
-            LOGGER.debug(solrServer);
-
-            try {
-                // TODO: Actually ping the server here too?
-                mySolrServer = new URL(solrServer);
-                LOGGER.debug(solrServer);
-                result.complete(this);
-            } catch (final MalformedURLException details) {
-                result.fail(new ConfigurationException("Solr server URL is not well-formed: " + solrServer));
-            }
-        } else {
-            result.fail(new ConfigurationException("No handler was passed to setSolrServer"));
-        }
     }
 }

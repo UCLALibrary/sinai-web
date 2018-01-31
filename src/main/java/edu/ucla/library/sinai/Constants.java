@@ -35,6 +35,22 @@ public interface Constants {
 
     public static final String METRICS_REG_PROP = "sinai.metrics";
 
+    /* Metadata database login properties */
+
+    public static final String KATIKON_HOST = "katikon.host";
+
+    public static final String KATIKON_PORT = "katikon.port";
+
+    public static final String KATIKON_DATABASE = "katikon.database";
+
+    public static final String KATIKON_USER = "katikon.user";
+
+    public static final String KATIKON_PASSWORD = "katikon.password";
+
+    public static final String KATIKON_SSL = "katikon.ssl";
+
+    public static final String KATIKON_SSLFACTORY = "katikon.sslfactory";
+
     /* These config values are only used internally. */
 
     public static final String SHARED_DATA_KEY = "sinai.shared.data";

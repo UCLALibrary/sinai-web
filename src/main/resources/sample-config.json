@@ -1,4 +1,9 @@
 {
-  "sinai.oauth.google.clientId": "587760109846-8ctkp2qbuag2n7kh0lnd0vv8ur5u1os9.apps.googleusercontent.com",
-  "sinai.oauth.facebook.clientId": "403322423208635"
+  "katikon.host": "",
+  "katikon.port": 5432,
+  "katikon.database": "",
+  "katikon.user": "",
+  "katikon.password": "",
+  "katikon.ssl": true,
+  "katikon.sslfactory": ""
 }

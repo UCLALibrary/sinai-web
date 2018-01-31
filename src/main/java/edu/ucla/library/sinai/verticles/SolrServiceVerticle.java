@@ -7,10 +7,6 @@ import static edu.ucla.library.sinai.util.SolrUtils.SOLR_STATUS;
 
 import edu.ucla.library.sinai.services.SolrService;
 import edu.ucla.library.sinai.services.impl.SolrServiceImpl;
-
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -29,7 +25,7 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
 
     @Override
     public void start(final Future<Void> aFuture) throws Exception {
-        final String solr = getConfiguration().getSolrServer().toExternalForm() + "/admin/ping?wt=json";
+        final String solr = getConfiguration().getSolrServer().getBaseURL() + "/admin/ping?wt=json";
         final HttpClient client = vertx.createHttpClient();
         final HttpClientRequest request;
 
@@ -39,6 +35,7 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
 
         // Create a connection to see if Solr responds at the expected location
         // The call to handlePingResponse is also necessary for setting up the connection
+
         request = client.getAbs(solr, response -> {
             handlePingResponse(response, aFuture, client);
         }).exceptionHandler(exceptionHandler -> {
@@ -48,6 +45,7 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
         });
 
         request.end();
+        aFuture.complete();
     }
 
     /**
@@ -55,6 +53,10 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
      */
     private void handlePingResponse(final HttpClientResponse aResponse, final Future<Void> aFuture,
             final HttpClient aClient) {
+
+        // TODO: once ping is ready, delete the uncommented code and uncomment the commented code
+        // Instantiate and register a Solr service
+
         if (aResponse.statusCode() == 200) {
             aResponse.bodyHandler(body -> {
                 final String status = new JsonObject(body.toString()).getString(SOLR_STATUS);
@@ -64,7 +66,7 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
                     // Instantiate and register a Solr service
                     myService = new SolrServiceImpl(getConfiguration(), vertx);
                     ProxyHelper.registerService(SolrService.class, vertx, myService, SOLR_SERVICE_KEY);
-                    
+
                     LOGGER.debug("Successfully connected to Solr server");
 
                     aClient.close();

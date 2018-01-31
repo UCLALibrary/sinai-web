@@ -20,6 +20,7 @@ AUTHBIND=""
 SINAI_CONFIG=""
 SINAI_HOST="-Dsinai.host=${SINAI_HOST:-localhost}"
 SINAI_AUTH_KEY="-Dsinai.id.key=${sinai.id.key}"
+JDBC_DRIVER="-Djdbc.drivers=org.postgresql.Driver"
 
 # If we have authbind and it's configured to run our port, let's use it
 if hash authbind 2>/dev/null; then
@@ -43,4 +44,4 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
 fi
 
 $AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER $SINAI_SOLR_SERVER \
-  $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG
+  $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $JDBC_DRIVER $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG
