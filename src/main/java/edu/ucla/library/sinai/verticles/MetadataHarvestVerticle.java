@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.solr.client.solrj.SolrServer;
@@ -89,6 +91,11 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
         private void updateSolr(final String doctype, final MetadataHarvestDBFields[] fields, final String sql, final Connection conn, final String multiValuedFieldDelimiter) {
             SolrInputDocument doc;
             final String errorMessage;
+
+            String solrFieldName;
+            Object solrFieldValue;
+            Map<String, Object> solrInputField;
+
             try (
                 final Statement st = conn.createStatement();
                 final ResultSet rs = st.executeQuery(sql)
@@ -97,9 +104,6 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     doc = new SolrInputDocument();
                     doc.addField("record_type", doctype);
                     for (int i = 0; i < fields.length; i++) {
-
-                        String solrFieldName;
-                        Object solrFieldValue;
 
                         if (fields[i].name.equals("uuid") || fields[i].name.equals("id") || fields[i].name.equals("manuscript_id")) {
                             solrFieldName = fields[i].name;
@@ -126,7 +130,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                                 } else {
                                     solrFieldValue = strVal;
                                 }
-                                doc.setField(solrFieldName, solrFieldValue);
+                            } else {
+                                continue;
                             }
                         } else if (fields[i].type.equals("int")) {
                             final Integer intVal = rs.getInt(fields[i].name);
@@ -140,14 +145,25 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                                 } else {
                                     solrFieldValue = intVal;
                                 }
-                                doc.setField(solrFieldName, solrFieldValue);
+                            } else {
+                                continue;
                             }
                         } else {
                             errorMessage = "Solr field type must be either string or int";
                             LOGGER.error(errorMessage);
                             throw new Error(errorMessage);
                         }
+
+                        if (solrFieldName.equals("uuid")) {
+                            doc.addField(solrFieldName, solrFieldValue);
+                        } else {
+                            // http://yonik.com/solr/atomic-updates/
+                            solrInputField = new HashMap<String, Object>(1);
+                            solrInputField.put("set", solrFieldValue);
+                            doc.addField(solrFieldName, solrInputField);
+                        }
                     }
+
                     LOGGER.debug(doc.toString());
                     mySolrServer.add(doc);
                 }
