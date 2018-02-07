@@ -5,6 +5,7 @@ import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
+import static edu.ucla.library.sinai.Constants.IMAGE_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.KATIKON_DATABASE;
 import static edu.ucla.library.sinai.Constants.KATIKON_HOST;
 import static edu.ucla.library.sinai.Constants.KATIKON_PASSWORD;
@@ -75,6 +76,8 @@ public class Configuration implements Shareable {
 
     private final String myURLScheme;
 
+    private final String myImageServer;
+
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
      *
@@ -92,6 +95,7 @@ public class Configuration implements Shareable {
         myHost = setHost(aConfig);
         myURLScheme = setURLScheme(aConfig);
         myPostgreSQLProperties = setPostgreSQLProperties(aConfig);
+        myImageServer = setImageServer(aConfig);
 
         if (aHandler != null) {
             result.setHandler(aHandler);
@@ -104,6 +108,15 @@ public class Configuration implements Shareable {
                 result.complete(this);
             });
         }
+    }
+
+    private String setImageServer(JsonObject aConfig) {
+        // TODO Auto-generated method stub
+        return aConfig.getString(IMAGE_SERVER_PROP);
+    }
+
+    public String getImageServer() {
+        return myImageServer;
     }
 
     /**

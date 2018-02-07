@@ -12,10 +12,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.JsonNodeValueResolver;
 
+import edu.ucla.library.sinai.Configuration;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-
-import edu.ucla.library.sinai.Configuration;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -46,7 +45,7 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
         final String host = System.getProperty("sinai.host", "localhost");
         final String port = System.getProperty("sinai.port", "8443");
 
-        aJsonObject.put("imageserver", System.getProperty("sinai.image.server"));
+        aJsonObject.put("imageserver", myConfig.getImageServer());
         aJsonObject.put("sinaiauthkey", System.getProperty("sinai.id.key", ""));
 
         // Add a workaround for developers testing on their machines
