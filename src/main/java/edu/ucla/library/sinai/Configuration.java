@@ -93,7 +93,6 @@ public class Configuration implements Shareable {
         myHost = setHost(aConfig);
         myURLScheme = setURLScheme(aConfig);
         myPostgreSQLProperties = setPostgreSQLProperties(aConfig);
-        myImageServer = setImageServer(aConfig);
 
         if (aHandler != null) {
             result.setHandler(aHandler);
