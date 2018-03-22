@@ -226,6 +226,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final Integer scriptDateStart = json.getInteger("script_date_start_i");
                         final Integer scriptDateEnd = json.getInteger("script_date_end_i");
                         final JsonArray scholarNames = json.getJsonArray("scholar_name_s", new JsonArray());
+                        final JsonArray folios = json.getJsonArray("folios_s", new JsonArray());
 
                         // whatever the first row is gets a hanging indent
                         Boolean hanging = false;
@@ -235,7 +236,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         li += "<li>";
 
                         if (!author.equals("") || !work.equals("") || !genre.equals("")) {
-                            li += "<span>";
+                            li += "<p>";
                             hanging = true;
 
                             if (!author.equals("")) {
@@ -254,17 +255,16 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 li += genre;
                             }
                             li += ".";
-                            li += "</span>"
-                                + "<br>";
+                            li += "</p>";
                         }
 
                         // second row: primaryLanguage, scriptName
                         if (!primaryLanguage.equals("") || !scriptName.equals("")) {
                             if (hanging == false) {
-                                li += "<span>";
+                                li += "<p>";
                                 hanging = true;
                             } else {
-                                li += "<span class=\"indent\">";
+                                li += "<p class=\"indent\">";
                             }
                             if (!primaryLanguage.equals("")) {
                                 li += primaryLanguage + ".";
@@ -275,17 +275,16 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 }
                                 li += "Script: " + scriptName + ".";
                             }
-                            li += "</span>"
-                                + "<br>";
+                            li += "</p>";
                         }
 
                         // third row: scriptDateText, scriptDateStart, scriptDateEnd
                         if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
                             if (hanging == false) {
-                                li += "<span>";
+                                li += "<p>";
                                 hanging = true;
                             } else {
-                                li += "<span class=\"indent\">";
+                                li += "<p class=\"indent\">";
                             }
                             if (!scriptDateText.equals("")) {
                                 li += scriptDateText;
@@ -297,20 +296,29 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
                             }
                             li += ".";
-                            li += "</span>"
-                                + "<br>";
+                            li += "</p>";
+                        }
+
+                        if (!folios.isEmpty()) {
+                            if (hanging == false) {
+                                li += "<p>";
+                                hanging = true;
+                            } else {
+                                li += "<p class=\"indent\">";
+                            }
+                            li += "Folios: " + String.join(", ", folios.getList()) + ".";
+                            li += "</p>";
                         }
 
                         if (!scholarNames.isEmpty()) {
                             if (hanging == false) {
-                                li += "<span>";
+                                li += "<p>";
                                 hanging = true;
                             } else {
-                                li += "<span class=\"indent\">";
+                                li += "<p class=\"indent\">";
                             }
                             li += String.join("; ", scholarNames.getList());
-                            li += "</span>"
-                                + "<br>";
+                            li += "</p>";
                         }
 
                         li += "</li>";
