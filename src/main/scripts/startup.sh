@@ -1,11 +1,52 @@
 #! /bin/bash
 
+# This script takes one argument:
+# --env - one of ["test", "stage", "prod"]
+# For example:
+# ./startup.sh --env prod
+
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+
+    case $key in
+        --env)
+        DEPLOY_ENV="$2"
+        shift
+        shift
+        ;;
+esac
+done
+
+SOLR_SERVER="-Dsinai.solr.server="
+IMAGE_SERVER="-Dsinai.image.server="
+if [[ $DEPLOY_ENV == "prod" ]]
+then
+    SOLR_SERVER=$SOLR_SERVER"http://solr.library.ucla.edu/solr/sinaimeta"
+    IMAGE_SERVER=$IMAGE_SERVER"https://sinai-images.library.ucla.edu"
+elif [[ $DEPLOY_ENV == "stage" ]]
+then
+    SOLR_SERVER=$SOLR_SERVER"http://solr.library.ucla.edu/solr/sinaistagemeta"
+    IMAGE_SERVER=$IMAGE_SERVER"https://stage-sinai-images.library.ucla.edu"
+elif [[ $DEPLOY_ENV == "test" ]]
+then
+    SOLR_SERVER=$SOLR_SERVER"http://test-solr.library.ucla.edu/solr/sinaimeta"
+    IMAGE_SERVER=$IMAGE_SERVER"https://test-sinai-images.library.ucla.edu"
+elif [[ $DEPLOY_ENV == "dev" ]]
+then
+    SOLR_SERVER=$SOLR_SERVER"${sinai.solr.server}"
+    IMAGE_SERVER=$IMAGE_SERVER"https://sinai-images.library.ucla.edu"
+else
+    # Print usage and exit
+    echo "Usage: ./startup.sh --env [ prod | stage | test | dev ]"
+    exit 1
+fi
+
 # We're going to be opinionated about logging frameworks
 LOG_DELEGATE="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
 KEY_PASS_CONFIG="-Dsinai.key.pass=${sinai.key.pass}"
 SINAI_TEMP_DIR="-Dsinai.temp.dir=${sinai.temp.dir}"
 SINAI_PORT="-Dsinai.port=${sinai.port} -Dsinai.redirect.port=${sinai.redirect.port}"
-IMAGE_SERVER="-Dsinai.image.server=${sinai.image.server}"
 DROPWIZARD_METRICS="-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=sinai.metrics"
 JMX_METRICS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true"
 # For tools like Eclipse's Debugging
@@ -13,9 +54,6 @@ JDWP_AGENTLIB="-agentlib:jdwp=transport=dt_socket,address=9003,server=y,suspend=
 # For tools like visualvm or jconsole (Note: only for use on dev's localhost since there is no configured security)
 JMXREMOTE="-Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.authenticate=false"
 JMXREMOTE="$JMXREMOTE -Dcom.sun.management.jmxremote.ssl=false"
-# Metadata for browse page
-SINAI_METADATA_SERVER="-Dsinai.metadata.server=${sinai.metadata.server}"
-SINAI_SOLR_SERVER="-Dsinai.solr.server=${sinai.solr.server}"
 AUTHBIND=""
 SINAI_CONFIG=""
 SINAI_HOST="-Dsinai.host=${SINAI_HOST:-localhost}"
@@ -43,5 +81,5 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SINAI_METADATA_SERVER $SINAI_SOLR_SERVER \
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SOLR_SERVER \
   $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $JDBC_DRIVER $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG

@@ -5,6 +5,7 @@ import static edu.ucla.library.sinai.Constants.CONFIG_KEY;
 import static edu.ucla.library.sinai.Constants.HTTP_HOST_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_PROP;
 import static edu.ucla.library.sinai.Constants.HTTP_PORT_REDIRECT_PROP;
+import static edu.ucla.library.sinai.Constants.IMAGE_SERVER_PROP;
 import static edu.ucla.library.sinai.Constants.KATIKON_DATABASE;
 import static edu.ucla.library.sinai.Constants.KATIKON_HOST;
 import static edu.ucla.library.sinai.Constants.KATIKON_PASSWORD;
@@ -57,8 +58,6 @@ public class Configuration implements Shareable {
 
     public static final long DEFAULT_SESSION_TIMEOUT = Long.MAX_VALUE; // 7200000L; // two hours
 
-    public static final String DEFAULT_SOLR_SERVER = "http://localhost:8983/solr/sinaimeta";
-
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
     private final int myPort;
@@ -74,6 +73,8 @@ public class Configuration implements Shareable {
     private JsonObject myPostgreSQLProperties;
 
     private final String myURLScheme;
+
+    private String myImageServer;
 
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
@@ -96,14 +97,46 @@ public class Configuration implements Shareable {
         if (aHandler != null) {
             result.setHandler(aHandler);
 
-            setSolrServer(aConfig, solrServerHandler -> {
-                if (solrServerHandler.failed()) {
-                    result.fail(solrServerHandler.cause());
+            setImageServer(imageServerHandler -> {
+                if (imageServerHandler.failed()) {
+                    result.fail(imageServerHandler.cause());
                 }
-                aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
-                result.complete(this);
+                setSolrServer(solrServerHandler -> {
+                    if (solrServerHandler.failed()) {
+                        result.fail(solrServerHandler.cause());
+                    }
+                    aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).put(CONFIG_KEY, this);
+                    result.complete(this);
+                });
             });
         }
+    }
+
+    private void setImageServer(final Handler<AsyncResult<Configuration>> aHandler) {
+        final Properties properties = System.getProperties();
+        final Future<Configuration> result = Future.future();
+
+        final String errorMessage;
+
+        if (aHandler != null) {
+            result.setHandler(aHandler);
+
+            if (properties.containsKey(IMAGE_SERVER_PROP)) {
+                myImageServer = properties.getProperty(IMAGE_SERVER_PROP);
+                LOGGER.debug("Found {} in system properties", IMAGE_SERVER_PROP);
+                result.complete(this);
+            } else {
+                errorMessage = IMAGE_SERVER_PROP + " is not set in system properties";
+                result.fail(new ConfigurationException(errorMessage));
+            }
+        } else {
+            errorMessage = "No handler was passed to setImageServer";
+            result.fail(new ConfigurationException(errorMessage));
+        }
+    }
+
+    public String getImageServer() {
+        return myImageServer;
     }
 
     /**
@@ -201,25 +234,26 @@ public class Configuration implements Shareable {
         return mySolrServer;
     }
 
-    private void setSolrServer(final JsonObject aConfig, final Handler<AsyncResult<Configuration>> aHandler) {
+    private void setSolrServer(final Handler<AsyncResult<Configuration>> aHandler) {
         final Properties properties = System.getProperties();
         final Future<Configuration> result = Future.future();
+
+        final String errorMessage;
 
         if (aHandler != null) {
             result.setHandler(aHandler);
 
-            final String solrServer = properties.getProperty(SOLR_SERVER_PROP, aConfig.getString(SOLR_SERVER_PROP,
-                    DEFAULT_SOLR_SERVER));
-
-            if (LOGGER.isDebugEnabled() && properties.containsKey(SOLR_SERVER_PROP)) {
-                LOGGER.debug("Found {} set in system properties", SOLR_SERVER_PROP);
+            if (properties.containsKey(SOLR_SERVER_PROP)) {
+                mySolrServer = new HttpSolrServer(properties.getProperty(SOLR_SERVER_PROP));
+                LOGGER.debug("Found {} in system properties", SOLR_SERVER_PROP);
+                result.complete(this);
+            } else {
+                errorMessage = SOLR_SERVER_PROP + " is not set in system properties";
+                result.fail(new ConfigurationException(errorMessage));
             }
-
-            mySolrServer = new HttpSolrServer(solrServer);
-            LOGGER.debug(solrServer);
-            result.complete(this);
         } else {
-            result.fail(new ConfigurationException("No handler was passed to setSolrServer"));
+            errorMessage = "No handler was passed to setSolrServer";
+            result.fail(new ConfigurationException(errorMessage));
         }
     }
 
