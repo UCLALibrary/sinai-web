@@ -17,6 +17,8 @@
     <!-- These are samples for testing purposes only ... DO NOT USE THEM IN PRODUCTION!!! -->
     <sinai.json.config.path>${basedir}/src/main/resources/sample-config.json</sinai.json.config.path>
     <sinai.id.key>OVERRIDE_THIS_VALUE_WITH_THE_REAL_KEY</sinai.id.key>
+    <sinai.image.server>http://localhost:8444</sinai.image.server>
+    <sinai.solr.server>http://localhost:8983/solr/sinaimeta</sinai.solr.server>
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
