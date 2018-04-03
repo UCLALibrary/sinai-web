@@ -135,11 +135,11 @@
       <version>1.4.1</version>
     </dependency>
     <dependency>
-	  <groupId>org.postgresql</groupId>
-	  <artifactId>postgresql</artifactId>
-	  <version>${postgresql.version}</version>
-	</dependency>
-	<dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+    </dependency>
+    <dependency>
       <artifactId>solr-solrj</artifactId>
       <groupId>org.apache.solr</groupId>
       <version>${solrj.version}</version>
