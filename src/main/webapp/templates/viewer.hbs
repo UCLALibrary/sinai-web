@@ -8,18 +8,37 @@
     <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
     <link rel="stylesheet" type="text/css" href="/css/styles.css" />
 
-    <!-- mirador -->
-    <script src="/js/jquery-1.11.1.min.js"></script>
-    <script src="/mirador/mirador.min.js"></script>
     <link href="/mirador/css/mirador-combined.min.css" rel="stylesheet" type="text/css">
-    <title>Mirador Viewer</title>
-    <style type="text/css">#viewer {  width: 100%; height: 100%; }</style>
 
+    <!-- mirador plugin styles -->
+    <link rel="stylesheet" type="text/css" href="/mirador/MiradorRuler.min.css">
+    <link rel="stylesheet" type="text/css" href="/mirador/MiradorDisableZoom.min.css">
+    <link rel="stylesheet" type="text/css" href="/mirador/MiradorSyncWindows.min.css">
+    <link rel="stylesheet" type="text/css" href="/mirador/MiradorShareWorkspace.min.css">
+
+    <title>Mirador Viewer</title>
+    <style type="text/css">
+     #viewer {
+       width: 100%;
+       height: 100%;
+       position: fixed;
+     }
+    </style>
   </head>
   <body>
     {{> templates/main-navbar}}
     {{#unless error}}
       <div id="viewer"></div>
+
+      <!-- mirador -->
+      <script src="/mirador/mirador.min.js"></script>
+
+      <!-- mirador plugin scripts -->
+      <!--<script src="/mirador/openseadragon-scalebar.js"></script>-->
+      <script src="/mirador/MiradorRuler.min.js"></script>
+      <script src="/mirador/MiradorDisableZoom.min.js"></script>
+      <script src="/mirador/MiradorSyncWindows.min.js"></script>
+      <script src="/mirador/MiradorShareWorkspace.min.js"></script>
 
       <script type="text/javascript">
 
@@ -28,30 +47,43 @@
         var mirador = Mirador({
           "id": "viewer",
           "layout": "1",
-          "showURLBox": true,
           "preserveManifestOrder": true,
+          'language': 'en',
+          'buildPath': '/mirador/',
           "data": [
             { "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest", "location": "UCLA" }
           ],
-          "windowObjects": [{
-            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
-            "slotAddress" : "row1",
-            "availableViews": ["ImageView", "ThumbnailsView", "BookView"],
-            "viewType": "ImageView",
-            "annotationLayer": false,
-            "annotationState": "annoOff",
-            "overlay": false,
-            "fullScreen": true,
-            "displayLayout": true,
+          "windowSettings": {
+            "availableViews": ["ImageView", "ThumbnailsView"],
+            "viewType": 'ImageView',
+            "canvasControls": {
+              "annotations": {
+                "annotationLayer": false,
+                "annotationCreation": false,
+                "annotationState": "off"
+              },
+              "imageManipulation": {
+                "manipulationLayer": true,
+                "controls": {
+                  "mirror": true
+                }
+              }
+            },
             "layoutOptions": {
               "newObject": true,
               "close": true,
             },
-            "bottomPanel": true,
-            "bottomPanelVisible": true,
-            "sidePanel": false,
+            "overlay": false,
             "sidePanelVisible": false
-          }]
+          },
+          "windowObjects": [{
+            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
+            "slotAddress" : "row1",
+          }],
+          "sidePanelOptions" : {
+            "layersTabAvailable": true
+          },
+          "saveSession": true
         });
 
         var manifests = [
