@@ -212,8 +212,15 @@ body.sinai-body {
                         margin-left: 50px;
                     }
 
-                    .undertext-objects-list > li {
-                        border-top: 1px solid $maroon;
+                    .undertext-objects-list {
+                        > li {
+                            border-top: 1px solid $maroon;
+                        }
+
+                        p {
+                            margin-top: 0px;
+                            margin-bottom: 0px;
+                        }
                     }
                 }
             }
