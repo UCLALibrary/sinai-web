@@ -4,6 +4,7 @@ package edu.ucla.library.sinai.verticles;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -121,17 +122,34 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                         }
 
                         if (fields[i].type.equals("string")) {
-                            final String strVal = rs.getString(fields[i].name);
+                            final String strVal;
+                            final Array sqlArrayVal;
+                            final String[] arrayVal;
 
-                            // Only put in Solr if not null and not empty
-                            if (rs.wasNull() == false && (strVal != null && !strVal.equals(""))) {
-                                if (fields[i].multiValued) {
-                                    solrFieldValue = Arrays.asList(strVal.split(multiValuedFieldDelimiter));
+                            if (fields[i].multiValued) {
+                                sqlArrayVal = rs.getArray(fields[i].name);
+                                if (sqlArrayVal != null) {
+                                    arrayVal = (String[])sqlArrayVal.getArray();
                                 } else {
-                                    solrFieldValue = strVal;
+                                    continue;
+                                }
+
+                                // Only put in Solr if not null and not empty
+                                if (rs.wasNull() == false && arrayVal != null && arrayVal.length > 0) {
+                                    solrFieldValue = Arrays.asList(arrayVal);
+
+                                } else {
+                                    continue;
                                 }
                             } else {
-                                continue;
+                                strVal = rs.getString(fields[i].name);
+
+                                // Only put in Solr if not null and not empty
+                                if (rs.wasNull() == false && strVal != null && !strVal.equals("")) {
+                                    solrFieldValue = strVal;
+                                } else {
+                                    continue;
+                                }
                             }
                         } else if (fields[i].type.equals("int")) {
                             final Integer intVal = rs.getInt(fields[i].name);
@@ -223,7 +241,9 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("script_date_text", "uto.script_date_text", "string", false),
                     new MetadataHarvestDBFields("script_date_start", "uto.script_date_start", "int", false),
                     new MetadataHarvestDBFields("script_date_end", "uto.script_date_end", "int", false),
+                    new MetadataHarvestDBFields("folios", "g.folios", "string", true),
                     new MetadataHarvestDBFields("scholar_name", "x.scholar_name", "string", true)
+
                 };
                 final String utoSql = "SELECT " + String.join(",", Arrays.stream(utoFields).map(s -> {
                     if (s.alias.equals("")) {
@@ -231,7 +251,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     } else {
                         return s.alias;
                     }
-                }).toArray(String[]::new)) + " FROM undertext_objects AS uto INNER JOIN text_layer_groupings AS tlg ON uto.text_layer_grouping_id = tlg.id INNER JOIN manuscripts AS m ON tlg.manuscript_id = m.id LEFT OUTER JOIN( SELECT y.text_layer_grouping_id, STRING_AGG( y.last_name, ',' ) AS scholar_name FROM ( SELECT ga.text_layer_grouping_id, u.last_name FROM grouping_assignments AS ga INNER JOIN users AS u ON ga.scholar_id = u.id ORDER BY u.last_name) AS y GROUP BY text_layer_grouping_id ) AS x ON tlg.id = x.text_layer_grouping_id";
+                }).toArray(String[]::new)) + " FROM undertext_objects AS uto INNER JOIN text_layer_groupings AS tlg ON uto.text_layer_grouping_id = tlg.id INNER JOIN manuscripts AS m ON tlg.manuscript_id = m.id LEFT OUTER JOIN ( SELECT f.undertext_object_id, ARRAY_AGG( DISTINCT (f.folio_number || f.folio_side) ) AS folios FROM ( SELECT tl.undertext_object_id, mc.folio_number, mc.folio_side FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id ) AS f GROUP BY undertext_object_id) AS g ON g.undertext_object_id = uto.id LEFT OUTER JOIN( SELECT y.text_layer_grouping_id, ARRAY_AGG( y.last_name ) AS scholar_name FROM ( SELECT ga.text_layer_grouping_id, u.last_name FROM grouping_assignments AS ga INNER JOIN users AS u ON ga.scholar_id = u.id ORDER BY u.last_name) AS y GROUP BY text_layer_grouping_id ) AS x ON tlg.id = x.text_layer_grouping_id";
                 updateSolr("undertext_object", utoFields, utoSql, conn, multiValuedFieldDelimiter);
 
                 conn.close();
