@@ -48,7 +48,6 @@
           "id": "viewer",
           "layout": "1",
           "preserveManifestOrder": true,
-          'language': 'en',
           'buildPath': '/mirador/',
           "data": [
             { "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest", "location": "UCLA" }
@@ -83,9 +82,13 @@
           "sidePanelOptions" : {
             "layersTabAvailable": true
           },
-          "saveSession": true
+          "canvasThumbnailLabelTransform": ['.+?_.', ''],
+          "saveSession": true,
         });
 
+        // FIXME: this is problematic when there is more than one window
+
+        /*
         var manifests = [
           {{#each manifests}}
             "{{imageserver}}/iiif/{{urlencode ark}}/manifest",
@@ -98,28 +101,26 @@
           manifests.splice(startManifest, 1); // remove active manifest
 
           mirador.viewer.eventEmitter.subscribe('windowAdded', function(event, window) {
-            // Watch until OSD has opened (not loaded, but good enough)
-            mirador.viewer.eventEmitter.subscribe('osdOpen.' + window.id, function() {
-              // Attach MouseEnter to 'Add Window' link so we can load other manifests
-              $(".add-flexible-slot").mouseenter(function() {
-                // Mirador will ignore manifests that already exist so this is okay
-                for (var index = 0; index < manifests.length; index++) {
-                  mirador.viewer.addManifestFromUrl(manifests[index]);
-                }
-              });
+            // Attach MouseEnter to 'Add Window' link so we can load other manifests
+            $(".add-flexible-slot").mouseenter(function() {
+              // Mirador will ignore manifests that already exist so this is okay
+              for (var index = 0; index < manifests.length; index++) {
+                mirador.viewer.addManifestFromUrl(manifests[index]);
+              }
+            });
 
-              // Attach MouseEnter to popup that opens the list of other manifests
-              $(".mirador-icon-window-menu ul li").mouseenter(function() {
-                // Mirador will ignore manifests that already exist so this is okay
-                for (var index = 0; index < manifests.length; index++) {
-                  mirador.viewer.addManifestFromUrl(manifests[index]);
-                }
-              });
+            // Attach MouseEnter to popup that opens the list of other manifests
+            $(".mirador-icon-window-menu ul li").mouseenter(function() {
+              // Mirador will ignore manifests that already exist so this is okay
+              for (var index = 0; index < manifests.length; index++) {
+                mirador.viewer.addManifestFromUrl(manifests[index]);
+              }
             });
           });
         } else {
           console.error("Didn't find default manifest in the list of manifests");
         }
+        */
       });
 
       </script>
