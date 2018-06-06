@@ -7,7 +7,16 @@ Check the project out from GitHub, package it and start it.
     git clone https://github.com/UCLALibrary/sinai-web
     cd sinai-web
     mvn clean package
-    target/startup.sh
+    target/startup.sh --env <dev|test|stage|prod>
+
+The `--env` argument allows for selection of the Solr core and IIIF image server to connect to:
+
+|`--env`|Solr server|IIIF image server|
+|---|---|---|
+|`dev`|`sinai.solr.server` according to `pom.xml`|https://sinai-images.library.ucla.edu|
+|`test`|http://test-solr.library.ucla.edu/solr/sinaimeta|https://test-sinai-images.library.ucla.edu|
+|`stage`|http://solr.library.ucla.edu/solr/sinaistagemeta|https://stage-sinai-images.library.ucla.edu|
+|`prod`|http://solr.library.ucla.edu/solr/sinaimeta|https://sinai-images.library.ucla.edu|
 
 It generates a self-signed certificate, so when you visit
 
