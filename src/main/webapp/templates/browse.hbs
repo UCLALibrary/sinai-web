@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
-    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
-
+    <title>Browse | Sinai Palimpsests Project</title>
     <script src="/js/jquery-1.11.1.min.js"></script>
+    {{> templates/common-head-nodes}}
   </head>
   <body class="sinai-body">
     {{> templates/header}}
@@ -30,11 +29,19 @@
                 <a href="/viewer/{{urlencode manuscript.ark}}">
                   <img class="browse-thumbnail" src="{{imageserver}}/iiif/{{manuscript.thumbnail_identifier}}" alt="{{manuscript.shelf_mark_s}}">
                 </a>
-                <div>
+                <div class="manuscript-metadata">
                   {{formatManuscript manuscript}}
 
-                  <h2 class="undertexts-header">Undertexts</h2>
-                  {{formatUndertextObjects undertext_objects}}
+                  <div class="accordion">
+                    <h2 class="undertexts-header">Undertexts &darr;</h2>
+                    <div>
+                      {{formatUndertextObjects undertext_objects}}
+                    </div>
+                  </div>
+                  <div class="accordion">
+                    <h2 class="folios-header">Folios &darr;</h2>
+                    <div>Coming soon!</div>
+                  </div>
                 </div>
 	          </li>
 	          {{/each}}
@@ -56,5 +63,13 @@
       </div>
     </div>
     {{> templates/footer}}
+
+    <script>
+    $( ".accordion" ).accordion({
+      active: false,
+      collapsible: true,
+      heightStyle: "content"
+    });
+    </script>
   </body>
 </html>

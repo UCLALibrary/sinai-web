@@ -188,6 +188,10 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                             + "<br>";
                     }
                     p += "</p>";
+                    p += "<div class=\"accordion\">"
+                       + "<h2 class=\"manuscript-more-info-header\">More Information &darr;</h2>"
+                       + "<div>Coming soon!</div>"
+                       + "</div>";
 
                     return new Handlebars.SafeString(p);
                 } catch (IOException e) {
@@ -320,6 +324,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                             li += String.join("; ", scholarNames.getList());
                             li += "</p>";
                         }
+
+                        li += "<div class=\"accordion\">"
+                                + "<h2 class=\"undertext-more-info-header\">More Information &darr;</h2>"
+                                + "<div>Coming soon!</div>"
+                                + "</div>";
 
                         li += "</li>";
                         ul += li;

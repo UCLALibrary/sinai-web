@@ -40,9 +40,6 @@
     <!-- This project depends on JDK 8 -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-
-    <!-- FIXME: Not a great practice to skip these, but for now... -->
-    <maven.test.skip>true</maven.test.skip>
   </properties>
 
   <dependencies>

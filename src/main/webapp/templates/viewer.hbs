@@ -4,10 +4,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <!-- for the navbar -->
-    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
-    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
-
     <link href="/mirador/css/mirador-combined.min.css" rel="stylesheet" type="text/css">
 
     <!-- mirador plugin styles -->
@@ -16,12 +12,22 @@
     <link rel="stylesheet" type="text/css" href="/mirador/MiradorSyncWindows.min.css">
     <link rel="stylesheet" type="text/css" href="/mirador/MiradorShareWorkspace.min.css">
 
-    <title>Mirador Viewer</title>
+    <title>Mirador Viewer | Sinai Palimpsests Project</title>
     <style type="text/css">
      #viewer {
        width: 100%;
        height: 100%;
        position: fixed;
+     }
+    </style>
+    <script src="/js/jquery-1.11.1.min.js"></script>
+    {{> templates/common-head-nodes}}
+
+    <style type="text/css">
+     /* TODO: remove once Mirador's jQuery UI is properly scoped */
+     #main-navbar > ul {
+       background-color: unset;
+       border: unset;
      }
     </style>
   </head>

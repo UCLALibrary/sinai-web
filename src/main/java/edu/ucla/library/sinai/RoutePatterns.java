@@ -60,6 +60,17 @@ public interface RoutePatterns {
             ".*(\\.txt|\\.js|\\.css|\\.ico|\\.png|\\.gif|\\.ttf|\\.eot|\\.svg|\\.woff|\\.woff2|\\.jpg|translation\\.json|\\.map)$";
 
     /**
+     * A route pattern that redirects to PDF resources.
+     */
+    public static final String PDF_PROXY_RE =
+            "(/terms-of-use/.*)|(/user-guide/.*)|(/publications)|(/contacts)";
+
+    /**
+     * A route pattern for serving PDF resources.
+     */
+    public static final String PDF_RE = ".*\\.pdf$";
+
+    /**
      * A regex that matches route patterns that are to be placed behind an authentication check.
      */
     public static final String AUTHENTICATION_CHECK_RE = METRICS_RE + "|" + STATUS + "|" + BROWSE_RE + "|" + ADMIN +
