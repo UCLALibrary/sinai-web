@@ -60,15 +60,26 @@ body.sinai-body {
             display: inline-block;
             font-weight: 300;
 
-            > a {
+            > div > a,
+            > div > span {
+                text-transform: uppercase;
+            }
+
+            ul {
+                color: white;
+                text-align: left;
+                background-color: $maroon;
+            }
+
+            a {
                 color: inherit;
                 display: inline-block;
                 padding: 10px 10px;
                 text-decoration: none;
-            }
 
-            &:hover {
-                color: #AAA;
+                &:hover {
+                    color: #AAA;
+                }
             }
         }
     }
@@ -133,7 +144,6 @@ body.sinai-body {
 #main-navbar {
     @extend .navbar;
     background-color: $maroon;
-    text-transform: uppercase;
 }
 
 #sub-navbar {

@@ -18,8 +18,6 @@ import javax.naming.ConfigurationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import info.freelibrary.util.IOUtils;
-
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.RoutePatterns;
 import edu.ucla.library.sinai.handlers.AdminHandler;
@@ -28,10 +26,11 @@ import edu.ucla.library.sinai.handlers.LoginHandler;
 import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.MiradorHandler;
+import edu.ucla.library.sinai.handlers.PDFProxyHandler;
 import edu.ucla.library.sinai.handlers.PageHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
-
+import info.freelibrary.util.IOUtils;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
@@ -154,6 +153,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
         final AdminHandler adminHandler = new AdminHandler(myConfig);
         final PageHandler pageHandler = new PageHandler(myConfig);
+        final PDFProxyHandler pdfProxyHandler = new PDFProxyHandler(myConfig);
 
         // Serve static files like images, scripts, css, etc.
         router.getWithRegex(STATIC_FILES_RE).handler(StaticHandler.create());
@@ -185,11 +185,16 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.get(ADMIN).handler(adminHandler);
         router.post(ADMIN).handler(adminHandler);
 
+        // Handle PDF requests before the catch-all handler (which is never passed control on requests at these routes)
+        router.getWithRegex(PDF_PROXY_RE).handler(pdfProxyHandler);
+        router.getWithRegex(PDF_RE).handler(StaticHandler.create());
+
         // Create a catch-all that passes content to the template handler
         router.get().handler(templateHandler).failureHandler(failureHandler);
 
         // Configure our StatusHandler, used by the Nagios script
         router.get(STATUS).handler(new StatusHandler(myConfig));
+
 
         // Start the server and start listening for connections
         vertx.createHttpServer(options).requestHandler(router::accept).listen(response -> {
