@@ -31,8 +31,16 @@
                 <div>
                   {{formatManuscript manuscript}}
 
-                  <h2 class="undertexts-header">Undertexts</h2>
-                  {{formatUndertextObjects undertext_objects}}
+                  <div class="accordion">
+                    <h2 class="undertexts-header">Undertexts &darr;</h2>
+                    <div>
+                      {{formatUndertextObjects undertext_objects}}
+                    </div>
+                  </div>
+                  <div class="accordion">
+                    <h2 class="folios-header">Folios &darr;</h2>
+                    <div>Coming soon!</div>
+                  </div>
                 </div>
 	          </li>
 	          {{/each}}
@@ -54,5 +62,13 @@
       </div>
     </div>
     {{> templates/footer}}
+
+    <script>
+      $( ".accordion" ).accordion({
+        active: false,
+        collapsible: true,
+        heightStyle: "content"
+      });
+    </script>
   </body>
 </html>
