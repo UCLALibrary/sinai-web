@@ -178,9 +178,6 @@ body.sinai-body {
                     font-style: italic;
                 }
 
-                width: 75%;
-                float: left;
-
                 #search-results-list > li {
                     border-top: 1px solid $maroon;
                     padding-top: 20px;
@@ -196,7 +193,7 @@ body.sinai-body {
                         float: left;
                     }
 
-                    div {
+                    div.manuscript-metadata {
                         //display: inline-block;
                         overflow: hidden;
                         width: auto;
