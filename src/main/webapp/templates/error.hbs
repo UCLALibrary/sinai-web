@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
-    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+    <title>Error | Sinai Palimpsests Project</title>
     <script src="/js/jquery-1.11.1.min.js"></script>
+    {{> templates/common-head-nodes}}
   </head>
   <body class="sinai-body">
     {{> templates/header}}
     <div id="main" class="text-bg">
       <div>
-            <h3>{{error-header}}</h3>
-            <p>{{error-message}}</p>
-            {{#if contact-info}}
-            <p>{{contact-info}}</p>
-            {{/if}}
+        <h3>{{error-header}}</h3>
+        <p>{{error-message}}</p>
+        {{#if contact-info}}
+        <p>{{contact-info}}</p>
+        {{/if}}
       </div>
     </div>
     {{> templates/footer}}

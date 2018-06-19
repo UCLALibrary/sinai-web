@@ -9,6 +9,7 @@ import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
+import edu.ucla.library.sinai.util.SearchResultComparator;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -39,6 +41,7 @@ public class PageHandler extends SinaiHandler {
         final String errorMessage;
 
         final JsonObject templateJson = new JsonObject();
+        final SearchResultComparator searchResultComparator = new SearchResultComparator();
 
         // If user is navigating to the browse page, need to load metadata
         if (aContext.normalisedPath().equals(BROWSE_RE)) {
@@ -95,7 +98,7 @@ public class PageHandler extends SinaiHandler {
                                 manuscriptIdList.addAll(secondList);
 
 
-                                final JsonArray searchResults = new JsonArray();
+                                final ArrayList<JsonObject> searchResults = new ArrayList<JsonObject>();
 
                                 // check if we have any results
                                 if (manuscriptIdList.size() > 0) {
@@ -152,7 +155,8 @@ public class PageHandler extends SinaiHandler {
 
 	                                                        searchResults.add(result);
 	                                                    }
-	                                                    templateJson.put("searchResults", searchResults);
+	                                                    Collections.sort(searchResults, searchResultComparator);
+	                                                    templateJson.put("searchResults", new JsonArray(searchResults));
 
 	                                                    if (LOGGER.isDebugEnabled()) {
 	                                                        LOGGER.debug("Sending to template: {}", templateJson.toString());
@@ -194,7 +198,8 @@ public class PageHandler extends SinaiHandler {
 
                                                     searchResults.add(result);
                                                 }
-                                                templateJson.put("searchResults", searchResults);
+                                                Collections.sort(searchResults, searchResultComparator);
+                                                templateJson.put("searchResults", new JsonArray(searchResults));
 
                                                 if (LOGGER.isDebugEnabled()) {
                                                     LOGGER.debug("Sending to template: {}", templateJson.toString());
@@ -224,7 +229,8 @@ public class PageHandler extends SinaiHandler {
                                     });
                                 } else {
                                     // no results for the search
-                                    templateJson.put("searchResults", searchResults);
+                                    Collections.sort(searchResults, searchResultComparator);
+                                    templateJson.put("searchResults", new JsonArray(searchResults));
 
                                     try {
                                         aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));

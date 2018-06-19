@@ -1,13 +1,60 @@
 <div id="main-navbar">
   <ul>
     <li>
-      <a href="/">Home</a>
+      <div><a href="/">Welcome</a></div>
     </li>
     <li>
-      <a href="/browse">Browse</a>
+      <div><a href="/browse">Browse</a></div>
     </li>
     <li>
-      <a href="http://sinaipalimpsests.org">Educational Site</a>
+      <div><span>Terms of Use &darr;</span></div>
+      <ul>
+	    <li>
+	      <div><a href="/terms-of-use/please-read" target="_blank" style="text-transform: uppercase">Please Read</a></div>
+	    </li>
+        <li>
+          <div><a href="/terms-of-use/workflow" target="_blank">Project Workflow</a></div>
+        </li>
+        <li>
+          <div><a href="/terms-of-use/contributors" target="_blank">Citing Contributors</a></div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div><a href="/user-guide" target="_blank">User Guide &darr;</a></div>
+      <ul>
+        <li>
+          <div><a href="/user-guide/mss-shelfmarks" target="_blank">Manuscript Shelfmarks</a></div>
+        </li>
+        <li>
+          <div><a href="/user-guide/navigating-images" target="_blank">Navigating Images</a></div>
+        </li>
+        <li>
+          <div><a href="/user-guide/choosing-images" target="_blank">Which Images Should I Use?</a></div>
+        </li>
+        <li>
+          <div><a href="/user-guide/mss-terms" target="_blank">Descriptions Glossary</a></div>
+        </li>
+        <li>
+          <div><a href="/user-guide/search-tips" target="_blank">Catalog Search Tips</a></div>
+        </li>
+        <li>
+          <div><a href="/user-guide/works-cited" target="_blank">Works Cited</a></div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div><a href="http://sinaipalimpsests.org">Project Homepage</a></div>
     </li>
   </ul>
 </div>
+
+<script>
+$(function() {
+  $("#main-navbar ul").menu({
+    // not sure why 'icons' isn't working; might have to do with lack of jQuery UI theme in the custom bundle
+    //icons: { submenu: "ui-icon-triangle-1-s" },
+    position: { my: "left top", at: "left bottom" }
+  });
+});
+</script>
