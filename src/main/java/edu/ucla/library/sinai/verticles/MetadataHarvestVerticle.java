@@ -81,6 +81,28 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
             mySolrServer = myConfig.getSolrServer();
         }
 
+        private String solrDynamicFieldSuffix(String type, Boolean multiValued) {
+            String ret = "";
+            if (type.equals("int")) {
+                ret = "_i";
+            } else if (type.equals("string")) {
+                ret = "_s";
+            } else if (type.equals("boolean")) {
+                ret = "_b";
+            } else if (type.equals("date")) {
+                ret = "_dt";
+            } else {
+                final String errorMessage = "invalid Solr field type: we aren't using \"" + type + "\" for Sinai!";
+                LOGGER.error(errorMessage);
+                throw new Error(errorMessage);
+            }
+
+            if (multiValued == true) {
+                ret += "s";
+            }
+            return ret;
+        }
+
         /**
          * Updates our Solr index.
          *
@@ -103,23 +125,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
             ) {
                 while (rs.next()) {
                     doc = new SolrInputDocument();
-                    doc.addField("record_type", doctype);
+                    doc.addField("record_type_s", doctype);
                     for (int i = 0; i < fields.length; i++) {
-
-                        if (fields[i].name.equals("uuid") || fields[i].name.equals("id") || fields[i].name.equals("manuscript_id")) {
-                            solrFieldName = fields[i].name;
-                        } else {
-
-                            if (fields[i].type.equals("string")) {
-                                solrFieldName = fields[i].name + "_s";
-                            } else if (fields[i].type.equals("int")) {
-                                solrFieldName = fields[i].name + "_i";
-                            } else {
-                                errorMessage = "Solr field type must be either string or int";
-                                LOGGER.error(errorMessage);
-                                throw new Error(errorMessage);
-                            }
-                        }
 
                         if (fields[i].type.equals("string")) {
                             final String strVal;
@@ -172,7 +179,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                             throw new Error(errorMessage);
                         }
 
-                        if (solrFieldName.equals("uuid")) {
+                        solrFieldName = fields[i].name + solrDynamicFieldSuffix(fields[i].type, fields[i].multiValued);
+                        if (fields[i].name.equals("uuid")) {
                             doc.addField(solrFieldName, solrFieldValue);
                         } else {
                             // http://yonik.com/solr/atomic-updates/
@@ -213,7 +221,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("shelf_mark", "m.shelf_mark", "string", false),
                     new MetadataHarvestDBFields("title", "m.title", "string", false),
                     new MetadataHarvestDBFields("primary_language", "m.primary_language", "string", false),
-                    new MetadataHarvestDBFields("secondary_language", "array_remove(array_replace(ARRAY[m.secondary_language_1, m.secondary_language_2, m.secondary_language_3], '', NULL), NULL)", "string", true),
+                    new MetadataHarvestDBFields("secondary_languages", "array_remove(array_replace(ARRAY[m.secondary_language_1, m.secondary_language_2, m.secondary_language_3], '', NULL), NULL)", "string", true),
                     new MetadataHarvestDBFields("language_description", "m.language_description", "string", false),
                     new MetadataHarvestDBFields("script", "m.script", "string", false),
                     new MetadataHarvestDBFields("script_note", "m.script_note", "string", false),
@@ -256,7 +264,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("primary_language", "uto.primary_language", "string", false),
                     new MetadataHarvestDBFields("script_name", "uto.script_name", "string", false),
                     new MetadataHarvestDBFields("script_characterization", "uto.script_characterization", "string", false),
-                    new MetadataHarvestDBFields("secondary_language", "array_remove(array_replace(ARRAY[uto.secondary_language_1, uto.secondary_language_2, uto.secondary_language_3], '', NULL), NULL)", "string", true),
+                    new MetadataHarvestDBFields("secondary_languages", "array_remove(array_replace(ARRAY[uto.secondary_language_1, uto.secondary_language_2, uto.secondary_language_3], '', NULL), NULL)", "string", true),
                     new MetadataHarvestDBFields("script_date_text", "uto.script_date_text", "string", false),
                     new MetadataHarvestDBFields("script_date_start", "uto.script_date_start", "int", false),
                     new MetadataHarvestDBFields("script_date_end", "uto.script_date_end", "int", false),

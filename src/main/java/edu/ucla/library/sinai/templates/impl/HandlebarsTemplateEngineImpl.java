@@ -110,11 +110,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                     // StringEscapeUtils.escapeHtml4 used to create HTML entities from special characters in the data (e.g., single quote)
 
                     // TODO: trim and/or detect trailing periods from some of the fields
-                    final String ark = StringEscapeUtils.escapeHtml4(json.getString("ark", ""));
+                    final String ark = StringEscapeUtils.escapeHtml4(json.getString("ark_s", ""));
                     final String shelfMark = StringEscapeUtils.escapeHtml4(json.getString("shelf_mark_s", ""));
                     final String title = StringEscapeUtils.escapeHtml4(json.getString("title_s", ""));
                     final String primaryLanguage = StringEscapeUtils.escapeHtml4(json.getString("primary_language_s", ""));
-                    final JsonArray secondaryLanguage = json.getJsonArray("secondary_language_s", new JsonArray());
+                    final JsonArray secondaryLanguage = json.getJsonArray("secondary_languages_ss", new JsonArray());
                     final String languageDescription = StringEscapeUtils.escapeHtml4(json.getString("language_description_s", ""));
                     final String script = StringEscapeUtils.escapeHtml4(json.getString("script_s", ""));
                     final String scriptNote = StringEscapeUtils.escapeHtml4(json.getString("script_note_s", ""));
@@ -339,7 +339,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final String primaryLanguage = StringEscapeUtils.escapeHtml4(json.getString("primary_language_s", ""));
                         final String scriptName = StringEscapeUtils.escapeHtml4(json.getString("script_name_s", ""));
                         final String scriptCharacterization = StringEscapeUtils.escapeHtml4(json.getString("script_characterization_s", ""));
-                        final JsonArray secondaryLanguage = json.getJsonArray("secondary_language_s", new JsonArray());
+                        final JsonArray secondaryLanguage = json.getJsonArray("secondary_languages_ss", new JsonArray());
                         final String scriptDateText = StringEscapeUtils.escapeHtml4(json.getString("script_date_text_s", ""));
                         final Integer scriptDateStart = json.getInteger("script_date_start_i");
                         final Integer scriptDateEnd = json.getInteger("script_date_end_i");
