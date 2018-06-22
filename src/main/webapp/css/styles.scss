@@ -200,6 +200,12 @@ body.sinai-body {
                         padding: 0px 20px;
                         margin-top: 0px;
 
+                        .manuscript-more-info-body {
+                            p {
+                                margin-top: 0px;
+                                margin-bottom: 0px;
+                            }
+                        }
                     }
 
                     a.beta {
@@ -224,7 +230,7 @@ body.sinai-body {
                             border-top: 1px solid $maroon;
                         }
 
-                        p {
+                        p:not(.scholar-names) {
                             margin-top: 0px;
                             margin-bottom: 0px;
                         }

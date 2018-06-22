@@ -33,11 +33,11 @@ public class MiradorHandler extends SinaiHandler {
         // get the ARKs of the manifests from Solr
         final SolrService solr = SolrService.createProxy(aContext.vertx(), SOLR_SERVICE_KEY);
         final JsonObject manuscriptSolrQuery = new JsonObject()
-                .put("q", "record_type:manuscript AND publish:true")
-                .put("fl", "ark")
+                .put("q", "record_type_s:manuscript AND publish_b:true")
+                .put("fl", "ark_s")
                 .put("group", "true")
                 .put("group.main", "true")
-                .put("group.field", "ark")
+                .put("group.field", "ark_s")
                 .put("rows", 10000000);
 
         solr.search(manuscriptSolrQuery, aHandler -> {
