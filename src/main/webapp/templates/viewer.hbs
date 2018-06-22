@@ -56,7 +56,7 @@
           "preserveManifestOrder": true,
           'buildPath': '/mirador/',
           "data": [
-            { "manifestUri": "{{imageserver}}/iiif/{{id_i}}/manifest", "location": "UCLA" }
+            { "manifestUri": "{{imageserver}}/iiif/{{id}}/manifest", "location": "UCLA" }
           ],
           "windowSettings": {
             "availableViews": ["ImageView", "ThumbnailsView"],
@@ -82,7 +82,7 @@
             "sidePanelVisible": false
           },
           "windowObjects": [{
-            "loadedManifest": "{{imageserver}}/iiif/{{id_i}}/manifest",
+            "loadedManifest": "{{imageserver}}/iiif/{{id}}/manifest",
             "slotAddress" : "row1",
           }],
           "sidePanelOptions" : {
@@ -101,7 +101,7 @@
           {{/each}}
         ];
 
-        var startManifest = manifests.indexOf("{{imageserver}}/iiif/{{id_i}}/manifest");
+        var startManifest = manifests.indexOf("{{imageserver}}/iiif/{{id}}/manifest");
 
         if (startManifest != -1) {
           manifests.splice(startManifest, 1); // remove active manifest
