@@ -275,18 +275,54 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         p += folioCount != null ? "<p>" + "Number of folios/fragments: " + folioCount + "." + "</p>" : "";
                         p += !currentForm.equals("") ? "<p>" + "Current form: " + currentForm + "." + "</p>" : "";
                         p += !manuscriptCondition.equals("") ? "<p>" + "Manuscript condition: " + manuscriptCondition + "." + "</p>" : "";
+
                         // manuscript dimensions
-                        //p += !.equals("") ? "<p>" + ": " +  + "." + "</p>" : "";
+                        if (manuscriptHeight != null ||
+                            manuscriptWidth != null ||
+                            manuscriptDepth != null) {
+                            p += "<p>" + "Manuscript dimensions in mm: ";
+                            if (manuscriptHeight != null) {
+                                p += "height [" + manuscriptHeight + "]";
+                            }
+                            if (manuscriptWidth != null) {
+                                if (manuscriptHeight != null) {
+                                    p += " x ";
+                                }
+                                p += "width [" + manuscriptWidth + "]";
+                            }
+                            if (manuscriptDepth != null) {
+                                if (manuscriptHeight != null || manuscriptWidth != null) {
+                                    p += " x ";
+                                }
+                                p += "depth [" + manuscriptDepth + "]";
+                            }
+                            p += "." + "</p>";
+                        }
+
                         // typical folio dims
+                        if (folioHeight != null ||
+                            folioWidth != null) {
+                            p += "<p>" + "Typical folio dimensions in mm: ";
+                            if (folioHeight != null) {
+                                p += "height [" + folioHeight + "]";
+                            }
+                            if (folioWidth != null) {
+                                if (folioHeight != null) {
+                                     p += " x ";
+                                }
+                                p += "width [" + folioWidth + "]";
+                            }
+                            p += "." + "</p>";
                         }
 
                         if (!bindingStatus.equals("") ||
                             !bindingDescription.equals("") ||
                             !bindingCondition.equals("")) {
-                        p += "<h3>Binding</h3>";
-                        p += !bindingStatus.equals("") ? "<p>" + "Relative date: " + bindingStatus + "." + "</p>" : "";
-                        p += !bindingDescription.equals("") ? "<p>" + "Description: " + bindingDescription + "." + "</p>" : "";
-                        p += !bindingCondition.equals("") ? "<p>" + "Condition: " + bindingCondition + "." + "</p>" : "";
+                            p += "<h4>Binding</h4>";
+                            p += !bindingStatus.equals("") ? "<p>" + "Relative date: " + bindingStatus + "." + "</p>" : "";
+                            p += !bindingDescription.equals("") ? "<p>" + "Description: " + bindingDescription + "." + "</p>" : "";
+                            p += !bindingCondition.equals("") ? "<p>" + "Condition: " + bindingCondition + "." + "</p>" : "";
+                        }
                     }
 
                     if (!quireStructure.equals("") ||
