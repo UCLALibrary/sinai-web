@@ -26,8 +26,8 @@
             <ul id="search-results-list">
               {{#each searchResults}}
               <li>
-                <a href="/viewer/{{urlencode manuscript.ark}}">
-                  <img class="browse-thumbnail" src="{{imageserver}}/iiif/{{manuscript.thumbnail_identifier}}" alt="{{manuscript.shelf_mark_s}}">
+                <a href="/viewer/{{urlencode manuscript.ark_s}}">
+                  <img class="browse-thumbnail" src="{{imageserver}}/iiif/{{manuscript.thumbnail_identifier_s}}" alt="{{manuscript.shelf_mark_s}}">
                 </a>
                 <div class="manuscript-metadata">
                   {{formatManuscript manuscript}}
