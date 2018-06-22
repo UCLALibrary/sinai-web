@@ -53,19 +53,19 @@ public class PageHandler extends SinaiHandler {
 
                 // get all manuscript IDs from 1) published manuscripts and 2) UTOs that match search query
                 final JsonObject manuscriptIdSolrQuery = new JsonObject()
-                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type:manuscript AND publish:true")
-                    .put("fl", "id")
+                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type_s:manuscript AND publish_b:true")
+                    .put("fl", "id_i")
                     .put("group",  "true")
                     .put("group.main",  "true")
-                    .put("group.field",  "id")
+                    .put("group.field",  "id_i")
                     .put("rows", 10000000);
 
                 final JsonObject utoManuscriptIdSolrQuery = new JsonObject()
-                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type:undertext_object")
-                    .put("fl", "manuscript_id")
+                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type_s:undertext_object")
+                    .put("fl", "manuscript_id_i")
                     .put("group",  "true")
                     .put("group.main",  "true")
-                    .put("group.field",  "manuscript_id")
+                    .put("group.field",  "manuscript_id_i")
                     .put("rows", 10000000);
 
                 // 1) published manuscripts
@@ -85,8 +85,8 @@ public class PageHandler extends SinaiHandler {
                                 // merge the manuscript ID numbers into one array
                                 ArrayList<String> manuscriptIdList = new ArrayList<String>();
 
-                                Function<Object, String> mapper1 = s -> ((JsonObject) s).getInteger("id").toString();
-                                Function<Object, String> mapper2 = s -> ((JsonObject) s).getInteger("manuscript_id").toString();
+                                Function<Object, String> mapper1 = s -> ((JsonObject) s).getInteger("id_i").toString();
+                                Function<Object, String> mapper2 = s -> ((JsonObject) s).getInteger("manuscript_id_i").toString();
 
                                 Stream<Object> s1 = firstHandler.result().getJsonObject("response").getJsonArray("docs").stream();
                                 ArrayList<String> firstList = s1.map(mapper1).collect(Collectors.toCollection(ArrayList::new));
@@ -105,7 +105,7 @@ public class PageHandler extends SinaiHandler {
 
                                     // get the full Solr documents this time
                                     final JsonObject manuscriptSolrQuery = new JsonObject()
-                                        .put("q", "record_type:manuscript AND publish:true AND id:(" + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                        .put("q", "record_type_s:manuscript AND publish_b:true AND id_i:(" + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
                                         .put("sort", "shelf_mark_s asc")
                                         .put("rows", 10000000);
 
@@ -121,7 +121,7 @@ public class PageHandler extends SinaiHandler {
 
                                             if (utoManuscriptIdList.size() > 0) {
 	                                            final JsonObject utoSolrQuery = new JsonObject()
-	                                                    .put("q", "record_type:undertext_object AND manuscript_id:(" + String.join(" ", utoManuscriptIdList.toArray(new String[0])) + ")")
+	                                                    .put("q", "record_type_s:undertext_object AND manuscript_id_i:(" + String.join(" ", utoManuscriptIdList.toArray(new String[0])) + ")")
 	                                                    .put("sort", "author_s asc")
 	                                                    .put("rows", 10000000);
 
@@ -147,7 +147,7 @@ public class PageHandler extends SinaiHandler {
 	                                                        Iterator<Object> utoIt = utos.iterator();
 	                                                        while (utoIt.hasNext()) {
 	                                                            JsonObject uto = (JsonObject) utoIt.next();
-	                                                            if (uto.getInteger("manuscript_id") == resultManuscript.getInteger("id")) {
+	                                                            if (uto.getInteger("manuscript_id_i") == resultManuscript.getInteger("id_i")) {
 	                                                                resultUtos.add(uto);
 	                                                            }
 	                                                        }
