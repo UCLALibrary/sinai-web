@@ -388,14 +388,14 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final Integer scriptDateStart = json.getInteger("script_date_start_i");
                         final Integer scriptDateEnd = json.getInteger("script_date_end_i");
                         final String placeOfOrigin = StringEscapeUtils.escapeHtml4(json.getString("place_of_origin_s", ""));
-                        final String layoutComments = StringEscapeUtils.escapeHtml4(json.getString("", ""));
-                        final JsonArray folios = json.getJsonArray("folios_s", new JsonArray());
+                        final String layoutComments = StringEscapeUtils.escapeHtml4(json.getString("layout_comments_s", ""));
+                        final JsonArray folios = json.getJsonArray("folios_ss", new JsonArray());
                         final String undertextFolioOrder = StringEscapeUtils.escapeHtml4(json.getString("undertext_folio_order_s", ""));
                         final String folioOrderComments = StringEscapeUtils.escapeHtml4(json.getString("folio_order_comments_s", ""));
                         final String relatedUndertextObjects = StringEscapeUtils.escapeHtml4(json.getString("related_undertext_objects_s", ""));
                         final String textRemarks = StringEscapeUtils.escapeHtml4(json.getString("text_remarks_s", ""));
                         final String bibliography = StringEscapeUtils.escapeHtml4(json.getString("bibliography_s", ""));
-                        final JsonArray scholarNames = json.getJsonArray("scholar_name_s", new JsonArray());
+                        final JsonArray scholarNames = json.getJsonArray("scholar_name_ss", new JsonArray());
 
                         // whatever the first row is gets a hanging indent
                         Boolean hanging = false;
@@ -538,7 +538,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                             !folioOrderComments.equals("")) {
                             li += "<h3>Folios that preserve undertext</h3>";
                             li += !folios.isEmpty() ? "<p>" + "Folios: " + String.join(", ", folios.getList()) + "." : "";
-                            li += !undertextFolioOrder.equals("") ? "<p>" + "Folios in order of unreconstructed undertext: " + undertextFolioOrder + "." + "</p>" : "";
+                            li += !undertextFolioOrder.equals("") ? "<p>" + "Folios in order of reconstructed undertext: " + undertextFolioOrder + "." + "</p>" : "";
                             li += !folioOrderComments.equals("") ? "<p>" + "Folio order comments: " + folioOrderComments + "." + "</p>" : "";
                         }
 
