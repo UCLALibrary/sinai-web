@@ -212,7 +212,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                     }
                     p += "</p>";
                     p += "<div class=\"accordion\">"
-                      + "<h2 class=\"manuscript-more-info-header\">More Information &darr;</h2>"
+                      + "<h2 class=\"manuscript-more-info-header\">Codicology & Overtext &darr;</h2>"
                       + "<div class=\"manuscript-more-info-body\">";
 
                     if (!title.equals("") ||
@@ -269,24 +269,68 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                     if (!supportMaterial.equals("") ||
                         folioCount != null ||
                         !currentForm.equals("") ||
-                        !manuscriptCondition.equals("")) {
+                        !manuscriptCondition.equals("") ||
+                        manuscriptHeight != null ||
+                        manuscriptWidth != null ||
+                        manuscriptDepth != null ||
+                        folioHeight != null ||
+                        folioWidth != null ||
+                        !bindingStatus.equals("") ||
+                        !bindingDescription.equals("") ||
+                        !bindingCondition.equals("")) {
                         p += "<h3>Codicological information</h3>";
                         p += !supportMaterial.equals("") ? "<p>" + "Page material: " + supportMaterial + "." + "</p>" : "";
                         p += folioCount != null ? "<p>" + "Number of folios/fragments: " + folioCount + "." + "</p>" : "";
                         p += !currentForm.equals("") ? "<p>" + "Current form: " + currentForm + "." + "</p>" : "";
                         p += !manuscriptCondition.equals("") ? "<p>" + "Manuscript condition: " + manuscriptCondition + "." + "</p>" : "";
+
                         // manuscript dimensions
-                        //p += !.equals("") ? "<p>" + ": " +  + "." + "</p>" : "";
+                        if (manuscriptHeight != null ||
+                            manuscriptWidth != null ||
+                            manuscriptDepth != null) {
+                            p += "<p>" + "Manuscript dimensions in mm: ";
+                            if (manuscriptHeight != null) {
+                                p += "height [" + manuscriptHeight + "]";
+                            }
+                            if (manuscriptWidth != null) {
+                                if (manuscriptHeight != null) {
+                                    p += " x ";
+                                }
+                                p += "width [" + manuscriptWidth + "]";
+                            }
+                            if (manuscriptDepth != null) {
+                                if (manuscriptHeight != null || manuscriptWidth != null) {
+                                    p += " x ";
+                                }
+                                p += "depth [" + manuscriptDepth + "]";
+                            }
+                            p += "." + "</p>";
+                        }
+
                         // typical folio dims
+                        if (folioHeight != null ||
+                            folioWidth != null) {
+                            p += "<p>" + "Typical folio dimensions in mm: ";
+                            if (folioHeight != null) {
+                                p += "height [" + folioHeight + "]";
+                            }
+                            if (folioWidth != null) {
+                                if (folioHeight != null) {
+                                     p += " x ";
+                                }
+                                p += "width [" + folioWidth + "]";
+                            }
+                            p += "." + "</p>";
                         }
 
                         if (!bindingStatus.equals("") ||
                             !bindingDescription.equals("") ||
                             !bindingCondition.equals("")) {
-                        p += "<h3>Binding</h3>";
-                        p += !bindingStatus.equals("") ? "<p>" + "Relative date: " + bindingStatus + "." + "</p>" : "";
-                        p += !bindingDescription.equals("") ? "<p>" + "Description: " + bindingDescription + "." + "</p>" : "";
-                        p += !bindingCondition.equals("") ? "<p>" + "Condition: " + bindingCondition + "." + "</p>" : "";
+                            p += "<h4>Binding</h4>";
+                            p += !bindingStatus.equals("") ? "<p>" + "Relative date: " + bindingStatus + "." + "</p>" : "";
+                            p += !bindingDescription.equals("") ? "<p>" + "Description: " + bindingDescription + "." + "</p>" : "";
+                            p += !bindingCondition.equals("") ? "<p>" + "Condition: " + bindingCondition + "." + "</p>" : "";
+                        }
                     }
 
                     if (!quireStructure.equals("") ||
@@ -344,14 +388,14 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final Integer scriptDateStart = json.getInteger("script_date_start_i");
                         final Integer scriptDateEnd = json.getInteger("script_date_end_i");
                         final String placeOfOrigin = StringEscapeUtils.escapeHtml4(json.getString("place_of_origin_s", ""));
-                        final String layoutComments = StringEscapeUtils.escapeHtml4(json.getString("", ""));
-                        final JsonArray folios = json.getJsonArray("folios_s", new JsonArray());
+                        final String layoutComments = StringEscapeUtils.escapeHtml4(json.getString("layout_comments_s", ""));
+                        final JsonArray folios = json.getJsonArray("folios_ss", new JsonArray());
                         final String undertextFolioOrder = StringEscapeUtils.escapeHtml4(json.getString("undertext_folio_order_s", ""));
                         final String folioOrderComments = StringEscapeUtils.escapeHtml4(json.getString("folio_order_comments_s", ""));
                         final String relatedUndertextObjects = StringEscapeUtils.escapeHtml4(json.getString("related_undertext_objects_s", ""));
                         final String textRemarks = StringEscapeUtils.escapeHtml4(json.getString("text_remarks_s", ""));
                         final String bibliography = StringEscapeUtils.escapeHtml4(json.getString("bibliography_s", ""));
-                        final JsonArray scholarNames = json.getJsonArray("scholar_name_s", new JsonArray());
+                        final JsonArray scholarNames = json.getJsonArray("scholar_name_ss", new JsonArray());
 
                         // whatever the first row is gets a hanging indent
                         Boolean hanging = false;
@@ -361,7 +405,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         li += "<li>";
 
                         if (!author.equals("") || !work.equals("") || !genre.equals("")) {
-                            li += "<p>";
+                            li += "<p class=\"bold\">";
                             hanging = true;
 
                             if (!author.equals("")) {
@@ -494,7 +538,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                             !folioOrderComments.equals("")) {
                             li += "<h3>Folios that preserve undertext</h3>";
                             li += !folios.isEmpty() ? "<p>" + "Folios: " + String.join(", ", folios.getList()) + "." : "";
-                            li += !undertextFolioOrder.equals("") ? "<p>" + "Folios in order of unreconstructed undertext: " + undertextFolioOrder + "." + "</p>" : "";
+                            li += !undertextFolioOrder.equals("") ? "<p>" + "Folios in order of reconstructed undertext: " + undertextFolioOrder + "." + "</p>" : "";
                             li += !folioOrderComments.equals("") ? "<p>" + "Folio order comments: " + folioOrderComments + "." + "</p>" : "";
                         }
 
@@ -525,6 +569,397 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                     return new Handlebars.SafeString(ul);
                 } catch (IOException e) {
                     return new Handlebars.SafeString("<span>Error processing JSON for browse page undertext object template: " + e.getMessage() + "</span>");
+                }
+            }
+        });
+
+        myHandlebars.registerHelper("formatManuscriptComponents", new Helper<ArrayNode>() {
+
+            /**
+             * Returns a <p> element that contains all of a manuscript component's metadata fields, with its text layers.
+             *
+             * @param an {ArrayNode} - { manuscript: , undertext_object: , manuscript_components
+             * @returns {SafeString}
+             */
+            @Override
+            public SafeString apply(final ArrayNode an, final Options options) {
+                //LOGGER.info("formatManuscriptComponents");
+                try {
+                    // get a vertx JsonArray to make things easier
+                    final JsonArray jsonArray = new JsonArray(new ObjectMapper().writeValueAsString(an));
+                    //LOGGER.info(jsonArray.toString());
+                    //LOGGER.info(new Integer(jsonArray.size()).toString());
+
+
+                    String ul = "";
+                    ul += "<ul class=\"manuscript-components-list\">";
+
+                    Iterator<Object> it = jsonArray.iterator();
+                    while (it.hasNext()) {
+                        //LOGGER.info("formatManuscriptComponents.iterator");
+                        JsonObject json = (JsonObject) it.next();
+
+                        final String shelfMark = StringEscapeUtils.escapeHtml4(json.getString("shelf_mark_s", ""));
+                        final String componentType = StringEscapeUtils.escapeHtml4(json.getString("component_type_s", ""));
+                        final String folioNumber = StringEscapeUtils.escapeHtml4(json.getString("folio_number_s", ""));
+                        final String folioSide = StringEscapeUtils.escapeHtml4(json.getString("folio_side_s", ""));
+
+                        final String leadingConjoinComponentType = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_component_type_s", ""));
+                        final String leadingConjoinFolioNumber = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_number_s", ""));
+                        final String leadingConjoinFolioSide = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_side_s", ""));
+                        final String quire = StringEscapeUtils.escapeHtml4(json.getString("quire_s", ""));
+                        final String quirePosition = StringEscapeUtils.escapeHtml4(json.getString("quire_position_s", ""));
+                        final String alternateNumbering = StringEscapeUtils.escapeHtml4(json.getString("alternate_numbering_s", ""));
+
+                        final String supportMaterial = StringEscapeUtils.escapeHtml4(json.getString("support_material_s", ""));
+                        final String folioDimensions = StringEscapeUtils.escapeHtml4(json.getString("folio_dimensions_s", ""));
+
+                        final Integer maxHeight = json.getInteger("max_height_i");
+                        final Integer maxWidth = json.getInteger("max_width_i");
+                        final Integer minHeight = json.getInteger("min_height_i");
+                        final Integer minWidth = json.getInteger("min_width_i");
+
+                        final String fleshHairSide = StringEscapeUtils.escapeHtml4(json.getString("flesh_hair_side_s", ""));
+                        final String parchmentQuality = StringEscapeUtils.escapeHtml4(json.getString("parchment_quality_s", ""));
+                        final String parchmentDescription = StringEscapeUtils.escapeHtml4(json.getString("parchment_description_s", ""));
+                        final String palimpsested = StringEscapeUtils.escapeHtml4(json.getString("palimpsested_s", ""));
+                        final String erasureMethod = StringEscapeUtils.escapeHtml4(json.getString("erasure_method_s", ""));
+
+                        final JsonArray undertextLayers = json.getJsonArray("undertext_layers", new JsonArray());
+                        final JsonObject overtextLayer = json.getJsonObject("overtext_layer");
+
+                        String li = "";
+                        li += "<li>";
+                        li += "<h3 class=\"manuscript-component-header\">" + shelfMark + ", ";
+                        if (!componentType.equals("") ||
+                            !folioNumber.equals("") ||
+                            !folioSide.equals("")) {
+
+                            if (!componentType.equals("")) {
+                                li += componentType;
+                            }
+                            if (!folioNumber.equals("")) {
+                                if (!componentType.equals("")) {
+                                    li += " ";
+                                }
+                                li += folioNumber;
+                            }
+                            if (!folioSide.equals("")) {
+                                if (!componentType.equals("") || !folioNumber.equals("")) {
+                                    li += " ";
+                                }
+                                li += folioSide;
+                            }
+                        } else {
+                            li += "Unidentified";
+                        }
+                        /*
+                        if (!componentType.equals("folio")) {
+                            li += " " + componentType;
+                        }
+                        li += !folioNumber.equals("") ?  " " + folioNumber : "";
+                        li += !folioSide.equals("") ? " " + folioSide : "";
+                        */
+                        li += "." + "</h3>";
+                        li += "<div class=\"manuscript-component-body\">";
+
+                        if (!leadingConjoinComponentType.equals("") ||
+                            !leadingConjoinFolioNumber.equals("") ||
+                            !leadingConjoinFolioSide.equals("") ||
+                            !quire.equals("") ||
+                            !quirePosition.equals("") ||
+                            !alternateNumbering.equals("")) {
+
+                            li += "<h3>Codicological Context of Folio</h3>";
+                            if (!leadingConjoinComponentType.equals("") ||
+                                !leadingConjoinFolioNumber.equals("") ||
+                                !leadingConjoinFolioSide.equals("")) {
+
+                                li += "<p>"
+                                   + "Conjoin: ";
+                                if (!leadingConjoinComponentType.equals("")) {
+                                    li += leadingConjoinComponentType;
+                                }
+                                if (!leadingConjoinFolioNumber.equals("")) {
+                                    if (!leadingConjoinComponentType.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += leadingConjoinFolioNumber;
+                                }
+                                if (!leadingConjoinFolioSide.equals("")) {
+                                    if (!leadingConjoinComponentType.equals("") || !leadingConjoinFolioNumber.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += leadingConjoinFolioSide;
+                                }
+                                li += "</p>";
+                            }
+                            li += !quire.equals("") ? "<p>" + "Quire number: " + quire + "." + "</p>" : "";
+                            li += !quirePosition.equals("") ? "<p>" + "Quire position: " + quirePosition + "." + "</p>" : "";
+                            li += !alternateNumbering.equals("") ? "<p>" + "Alternative numbering: " + alternateNumbering + "." + "</p>" : "";
+                        }
+
+                        if (!supportMaterial.equals("") ||
+                            !folioDimensions.equals("") ||
+                            (maxHeight != null && maxWidth != null) ||
+                            (minHeight != null && minWidth != null) ||
+                            !fleshHairSide.equals("") ||
+                            !parchmentQuality.equals("") ||
+                            !parchmentDescription.equals("") ||
+                            !palimpsested.equals("") ||
+                            !erasureMethod.equals("")) {
+
+                            li += "<h3>Physical Description</h3>";
+                            li += !supportMaterial.equals("") ? "<p>" + "Support: " + supportMaterial + "</p>" : "";
+                            li += !folioDimensions.equals("") ? "<p>" + "Manuscript folio dimensions (mm): " + folioDimensions + "." + "</p>" : "";
+                            if (!folioDimensions.equals("") ||
+                                (maxHeight != null && maxWidth != null) ||
+                                (minHeight != null && minWidth != null)) {
+                                li += !folioDimensions.equals("") ? "<p>" + "Manuscript folio dimensions (mm): " + folioDimensions + "." + "</p>" : "<p>Manuscript folio dimensions (mm):</p>";
+                                li += (maxHeight != null && maxWidth != null) ? "<p class=\"indent\">" + "Maximum (mm): " + maxHeight + " x " + maxWidth + "." + "</p>" : "";
+                                li += (minHeight != null && minWidth != null) ? "<p class=\"indent\">" + "Minimum (mm): " + minHeight + " x " + minWidth + "." + "</p>" : "";
+                                li += "<p class=\"indentindent\">if different from typical folio dimensions for manuscript.</p>";
+                            }
+                            li += !fleshHairSide.equals("") ? "<p>" + "Side: " + fleshHairSide + "." + "</p>" : "";
+                            li += !parchmentQuality.equals("") ? "<p>" + "Parchment quality: " + parchmentQuality + "." + "</p>" : "";
+                            li += !parchmentDescription.equals("") ? "<p>" + "Description of parchment: " + parchmentDescription + "." + "</p>" : "";
+                            li += !palimpsested.equals("") ? "<p>" + "Palimpsested?: " + palimpsested + "." + "</p>" : "";
+                            li += !erasureMethod.equals("") ? "<p>" + "Method of erasure: " + erasureMethod + "." + "</p>" : "";
+                        }
+
+                        if (undertextLayers.size() > 0) {
+                            li += "<h3>Undertext(s)</h3>";
+                            Iterator<Object> utlIt = undertextLayers.iterator();
+                            for (Integer i = 0; utlIt.hasNext(); i++) {
+
+                                JsonObject utl = (JsonObject) utlIt.next();
+
+                                final String workTitle = StringEscapeUtils.escapeHtml4(utl.getString("work_title_s", ""));
+                                final String author = StringEscapeUtils.escapeHtml4(utl.getString("author_s", ""));
+                                final String workPassage = StringEscapeUtils.escapeHtml4(utl.getString("work_passage_s", ""));
+                                final String genre = StringEscapeUtils.escapeHtml4(utl.getString("genre_s", ""));
+                                final String primaryLanguage = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_s", ""));
+                                final String script = StringEscapeUtils.escapeHtml4(utl.getString("script_s", ""));
+                                final String scriptNote = StringEscapeUtils.escapeHtml4(utl.getString("script_note_s", ""));
+                                final JsonArray secondaryLanguage = utl.getJsonArray("secondary_languages_ss", new JsonArray());
+                                final String scriptDateText = StringEscapeUtils.escapeHtml4(utl.getString("script_date_text_s", ""));
+                                final Integer scriptDateStart = utl.getInteger("script_date_start_i");
+                                final Integer scriptDateEnd = utl.getInteger("script_date_end_i");
+                                final String placeOfOrigin = StringEscapeUtils.escapeHtml4(utl.getString("place_of_origin_s", ""));
+                                final JsonArray folios = utl.getJsonArray("folios_ss", new JsonArray());
+                                final String undertextFolioOrder = StringEscapeUtils.escapeHtml4(utl.getString("undertext_folio_order_s", ""));
+                                final String folioOrderComments = StringEscapeUtils.escapeHtml4(utl.getString("folio_order_comments_s", ""));
+                                final Boolean marginaliaPresent = utl.getBoolean("marginalia_present_b");
+                                final String marginalia = StringEscapeUtils.escapeHtml4(utl.getString("marginalia_s", ""));
+                                final Boolean nonTextualContentPresent = utl.getBoolean("nontextual_content_present_b");
+                                final String nonTextualContent = StringEscapeUtils.escapeHtml4(utl.getString("nontextual_content_s", ""));
+                                final String catchwords = StringEscapeUtils.escapeHtml4(utl.getString("catchwords_s", ""));
+                                final String signatures = StringEscapeUtils.escapeHtml4(utl.getString("signatures_s", ""));
+                                final Integer underTextOrientation = utl.getInteger("under_text_orientation_i");
+                                final Boolean prickings = utl.getBoolean("prickings_b");
+                                final Boolean ruledLines = utl.getBoolean("ruled_lines_b");
+                                final String preservationNotes = StringEscapeUtils.escapeHtml4(utl.getString("preservation_notes_s", ""));
+                                final String remarks = StringEscapeUtils.escapeHtml4(utl.getString("remarks_s", ""));
+                                final String notes = StringEscapeUtils.escapeHtml4(utl.getString("notes_s", ""));
+                                final JsonArray scholarNames = utl.getJsonArray("scholar_name_ss", new JsonArray());
+
+                                li += "<h4>Undertext #" + new Integer(i + 1).toString() + "</h4>";
+                                li += "<div class=\"indent\">";
+
+                                if (!workTitle.equals("") ||
+                                    !author.equals("") ||
+                                    !workPassage.equals("") ||
+                                    !genre.equals("") ||
+                                    !primaryLanguage.equals("") ||
+                                    !script.equals("") ||
+                                    !scriptNote.equals("") ||
+                                    !secondaryLanguage.isEmpty() ||
+                                    (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
+                                    !placeOfOrigin.equals("")) {
+
+                                    li += "<h4>Identity and Provenance</h4>";
+                                    li += !workTitle.equals("") ? "<p>" + "Title: " + workTitle + "." + "</p>" : "";
+                                    li += !author.equals("") ? "<p>" + "Author: " + author + "." + "</p>" : "";
+                                    li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
+                                    li += !genre.equals("") ? "<p>" + "Genre: " + genre + "." + "</p>" : "";
+                                    li += !primaryLanguage.equals("") ? "<p>" + "Primary language: " + primaryLanguage + "." + "</p>" : "";
+                                    li += !script.equals("") ? "<p>" + "Script: " + script + "." + "</p>" : "";
+                                    li += !scriptNote.equals("") ? "<p>" + "Script note: " + scriptNote + "." + "</p>" : "";
+                                    li += !secondaryLanguage.isEmpty() ? "<p>" + "Secondary language(s): " + String.join(", ", secondaryLanguage.getList()) + "." + "</p>" : "";
+                                    if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
+                                        li += "<p>"
+                                           + "Date: ";
+                                        if (!scriptDateText.equals("")) {
+                                            li += scriptDateText;
+                                        }
+                                        if (scriptDateStart != null && scriptDateEnd != null) {
+                                            if (!scriptDateText.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+                                    li += !placeOfOrigin.equals("") ? "<p>" + "Place of origin: " + placeOfOrigin + "." + "</p>" : "";
+                                }
+                                if (!folios.isEmpty() ||
+                                    !undertextFolioOrder.equals("") ||
+                                    !folioOrderComments.equals("")) {
+                                    li += "<h3>Folios that preserve undertext</h3>";
+                                    li += !folios.isEmpty() ? "<p>" + "Folios: " + String.join(", ", folios.getList()) + "." : "";
+                                    li += !undertextFolioOrder.equals("") ? "<p>" + "Folios in order of reconstructed undertext: " + undertextFolioOrder + "." + "</p>" : "";
+                                    li += !folioOrderComments.equals("") ? "<p>" + "Folio order comments: " + folioOrderComments + "." + "</p>" : "";
+                                }
+                                if (marginaliaPresent != null ||
+                                    !marginalia.equals("")) {
+                                    li += "<h4>Marginalia</h4>";
+                                    li += marginaliaPresent != null ? "<p>" + "Marginalia present?: " + (marginaliaPresent ? "Yes" : "No") + "." + "</p>" : "";
+                                    li += !marginalia.equals("") ? "<p>" + "Marginalia: " + marginalia + "." + "</p>" : "";
+                                }
+
+                                if (nonTextualContentPresent != null ||
+                                    !nonTextualContent.equals("")) {
+                                    li += "<h4>Non-textual content</h4>";
+                                    li += nonTextualContentPresent != null ? "<p>" + "Non-textual content?: " + (nonTextualContentPresent ? "Yes" : "No") + "." + "</p>" : "";
+                                    li += !nonTextualContent.equals("") ? "<p>" + "Non-textual content description: " + nonTextualContent + "." + "</p>" : "";
+                                }
+
+                                if (!catchwords.equals("") ||
+                                    !signatures.equals("") ||
+                                    underTextOrientation != null ||
+                                    prickings != null ||
+                                    ruledLines != null ||
+                                    !preservationNotes.equals("")) {
+
+                                    li += "<h4>Codicological information</h4>";
+                                    li += !catchwords.equals("") ? "Catchwords: " + catchwords + "</p>" : "";
+                                    li += !signatures.equals("") ? "Quire signatures: " + signatures + "</p>" : "";
+                                    li += underTextOrientation != null ? "Undertext orientation: " + underTextOrientation.toString() + "</p>" : "";
+                                    if (prickings != null || ruledLines != null) {
+                                        li += "<p>Physical evidence of undertext (if low legibility)</p>";
+                                        li += prickings != null ? "<p class=\"indent\">" + "Prickings: " + (prickings ? "Yes" : "No") + "</p>" : "";
+                                        li += ruledLines != null ? "<p class=\"indent\">" + "Ruled lines: " + (ruledLines ? "Yes" : "No") + "</p>" : "";
+                                    }
+                                    li += !preservationNotes.equals("") ? "Notes: " + preservationNotes + "</p>" : "";
+                                }
+
+                                if (!remarks.equals("") ||
+                                    !notes.equals("")) {
+
+                                    li += "<h4>Additional remarks about folio</h4>";
+                                    li += !remarks.equals("") ? remarks + "</p>" : "";
+                                    li += !notes.equals("") ? notes + "</p>" : "";
+                                }
+
+                                li += !scholarNames.isEmpty() ? "<p class=\"scholar-names\">" + String.join(", ", scholarNames.getList()) + "." : "";
+                                li += "</div>";
+
+                            }
+                        }
+
+                        if (overtextLayer != null) {
+                            final String title = StringEscapeUtils.escapeHtml4(overtextLayer.getString("title_s", ""));
+                            final String textIdentity = StringEscapeUtils.escapeHtml4(overtextLayer.getString("text_identity_s", ""));
+                            final String primaryLanguage = StringEscapeUtils.escapeHtml4(overtextLayer.getString("primary_language_s", ""));
+                            final String folioScript = StringEscapeUtils.escapeHtml4(overtextLayer.getString("script_s", ""));
+                            final String scriptNote = StringEscapeUtils.escapeHtml4(overtextLayer.getString("script_note_s", ""));
+                            final String scriptDateText = StringEscapeUtils.escapeHtml4(overtextLayer.getString("script_date_text_s", ""));
+                            final Integer scriptDateStart = overtextLayer.getInteger("script_date_start_i");
+                            final Integer scriptDateEnd = overtextLayer.getInteger("script_date_end_i");
+
+                            final Boolean marginaliaPresent = overtextLayer.getBoolean("marginalia_present_b");
+                            final String marginalia = StringEscapeUtils.escapeHtml4(overtextLayer.getString("marginalia_s", ""));
+
+                            final Boolean nonTextualContentPresent = overtextLayer.getBoolean("nontextual_content_present_b");
+                            final String nonTextualContent = StringEscapeUtils.escapeHtml4(overtextLayer.getString("nontextual_content_s", ""));
+                            final String decoration = StringEscapeUtils.escapeHtml4(json.getString("decoration_s", ""));
+
+                            final String notes = StringEscapeUtils.escapeHtml4(overtextLayer.getString("notes_s", ""));
+
+                            if (!title.equals("") ||
+                                !textIdentity.equals("") ||
+                                !primaryLanguage.equals("") ||
+                                !folioScript.equals("") ||
+                                !scriptNote.equals("") ||
+                                (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
+                                marginaliaPresent != null ||
+                                !marginalia.equals("") ||
+                                nonTextualContentPresent != null ||
+                                !nonTextualContent.equals("") ||
+                                !decoration.equals("") ||
+                                !notes.equals("")) {
+
+                                li += "<h3>Overtext</h3>";
+                                li += "<div class=\"indent\">";
+                                if (!title.equals("") ||
+                                    !textIdentity.equals("") ||
+                                    !primaryLanguage.equals("") ||
+                                    !folioScript.equals("") ||
+                                    !scriptNote.equals("") ||
+                                    (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null))) {
+
+
+                                    li += "<h4>Identification and Provenance</h4>";
+                                    li += !title.equals("") ? "<p>" + "Title: " + title + "." + "</p>" : "";
+                                    li += !textIdentity.equals("") ? "<p>" + "Text identity: " + textIdentity + "." + "</p>" : "";
+                                    li += !primaryLanguage.equals("") ? "<p>" + "Primary language: " + primaryLanguage + "." + "</p>" : "";
+                                    li += !folioScript.equals("") ? "<p>" + "Script: " + folioScript + "." + "</p>" : "";
+                                    li += !scriptNote.equals("") ? "<p>" + "Script note: " + scriptNote + "." + "</p>" : "";
+                                    if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
+                                        li += "<p>"
+                                           + "Date: ";
+                                        if (!scriptDateText.equals("")) {
+                                            li += scriptDateText;
+                                        }
+                                        if (scriptDateStart != null && scriptDateEnd != null) {
+                                            if (!scriptDateText.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+                                }
+
+                                if (marginaliaPresent != null ||
+                                    !marginalia.equals("")) {
+
+                                    li += "<h4>Marginalia</h4>";
+                                    li += marginaliaPresent != null ? "<p>" + "Marginalia present?: " + (marginaliaPresent ? "Yes" : "No") + "." + "</p>" : "";
+                                    li += !marginalia.equals("") ? "<p>" + "Marginalia: " + marginalia + "." + "</p>" : "";
+                                }
+
+                                if (nonTextualContentPresent != null ||
+                                    !nonTextualContent.equals("") ||
+                                    !decoration.equals("")) {
+
+                                    li += "<h4>Non-textual content</h4>";
+                                    li += nonTextualContentPresent != null ? "<p>" + "Non-textual content?: " + (nonTextualContentPresent ? "Yes" : "No") + "." + "</p>" : "";
+                                    li += !nonTextualContent.equals("") ? "<p>" + "Non-textual content description: " + nonTextualContent + "." + "</p>" : "";
+                                    li += !decoration.equals("") ? "<p>" + "Decoration: " + decoration + "." + "</p>" : "";
+                                }
+
+                                if (!notes.equals("")) {
+
+                                    li += "<h4>Notes</h4>";
+                                    li += "<p>" + notes + "</p>";
+                                }
+                                li += "</div>";
+                            }
+                        }
+                        li +="</div>";
+
+                        li += "</li>";
+
+                        ul += li;
+                    }
+                    ul += "</ul>";
+
+                    return new Handlebars.SafeString(ul);
+                } catch (IOException e) {
+                    return new Handlebars.SafeString("<span>Error processing JSON for browse page manuscript component template: " + e.getMessage() + "</span>");
                 }
             }
         });
