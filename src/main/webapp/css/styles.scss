@@ -200,7 +200,22 @@ body.sinai-body {
                         padding: 0px 20px;
                         margin-top: 0px;
 
+                        .manuscript-more-info-header {
+                            padding-left: 50px;
+                        }
+
                         .manuscript-more-info-body {
+                            padding-left: 50px;
+                            padding-top: 0;
+
+                            h3 {
+                                margin-bottom: 0;
+                            }
+                            h4 {
+                                margin-top: 0;
+                                margin-bottom: 0;
+                            }
+
                             p {
                                 margin-top: 0px;
                                 margin-bottom: 0px;
@@ -224,6 +239,17 @@ body.sinai-body {
                     .indent {
                         margin-left: 50px;
                     }
+                    .indentindent {
+                        margin-left: 100px;
+                    }
+
+                    .undertexts-header {
+                        padding-left: 50px;
+                    }
+
+                    .undertexts-body {
+                        padding-left: 50px;
+                    }
 
                     .undertext-objects-list {
                         > li {
@@ -234,6 +260,63 @@ body.sinai-body {
                             margin-top: 0px;
                             margin-bottom: 0px;
                         }
+
+                        .undertext-more-info-header {
+                            padding-left: 50px;
+                        }
+
+                        .undertext-more-info-body {
+                            padding-left: 50px;
+                            padding-top: 0;
+
+                            h3 {
+                                margin-bottom: 0;
+                            }
+                            h4 {
+                                margin-top: 0;
+                                margin-bottom: 0;
+                            }
+                        }
+                    }
+
+                    .folios-header {
+                        padding-left: 50px;
+                    }
+
+                    .folios-body {
+                        padding-left: 50px;
+                    }
+
+                    .manuscript-components-list {
+                        > li {
+                            border-top: 1px solid $maroon;
+                        }
+
+                        p:not(.scholar-names) {
+                            margin-top: 0px;
+                            margin-bottom: 0px;
+                        }
+
+                        .manuscript-component-header {
+                            margin-top: 0;
+                        }
+                        .manuscript-component-body {
+                            margin-left: 50px;
+                            padding-bottom: 0.5em;
+                        }
+
+                        h3 {
+                            margin-bottom: 0;
+                        }
+                        h4 {
+                            //margin-top: 0;
+                            margin-bottom: 0;
+                        }
+                    }
+
+                    .ui-accordion .ui-accordion-header {
+                        color: $maroon;
+                        font-weight: normal;
                     }
                 }
             }
