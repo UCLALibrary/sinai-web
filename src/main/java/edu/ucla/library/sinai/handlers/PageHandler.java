@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
 import edu.ucla.library.sinai.util.SearchResultComparator;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,6 +29,12 @@ import io.vertx.ext.web.RoutingContext;
  * A generic page handler.
  */
 public class PageHandler extends SinaiHandler {
+
+    private JsonArray manuscripts;
+    private JsonArray undertextObjects;
+    private JsonArray manuscriptComponents;
+    private JsonArray overtextLayers;
+    private JsonArray undertextLayers;
 
     public PageHandler(final Configuration aConfig) {
         super(aConfig);
@@ -40,9 +48,6 @@ public class PageHandler extends SinaiHandler {
         final JsonObject jsonNode;
         final String errorMessage;
 
-        final JsonObject templateJson = new JsonObject();
-        final SearchResultComparator searchResultComparator = new SearchResultComparator();
-
         // If user is navigating to the browse page, need to load metadata
         if (aContext.normalisedPath().equals(BROWSE_RE)) {
             final SolrService service = SolrService.createProxy(aContext.vertx(), SOLR_SERVICE_KEY);
@@ -51,215 +56,125 @@ public class PageHandler extends SinaiHandler {
 
             if (method == HttpMethod.GET) {
 
-                // get all manuscript IDs from 1) published manuscripts and 2) UTOs that match search query
+                // get all manuscript IDs from all records that match search
                 final JsonObject manuscriptIdSolrQuery = new JsonObject()
-                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type_s:manuscript AND publish_b:true")
-                    .put("fl", "id_i")
-                    .put("group",  "true")
-                    .put("group.main",  "true")
-                    .put("group.field",  "id_i")
-                    .put("rows", 10000000);
+                        .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND manuscript_id_i:[* TO *]")
+                        .put("fl", "manuscript_id_i").put("group", "true").put("group.main", "true")
+                        .put("group.field", "manuscript_id_i").put("rows", 10000000);
 
-                final JsonObject utoManuscriptIdSolrQuery = new JsonObject()
-                    .put("q", "keyword_t:" + (searchQueryParam == null ? "*" : ("\"" + searchQueryParam + "\"")) + " AND record_type_s:undertext_object")
-                    .put("fl", "manuscript_id_i")
-                    .put("group",  "true")
-                    .put("group.main",  "true")
-                    .put("group.field",  "manuscript_id_i")
-                    .put("rows", 10000000);
-
-                // 1) published manuscripts
-                service.search(manuscriptIdSolrQuery, firstHandler -> {
+                service.search(manuscriptIdSolrQuery, manuscriptIdSolrSearch -> {
 
                     final String firstHandlerErrorMessage;
 
-                    if (firstHandler.succeeded()) {
+                    if (manuscriptIdSolrSearch.succeeded()) {
 
-                        // 2) UTOs
-                        service.search(utoManuscriptIdSolrQuery, secondHandler -> {
+                        final JsonObject solrResponse = manuscriptIdSolrSearch.result().getJsonObject("response");
 
-                            final String secondHandlerErrorMessage;
+                        // If we get any hits, return a list of manuscripts
+                        if (solrResponse.getInteger("numFound") > 0) {
 
-                            if (secondHandler.succeeded()) {
+                            Function<Object, String> getManuscriptId = solrResponseDocument -> {
+                                return ((JsonObject) solrResponseDocument).getInteger("manuscript_id_i").toString();
+                            };
+                            Stream<Object> solrResponseDocumentStream = solrResponse.getJsonArray("docs").stream();
+                            ArrayList<String> manuscriptIdList = solrResponseDocumentStream.map(getManuscriptId)
+                                    .collect(Collectors.toCollection(ArrayList::new));
 
-                                // merge the manuscript ID numbers into one array
-                                ArrayList<String> manuscriptIdList = new ArrayList<String>();
+                            final JsonObject manuscriptsSolrQuery = new JsonObject()
+                                    .put("q",
+                                            "record_type_s:manuscript AND publish_b:true AND manuscript_id_i:("
+                                                    + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                    .put("sort", "shelf_mark_s asc").put("rows", 10000000);
+                            final JsonObject undertextObjectsSolrQuery = new JsonObject()
+                                    .put("q",
+                                            "record_type_s:undertext_object AND manuscript_id_i:("
+                                                    + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                    .put("sort", "primary_language_s asc").put("rows", 10000000);
+                            final JsonObject manuscriptComponentsSolrQuery = new JsonObject()
+                                    .put("q",
+                                            "record_type_s:manuscript_component AND manuscript_id_i:("
+                                                    + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                    .put("sort", "position_i asc").put("rows", 10000000);
+                            final JsonObject overtextLayersSolrQuery = new JsonObject()
+                                    .put("q",
+                                            "record_type_s:overtext_layer AND manuscript_id_i:("
+                                                    + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                    .put("rows", 10000000);
+                            final JsonObject undertextLayersSolrQuery = new JsonObject()
+                                    .put("q",
+                                            "record_type_s:undertext_layer AND manuscript_id_i:("
+                                                    + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
+                                    .put("rows", 10000000);
 
-                                Function<Object, String> mapper1 = s -> ((JsonObject) s).getInteger("id_i").toString();
-                                Function<Object, String> mapper2 = s -> ((JsonObject) s).getInteger("manuscript_id_i").toString();
-
-                                Stream<Object> s1 = firstHandler.result().getJsonObject("response").getJsonArray("docs").stream();
-                                ArrayList<String> firstList = s1.map(mapper1).collect(Collectors.toCollection(ArrayList::new));
-
-                                Stream<Object> s2 = secondHandler.result().getJsonObject("response").getJsonArray("docs").stream();
-                                ArrayList<String> secondList = s2.map(mapper2).collect(Collectors.toCollection(ArrayList::new));
-
-                                manuscriptIdList.addAll(firstList);
-                                manuscriptIdList.addAll(secondList);
-
-
-                                final ArrayList<JsonObject> searchResults = new ArrayList<JsonObject>();
-
-                                // check if we have any results
-                                if (manuscriptIdList.size() > 0) {
-
-                                    // get the full Solr documents this time
-                                    final JsonObject manuscriptSolrQuery = new JsonObject()
-                                        .put("q", "record_type_s:manuscript AND publish_b:true AND id_i:(" + String.join(" ", manuscriptIdList.toArray(new String[0])) + ")")
-                                        .put("sort", "shelf_mark_s asc")
-                                        .put("rows", 10000000);
-
-                                    // again: first, manuscripts
-                                    service.search(manuscriptSolrQuery, thirdHandler -> {
-
-                                        final String thirdHandlerErrorMessage;
-
-                                        if (thirdHandler.succeeded()) {
-
-                                            final ArrayList<String> utoManuscriptIdList = thirdHandler.result().getJsonObject("response").getJsonArray("docs").stream()
-                                                .map(mapper1).collect(Collectors.toCollection(ArrayList::new));
-
-                                            if (utoManuscriptIdList.size() > 0) {
-	                                            final JsonObject utoSolrQuery = new JsonObject()
-	                                                    .put("q", "record_type_s:undertext_object AND manuscript_id_i:(" + String.join(" ", utoManuscriptIdList.toArray(new String[0])) + ")")
-	                                                    .put("sort", "author_s asc")
-	                                                    .put("rows", 10000000);
-
-	                                            // second, UTOs
-	                                            service.search(utoSolrQuery, fourthHandler -> {
-
-	                                                final String fourthHandlerErrorMessage;
-
-	                                                if (fourthHandler.succeeded()) {
-
-	                                                    final JsonArray manuscripts = thirdHandler.result().getJsonObject("response").getJsonArray("docs");
-	                                                    final JsonArray utos = fourthHandler.result().getJsonObject("response").getJsonArray("docs");
-
-	                                                    // put each search result (manuscript with it's UTOs) into an array
-	                                                    Iterator<Object> manuscriptsIt = manuscripts.iterator();
-	                                                    while (manuscriptsIt.hasNext()) {
-	                                                        JsonObject result = new JsonObject();
-	                                                        JsonObject resultManuscript = (JsonObject) manuscriptsIt.next();
-	                                                        JsonArray resultUtos = new JsonArray();
-
-	                                                        result.put("manuscript", resultManuscript);
-
-	                                                        Iterator<Object> utoIt = utos.iterator();
-	                                                        while (utoIt.hasNext()) {
-	                                                            JsonObject uto = (JsonObject) utoIt.next();
-	                                                            if (uto.getInteger("manuscript_id_i") == resultManuscript.getInteger("id_i")) {
-	                                                                resultUtos.add(uto);
-	                                                            }
-	                                                        }
-	                                                        result.put("undertext_objects", resultUtos);
-
-	                                                        searchResults.add(result);
-	                                                    }
-	                                                    Collections.sort(searchResults, searchResultComparator);
-	                                                    templateJson.put("searchResults", new JsonArray(searchResults));
-
-	                                                    if (LOGGER.isDebugEnabled()) {
-	                                                        LOGGER.debug("Sending to template: {}", templateJson.toString());
-	                                                    }
-
-	                                                    try {
-	                                                        aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
-	                                                        aContext.next();
-	                                                    } catch (IOException e) {
-	                                                        e.printStackTrace();
-
-	                                                        fourthHandlerErrorMessage = msg("Handlebars context generation failed: {}", templateJson.toString());
-
-	                                                        aContext.put(ERROR_HEADER, "Internal Server Error");
-	                                                        aContext.put(ERROR_MESSAGE, fourthHandlerErrorMessage);
-	                                                        fail(aContext, new Error(fourthHandlerErrorMessage));
-	                                                    }
-	                                                } else {
-	                                                    // error
-	                                                    fourthHandlerErrorMessage = fourthHandler.cause().getMessage();
-
-	                                                    aContext.put(ERROR_HEADER, "Solr Search Error");
-	                                                    aContext.put(ERROR_MESSAGE, fourthHandlerErrorMessage);
-	                                                    fail(aContext, fourthHandler.cause());
-	                                                }
-	                                            });
-                                            } else {
-                                                // no uto results
-                                                final JsonArray manuscripts = thirdHandler.result().getJsonObject("response").getJsonArray("docs");
-
-                                                // put each search result (manuscript) into an array
-                                                Iterator<Object> manuscriptsIt = manuscripts.iterator();
-                                                while (manuscriptsIt.hasNext()) {
-                                                    JsonObject result = new JsonObject();
-                                                    JsonObject resultManuscript = (JsonObject) manuscriptsIt.next();
-                                                    JsonArray resultUtos = new JsonArray();
-
-                                                    result.put("manuscript", resultManuscript);
-
-                                                    searchResults.add(result);
-                                                }
-                                                Collections.sort(searchResults, searchResultComparator);
-                                                templateJson.put("searchResults", new JsonArray(searchResults));
-
-                                                if (LOGGER.isDebugEnabled()) {
-                                                    LOGGER.debug("Sending to template: {}", templateJson.toString());
-                                                }
-
-                                                try {
-                                                    aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
-                                                    aContext.next();
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-
-                                                    final String errorMessageNoUtoResults = msg("Handlebars context generation failed: {}", templateJson.toString());
-
-                                                    aContext.put(ERROR_HEADER, "Internal Server Error");
-                                                    aContext.put(ERROR_MESSAGE, errorMessageNoUtoResults);
-                                                    fail(aContext, new Error(errorMessageNoUtoResults));
-                                                }
-                                            }
-                                        } else {
-                                            // error
-                                            thirdHandlerErrorMessage = thirdHandler.cause().getMessage();
-
-                                            aContext.put(ERROR_HEADER, "Solr Search Error");
-                                            aContext.put(ERROR_MESSAGE, thirdHandlerErrorMessage);
-                                            fail(aContext, thirdHandler.cause());
-                                        }
-                                    });
+                            /*
+                             *  Each of these handlers sets one of the private member variables of the enclosing class,
+                             *  to be used by combineSearchResults.
+                             *
+                             *  Each one calls the handler directly above it, except for undertextLayersSearchHandler,
+                             *  which calls combineSearchResults.
+                             */
+                            Handler<AsyncResult<JsonObject>> undertextLayersSolrSearchHandler = search -> {
+                                if (search.succeeded()) {
+                                    undertextLayers = search.result().getJsonObject("response").getJsonArray("docs");
+                                    combineSearchResults(aContext);
                                 } else {
-                                    // no results for the search
-                                    Collections.sort(searchResults, searchResultComparator);
-                                    templateJson.put("searchResults", new JsonArray(searchResults));
-
-                                    try {
-                                        aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
-                                        aContext.next();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-
-                                        secondHandlerErrorMessage = msg("Handlebars context generation failed: {}", templateJson.toString());
-
-                                        aContext.put(ERROR_HEADER, "Internal Server Error");
-                                        aContext.put(ERROR_MESSAGE, secondHandlerErrorMessage);
-                                        fail(aContext, new Error(secondHandlerErrorMessage));
-                                    }
+                                    aContext.put(ERROR_HEADER, "Solr Search Error");
+                                    aContext.put(ERROR_MESSAGE, search.cause().getMessage());
+                                    fail(aContext, search.cause());
                                 }
-                            } else {
-                                // failure
-                                secondHandlerErrorMessage = secondHandler.cause().getMessage();
+                            };
+                            Handler<AsyncResult<JsonObject>> overtextLayersSolrSearchHandler = search -> {
+                                if (search.succeeded()) {
+                                    overtextLayers = search.result().getJsonObject("response").getJsonArray("docs");
+                                    service.search(undertextLayersSolrQuery, undertextLayersSolrSearchHandler);
+                                } else {
+                                    aContext.put(ERROR_HEADER, "Solr Search Error");
+                                    aContext.put(ERROR_MESSAGE, search.cause().getMessage());
+                                    fail(aContext, search.cause());
+                                }
+                            };
+                            Handler<AsyncResult<JsonObject>> manuscriptComponentsSolrSearchHandler = search -> {
+                                if (search.succeeded()) {
+                                    manuscriptComponents = search.result().getJsonObject("response")
+                                            .getJsonArray("docs");
+                                    service.search(overtextLayersSolrQuery, overtextLayersSolrSearchHandler);
+                                } else {
+                                    aContext.put(ERROR_HEADER, "Solr Search Error");
+                                    aContext.put(ERROR_MESSAGE, search.cause().getMessage());
+                                    fail(aContext, search.cause());
+                                }
+                            };
 
-                                aContext.put(ERROR_HEADER, "Solr Search Error");
-                                aContext.put(ERROR_MESSAGE, secondHandlerErrorMessage);
-                                fail(aContext, secondHandler.cause());
-                            }
-                        });
+                            Handler<AsyncResult<JsonObject>> undertextObjectsSolrSearchHandler = search -> {
+                                if (search.succeeded()) {
+                                    undertextObjects = search.result().getJsonObject("response").getJsonArray("docs");
+                                    service.search(manuscriptComponentsSolrQuery, manuscriptComponentsSolrSearchHandler);
+                                } else {
+                                    aContext.put(ERROR_HEADER, "Solr Search Error");
+                                    aContext.put(ERROR_MESSAGE, search.cause().getMessage());
+                                    fail(aContext, search.cause());
+                                }
+                            };
+                            Handler<AsyncResult<JsonObject>> manuscriptsSolrSearchHandler = search -> {
+                                if (search.succeeded()) {
+                                    manuscripts = search.result().getJsonObject("response").getJsonArray("docs");
+                                    service.search(undertextObjectsSolrQuery, undertextObjectsSolrSearchHandler);
+                                } else {
+                                    aContext.put(ERROR_HEADER, "Solr Search Error");
+                                    aContext.put(ERROR_MESSAGE, search.cause().getMessage());
+                                    fail(aContext, search.cause());
+                                }
+                            };
+
+                            // Start searching!
+                            service.search(manuscriptsSolrQuery, manuscriptsSolrSearchHandler);
+                        }
                     } else {
-                        firstHandlerErrorMessage = msg("Solr search failed: {}", firstHandler.cause().getMessage());
+                        firstHandlerErrorMessage = msg("Solr search failed: {}", manuscriptIdSolrSearch.cause().getMessage());
 
                         aContext.put(ERROR_HEADER, "Solr Search Error");
                         aContext.put(ERROR_MESSAGE, firstHandlerErrorMessage);
-                        fail(aContext, firstHandler.cause());
+                        fail(aContext, manuscriptIdSolrSearch.cause());
                     }
                 });
 
@@ -272,20 +187,124 @@ public class PageHandler extends SinaiHandler {
                 fail(aContext, new Error(errorMessage));
             }
         } else {
-
             // We also need what's set in SinaiHandler
             try {
-                aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
+                aContext.data().put(HBS_DATA_KEY, toHbsContext(new JsonObject(), aContext));
                 aContext.next();
             } catch (IOException e) {
                 e.printStackTrace();
 
-                errorMessage = msg("Handlebars context generation failed: {}", templateJson.toString());
+                errorMessage = msg("Handlebars context generation failed: {}", new JsonObject().toString());
 
                 aContext.put(ERROR_HEADER, "Internal Server Error");
                 aContext.put(ERROR_MESSAGE, errorMessage);
                 fail(aContext, new Error(errorMessage));
             }
+        }
+    }
+
+    /*
+     * Builds a list of manuscripts that are shaped like so:
+     *
+     * manuscript: {
+     *   undertext_objects: [ {}, ... ],
+     *   manuscript_components: [
+     *     {
+     *       overtext_layer: {},
+     *       undertext_layers: [ {}, ... ],
+     *       ...
+     *     },
+     *     ...
+     *   ],
+     *   ...
+     * }
+     *
+     */
+    private void combineSearchResults(final RoutingContext aContext) {
+
+        final ArrayList<JsonObject> searchResults = new ArrayList<JsonObject>();
+        final JsonObject templateJson = new JsonObject();
+        final SearchResultComparator searchResultComparator = new SearchResultComparator();
+
+        Iterator<Object> mIt = manuscripts.iterator();
+        while (mIt.hasNext()) {
+            JsonObject searchResult = new JsonObject();
+            JsonObject m = (JsonObject) mIt.next();
+            final Integer mId = m.getInteger("manuscript_id_i");
+            final String shelfMark = m.getString("shelf_mark_s", "");
+            JsonArray resultUtos = new JsonArray();
+            JsonArray resultMcs = new JsonArray();
+
+            searchResult.put("manuscript", m);
+
+            Iterator<Object> utoIt = undertextObjects.iterator();
+            while (utoIt.hasNext()) {
+                JsonObject uto = (JsonObject) utoIt.next();
+                if (uto.getInteger("manuscript_id_i").equals(mId)) {
+
+                    resultUtos.add(uto);
+                }
+            }
+            searchResult.put("undertext_objects", resultUtos);
+
+            Iterator<Object> mcIt = manuscriptComponents.iterator();
+            while (mcIt.hasNext()) {
+                JsonObject mc = (JsonObject) mcIt.next();
+                if (mc.getInteger("manuscript_id_i").equals(mId)) {
+
+                    final Integer manuscriptComponentId = mc.getInteger("manuscript_component_id_i");
+                    final String decoration = mc.getString("decoration_s", "");
+                    mc.put("shelf_mark_s", shelfMark);
+                    mc.put("support_material_s", m.getString("support_material_s"));
+
+                    final JsonArray utls = new JsonArray();
+                    Iterator<Object> utlIt = undertextLayers.iterator();
+                    while (utlIt.hasNext()) {
+                        JsonObject utl = (JsonObject) utlIt.next();
+                        if (utl.getInteger("manuscript_component_id_i").equals(manuscriptComponentId)) {
+                            // TODO: need place_of_origin_s and scholar_name_ss from UTO
+                            utls.add(utl);
+                        }
+                    }
+                    mc.put("undertext_layers", utls);
+
+                    Iterator<Object> otlIt = overtextLayers.iterator();
+                    while (otlIt.hasNext()) {
+                        JsonObject otl = (JsonObject) otlIt.next();
+                        if (otl.getInteger("manuscript_component_id_i").equals(manuscriptComponentId)) {
+                            otl.put("decoration_s", decoration);
+                            mc.put("overtext_layer", otl);
+                            // only ever one overtext layer, so leave loop
+                            break;
+                        }
+                    }
+
+                    resultMcs.add(mc);
+                }
+            }
+            searchResult.put("manuscript_components", resultMcs);
+
+            searchResults.add(searchResult);
+        }
+        Collections.sort(searchResults, searchResultComparator);
+        templateJson.put("searchResults", new JsonArray(searchResults));
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Sending to template: {}", templateJson.toString());
+        }
+
+        try {
+            aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
+            aContext.next();
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            final String errorMessageNoUtoResults = msg("Handlebars context generation failed: {}",
+                    templateJson.toString());
+
+            aContext.put(ERROR_HEADER, "Internal Server Error");
+            aContext.put(ERROR_MESSAGE, errorMessageNoUtoResults);
+            fail(aContext, new Error(errorMessageNoUtoResults));
         }
     }
 

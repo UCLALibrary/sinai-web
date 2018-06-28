@@ -173,8 +173,23 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                             } else {
                                 continue;
                             }
+                        } else if (fields[i].type.equals("boolean")) {
+                            final boolean boolVal = rs.getBoolean(fields[i].name);
+
+                            if (rs.wasNull() == false) {
+                                // Disallow representing multi-valued fields with ints
+                                if (fields[i].multiValued) {
+                                    errorMessage = "Solr multiValued field must only be derived from strings";
+                                    LOGGER.error(errorMessage);
+                                    throw new Error(errorMessage);
+                                } else {
+                                    solrFieldValue = boolVal;
+                                }
+                            } else {
+                                continue;
+                            }
                         } else {
-                            errorMessage = "Solr field type must be either string or int";
+                            errorMessage = "Solr field type must be either string, int, or boolean";
                             LOGGER.error(errorMessage);
                             throw new Error(errorMessage);
                         }
@@ -217,7 +232,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 final MetadataHarvestDBFields[] manuscriptsFields = {
                     new MetadataHarvestDBFields("uuid", "m.uuid", "string", false),
-                    new MetadataHarvestDBFields("id", "m.id", "int", false),
+                    new MetadataHarvestDBFields("manuscript_id", "m.id", "int", false),
                     new MetadataHarvestDBFields("shelf_mark", "m.shelf_mark", "string", false),
                     new MetadataHarvestDBFields("title", "m.title", "string", false),
                     new MetadataHarvestDBFields("primary_language", "m.primary_language", "string", false),
@@ -282,6 +297,105 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     return s.alias + " AS " + s.name;
                 }).toArray(String[]::new)) + " FROM undertext_objects AS uto INNER JOIN text_layer_groupings AS tlg ON uto.text_layer_grouping_id = tlg.id INNER JOIN manuscripts AS m ON tlg.manuscript_id = m.id LEFT OUTER JOIN ( SELECT f.undertext_object_id, ARRAY_AGG( f.folio_number || f.folio_side ) AS folios FROM ( SELECT tl.undertext_object_id, mc.folio_number, mc.folio_side, mc.position AS pos FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id ORDER BY pos ) AS f GROUP BY undertext_object_id) AS g ON g.undertext_object_id = uto.id LEFT OUTER JOIN( SELECT y.text_layer_grouping_id, ARRAY_AGG( y.last_name ) AS scholar_name FROM ( SELECT ga.text_layer_grouping_id, u.last_name FROM grouping_assignments AS ga INNER JOIN users AS u ON ga.scholar_id = u.id ORDER BY u.last_name) AS y GROUP BY text_layer_grouping_id ) AS x ON tlg.id = x.text_layer_grouping_id";
                 updateSolr("undertext_object", utoFields, utoSql, conn, multiValuedFieldDelimiter);
+
+                // Add folios (manuscript components)
+                final MetadataHarvestDBFields[] folioFields = {
+                    new MetadataHarvestDBFields("uuid", "mc.uuid", "string", false),
+                    new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
+                    new MetadataHarvestDBFields("manuscript_component_id", "mc.id", "int", false),
+
+                    // Used to sort
+                    new MetadataHarvestDBFields("position", "mc.position", "int", false),
+                    new MetadataHarvestDBFields("component_type", "mc.component_type", "string", false),
+                    new MetadataHarvestDBFields("folio_number", "mc.folio_number", "string", false),
+                    new MetadataHarvestDBFields("folio_side", "mc.folio_side", "string", false),
+
+                    new MetadataHarvestDBFields("leading_conjoin_component_type", "mcj.leading_conjoin_component_type", "string", false),
+                    new MetadataHarvestDBFields("leading_conjoin_folio_number", "mcj.leading_conjoin_folio_number", "string", false),
+                    new MetadataHarvestDBFields("leading_conjoin_folio_side", "mcj.leading_conjoin_folio_side", "string", false),
+
+                    new MetadataHarvestDBFields("quire", "mc.quire", "string", false),
+                    new MetadataHarvestDBFields("quire_position", "mc.quire_position", "string", false),
+                    new MetadataHarvestDBFields("alternate_numbering", "mc.alternate_numbering", "string", false),
+
+                    new MetadataHarvestDBFields("folio_dimensions", "mc.folio_dimensions", "string", false),
+                    new MetadataHarvestDBFields("max_height", "mc.max_height", "int", false),
+                    new MetadataHarvestDBFields("max_width", "mc.max_width", "int", false),
+                    new MetadataHarvestDBFields("min_height", "mc.min_height", "int", false),
+                    new MetadataHarvestDBFields("min_width", "mc.min_width", "int", false),
+                    new MetadataHarvestDBFields("flesh_hair_side", "mc.flesh_hair_side", "string", false),
+                    new MetadataHarvestDBFields("parchment_quality", "mc.parchment_quality", "string", false),
+                    new MetadataHarvestDBFields("parchment_description", "mc.parchment_description", "string", false),
+                    new MetadataHarvestDBFields("palimpsested", "mc.palimpsested", "string", false),
+                    new MetadataHarvestDBFields("erasure_method", "mc.erasure_method", "string", false),
+
+                    // for Overtext layer description
+                    new MetadataHarvestDBFields("decoration", "mc.decoration", "string", false),
+                };
+                final String folioSql = "SELECT " + String.join(",", Arrays.stream(folioFields).map(s -> {
+                    return s.alias + " AS " + s.name;
+                }).toArray(String[]::new)) + " FROM manuscript_components AS mc LEFT OUTER JOIN ( SELECT id, component_type AS leading_conjoin_component_type, folio_number AS leading_conjoin_folio_number, folio_side AS leading_conjoin_folio_side FROM manuscript_components ) AS mcj ON mc.leading_conjoin_id = mcj.id";
+                updateSolr("manuscript_component", folioFields, folioSql, conn, multiValuedFieldDelimiter);
+
+                // Add under text layers
+                final MetadataHarvestDBFields[] underTextLayerFields = {
+                    new MetadataHarvestDBFields("uuid", "tl.uuid", "string", false),
+                    new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
+                    new MetadataHarvestDBFields("manuscript_component_id", "tl.manuscript_component_id", "int", false),
+                    new MetadataHarvestDBFields("work_title", "tl.work_title", "string", false),
+                    new MetadataHarvestDBFields("author", "tl.author", "string", false),
+                    new MetadataHarvestDBFields("work_passage", "tl.work_passage", "string", false),
+                    new MetadataHarvestDBFields("genre", "tl.genre", "string", false),
+                    new MetadataHarvestDBFields("primary_language", "tl.primary_language", "string", false),
+                    new MetadataHarvestDBFields("script", "tl.script", "string", false),
+                    new MetadataHarvestDBFields("script_note", "tl.script_note", "string", false),
+                    new MetadataHarvestDBFields("secondary_languages", "array_remove(array_replace(ARRAY[tl.secondary_language_1, tl.secondary_language_2, tl.secondary_language_3], '', NULL), NULL)", "string", true),
+                    new MetadataHarvestDBFields("script_date_text", "tl.script_date_text", "string", false),
+                    new MetadataHarvestDBFields("script_date_start", "tl.script_date_start", "int", false),
+                    new MetadataHarvestDBFields("script_date_end", "tl.script_date_end", "int", false),
+                    new MetadataHarvestDBFields("marginalia_present", "tl.marginalia_present", "boolean", false),
+                    new MetadataHarvestDBFields("marginalia", "tl.marginalia", "string", false),
+                    new MetadataHarvestDBFields("nontextual_content_present", "tl.nontextual_content_present", "boolean", false),
+                    new MetadataHarvestDBFields("nontextual_content", "tl.nontextual_content", "string", false),
+                    new MetadataHarvestDBFields("catchwords", "tl.catchwords", "string", false),
+                    new MetadataHarvestDBFields("signatures", "tl.signatures", "string", false),
+                    new MetadataHarvestDBFields("under_text_orientation", "tl.under_text_orientation", "int", false),
+                    new MetadataHarvestDBFields("legibility", "tl.legibility", "int", false),
+                    new MetadataHarvestDBFields("prickings", "tl.prickings", "boolean", false),
+                    new MetadataHarvestDBFields("ruled_lines", "tl.ruled_lines", "boolean", false),
+                    new MetadataHarvestDBFields("preservation_notes", "tl.preservation_notes", "string", false),
+                    new MetadataHarvestDBFields("remarks", "tl.remarks", "string", false),
+                    new MetadataHarvestDBFields("notes", "tl.notes", "string", false)
+                };
+                final String underTextLayerSql = "SELECT " + String.join(",", Arrays.stream(underTextLayerFields).map(s -> {
+                    return s.alias + " AS " + s.name;
+                }).toArray(String[]::new)) + " FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id WHERE tl.type = 'UnderTextLayer'";
+                LOGGER.info(underTextLayerSql);
+                updateSolr("undertext_layer", underTextLayerFields, underTextLayerSql, conn, multiValuedFieldDelimiter);
+
+                // Add over text layers
+                final MetadataHarvestDBFields[] overTextLayerFields = {
+                    new MetadataHarvestDBFields("uuid", "tl.uuid", "string", false),
+                    new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
+                    new MetadataHarvestDBFields("manuscript_component_id", "tl.manuscript_component_id", "int", false),
+                    new MetadataHarvestDBFields("text_identity", "tl.text_identity", "string", false),
+                    new MetadataHarvestDBFields("primary_language", "tl.primary_language", "string", false),
+                    new MetadataHarvestDBFields("script", "tl.script", "string", false),
+                    new MetadataHarvestDBFields("script_note", "tl.script_note", "string", false),
+                    new MetadataHarvestDBFields("script_date_text", "tl.script_date_text", "string", false),
+                    new MetadataHarvestDBFields("script_date_start", "tl.script_date_start", "int", false),
+                    new MetadataHarvestDBFields("script_date_end", "tl.script_date_end", "int", false),
+                    new MetadataHarvestDBFields("marginalia_present", "tl.marginalia_present", "boolean", false),
+                    new MetadataHarvestDBFields("marginalia", "tl.marginalia", "string", false),
+                    new MetadataHarvestDBFields("nontextual_content_present", "tl.nontextual_content_present", "boolean", false),
+                    new MetadataHarvestDBFields("nontextual_content", "tl.nontextual_content", "string", false),
+                    // from manuscript_components: decoration
+                    new MetadataHarvestDBFields("notes", "tl.notes", "string", false)
+                };
+                final String overTextLayerSql = "SELECT " + String.join(",", Arrays.stream(overTextLayerFields).map(s -> {
+                    return s.alias + " AS " + s.name;
+                }).toArray(String[]::new)) + " FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id WHERE tl.type = 'OverTextLayer'";
+                updateSolr("overtext_layer", overTextLayerFields, overTextLayerSql, conn, multiValuedFieldDelimiter);
 
                 conn.close();
             } catch (SQLException e){
