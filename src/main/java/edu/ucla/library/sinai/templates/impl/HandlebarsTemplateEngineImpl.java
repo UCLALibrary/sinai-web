@@ -405,7 +405,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         li += "<li>";
 
                         if (!author.equals("") || !work.equals("") || !genre.equals("")) {
-                            li += "<p>";
+                            li += "<p class=\"bold\">";
                             hanging = true;
 
                             if (!author.equals("")) {
