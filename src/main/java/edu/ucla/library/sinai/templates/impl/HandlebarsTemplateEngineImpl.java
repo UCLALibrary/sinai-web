@@ -212,7 +212,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                     }
                     p += "</p>";
                     p += "<div class=\"accordion\">"
-                      + "<h2 class=\"manuscript-more-info-header\">More Information &darr;</h2>"
+                      + "<h2 class=\"manuscript-more-info-header\">Codicology & Overtext &darr;</h2>"
                       + "<div class=\"manuscript-more-info-body\">";
 
                     if (!title.equals("") ||
