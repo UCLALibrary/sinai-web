@@ -366,6 +366,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("preservation_notes", "tl.preservation_notes", "string", false),
                     new MetadataHarvestDBFields("remarks", "tl.remarks", "string", false),
                     new MetadataHarvestDBFields("notes", "tl.notes", "string", false)
+                    // TODO: add undertext_object_id field
                 };
                 final String underTextLayerSql = "SELECT " + String.join(",", Arrays.stream(underTextLayerFields).map(s -> {
                     return s.alias + " AS " + s.name;
