@@ -231,6 +231,7 @@ public class PageHandler extends SinaiHandler {
      */
     private void combineSearchResults(final RoutingContext aContext) {
 
+        // TODO: undertext_layers needs key undertext_object_id, and transform undertextLayers into hash table
         final ArrayList<JsonObject> searchResults = new ArrayList<JsonObject>();
         final JsonObject templateJson = new JsonObject();
         final SearchResultComparator searchResultComparator = new SearchResultComparator();
