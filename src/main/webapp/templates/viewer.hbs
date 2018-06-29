@@ -50,7 +50,11 @@
 
       $(function() {
         var anno_token;
-        var mirador = Mirador({
+        var mirador = Mirador(
+        {{#if workspaceSettings}}
+        {{{workspaceSettings}}}
+        {{else}}
+        {
           "id": "viewer",
           "layout": "1",
           "preserveManifestOrder": true,
@@ -89,12 +93,11 @@
             "layersTabAvailable": true
           },
           "canvasThumbnailLabelTransform": ['.+?_', ''],
-          "saveSession": true,
-        });
+          "saveSession": false,
+        }
+        {{/if}}
+        );
 
-        // FIXME: this is problematic when there is more than one window
-
-        /*
         var manifests = [
           {{#each manifests}}
             "{{imageserver}}/iiif/{{urlencode ark_s}}/manifest",
@@ -126,7 +129,6 @@
         } else {
           console.error("Didn't find default manifest in the list of manifests");
         }
-        */
       });
 
       </script>
