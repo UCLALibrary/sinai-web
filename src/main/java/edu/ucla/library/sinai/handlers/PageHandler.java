@@ -30,11 +30,11 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class PageHandler extends SinaiHandler {
 
-    private JsonArray manuscripts;
-    private JsonArray undertextObjects;
-    private JsonArray manuscriptComponents;
-    private JsonArray overtextLayers;
-    private JsonArray undertextLayers;
+    private JsonArray manuscripts = new JsonArray();
+    private JsonArray undertextObjects = new JsonArray();
+    private JsonArray manuscriptComponents = new JsonArray();
+    private JsonArray overtextLayers = new JsonArray();
+    private JsonArray undertextLayers = new JsonArray();
 
     public PageHandler(final Configuration aConfig) {
         super(aConfig);
@@ -168,6 +168,15 @@ public class PageHandler extends SinaiHandler {
 
                             // Start searching!
                             service.search(manuscriptsSolrQuery, manuscriptsSolrSearchHandler);
+                        } else {
+                            // no results; set these members after each search
+                            manuscripts = new JsonArray();
+                            undertextObjects = new JsonArray();
+                            manuscriptComponents = new JsonArray();
+                            overtextLayers = new JsonArray();
+                            undertextLayers = new JsonArray();
+
+                            combineSearchResults(aContext);
                         }
                     } else {
                         firstHandlerErrorMessage = msg("Solr search failed: {}", manuscriptIdSolrSearch.cause().getMessage());
@@ -222,6 +231,7 @@ public class PageHandler extends SinaiHandler {
      */
     private void combineSearchResults(final RoutingContext aContext) {
 
+        // TODO: undertext_layers needs key undertext_object_id, and transform undertextLayers into hash table
         final ArrayList<JsonObject> searchResults = new ArrayList<JsonObject>();
         final JsonObject templateJson = new JsonObject();
         final SearchResultComparator searchResultComparator = new SearchResultComparator();

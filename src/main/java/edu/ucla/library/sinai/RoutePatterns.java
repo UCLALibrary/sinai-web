@@ -63,7 +63,7 @@ public interface RoutePatterns {
      * A route pattern that redirects to PDF resources.
      */
     public static final String PDF_PROXY_RE =
-            "(/terms-of-use/.*)|(/user-guide/.*)|(/publications)|(/contacts)";
+            "(/terms-of-use/.*)|(/user-guide(?:/.*)?)|(/publications)|(/contacts)";
 
     /**
      * A route pattern for serving PDF resources.

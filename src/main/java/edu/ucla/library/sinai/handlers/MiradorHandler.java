@@ -9,6 +9,10 @@ import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
 
 import org.slf4j.Logger;
 
@@ -16,7 +20,9 @@ import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
 import edu.ucla.library.sinai.util.PathUtils;
 import info.freelibrary.util.LoggerFactory;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 
 public class MiradorHandler extends SinaiHandler {
@@ -42,7 +48,7 @@ public class MiradorHandler extends SinaiHandler {
 
         solr.search(manuscriptSolrQuery, aHandler -> {
 
-            final String errorMessage;
+            String errorMessage;
 
             if (aHandler.succeeded()) {
 
@@ -85,10 +91,36 @@ public class MiradorHandler extends SinaiHandler {
 
                 jsonNode.put("id", id);
 
-                /* To drop the ID from the path for template processing */
-                aContext.data().put(HBS_PATH_SKIP_KEY, skip + slashCount(PathUtils.decode(id)));
                 try {
+                    final HttpMethod method = aContext.request().method();
+                    if (method == HttpMethod.POST) {
+                        Set<FileUpload> uploads = aContext.fileUploads();
+                        if (uploads.size() != 1) {
+                            errorMessage = msg("Only one file upload is allowed at a time");
+
+                            aContext.response().setStatusCode(400);
+                            aContext.put(ERROR_MESSAGE, errorMessage);
+                            fail(aContext, new Error(errorMessage));
+                        }
+                        final Path filePath = Paths.get(uploads.toArray(new FileUpload[0])[0].uploadedFileName());
+                        final String workspaceSettings = new String(Files.readAllBytes(filePath), "UTF8");
+
+                        // validate JSON
+                        try {
+                            new JsonObject(workspaceSettings);
+                        } catch (Exception ex) {
+                            errorMessage = msg("Uploaded file is not valid JSON");
+
+                            aContext.response().setStatusCode(400);
+                            aContext.put(ERROR_MESSAGE, errorMessage);
+                            fail(aContext, new Error(errorMessage));
+                        }
+
+                        jsonNode.put("workspaceSettings", workspaceSettings);
+                    }
                     aContext.data().put(HBS_DATA_KEY, toHbsContext(jsonNode, aContext));
+                    /* To drop the ID from the path for template processing */
+                    aContext.data().put(HBS_PATH_SKIP_KEY, skip + slashCount(PathUtils.decode(id)));
                     aContext.next();
                 } catch (IOException e) {
                     e.printStackTrace();

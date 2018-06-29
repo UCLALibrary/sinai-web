@@ -727,6 +727,8 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                             li += !erasureMethod.equals("") ? "<p>" + "Method of erasure: " + erasureMethod + "." + "</p>" : "";
                         }
 
+                        // TODO: get title, author, genre, and date from undertext_objects, then display them in, and uncomment, the following block
+                        /*
                         if (undertextLayers.size() > 0) {
                             li += "<h3>Undertext(s)</h3>";
                             Iterator<Object> utlIt = undertextLayers.iterator();
@@ -777,7 +779,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
                                     !placeOfOrigin.equals("")) {
 
-                                    li += "<h4>Identity and Provenance</h4>";
+                                    li += "<h4>Identification and provenance</h4>";
                                     li += !workTitle.equals("") ? "<p>" + "Title: " + workTitle + "." + "</p>" : "";
                                     li += !author.equals("") ? "<p>" + "Author: " + author + "." + "</p>" : "";
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
@@ -857,6 +859,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
 
                             }
                         }
+                        */
 
                         if (overtextLayer != null) {
                             final String title = StringEscapeUtils.escapeHtml4(overtextLayer.getString("title_s", ""));
