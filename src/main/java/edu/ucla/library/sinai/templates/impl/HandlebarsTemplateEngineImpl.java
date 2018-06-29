@@ -777,7 +777,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
                                     !placeOfOrigin.equals("")) {
 
-                                    li += "<h4>Identity and Provenance</h4>";
+                                    li += "<h4>Identification and provenance</h4>";
                                     li += !workTitle.equals("") ? "<p>" + "Title: " + workTitle + "." + "</p>" : "";
                                     li += !author.equals("") ? "<p>" + "Author: " + author + "." + "</p>" : "";
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
