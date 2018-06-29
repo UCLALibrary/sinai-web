@@ -154,6 +154,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         final AdminHandler adminHandler = new AdminHandler(myConfig);
         final PageHandler pageHandler = new PageHandler(myConfig);
         final PDFProxyHandler pdfProxyHandler = new PDFProxyHandler(myConfig);
+        final MiradorHandler miradorHandler = new MiradorHandler(myConfig);
 
         // Serve static files like images, scripts, css, etc.
         router.getWithRegex(STATIC_FILES_RE).handler(StaticHandler.create());
@@ -174,7 +175,8 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         router.get(LOGOUT).handler(logoutHandler);
 
         // Route for Mirador viewing
-        router.getWithRegex(VIEWER_RE).handler(new MiradorHandler(myConfig));
+        router.getWithRegex(VIEWER_RE).handler(miradorHandler);
+        router.postWithRegex(VIEWER_RE).handler(miradorHandler);
 
         // Then we have the plain old administrative UI patterns
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
@@ -191,6 +193,9 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
         // Create a catch-all that passes content to the template handler
         router.get().handler(templateHandler).failureHandler(failureHandler);
+
+        // Pass content to template handler on POST requests to viewer only
+        router.postWithRegex(VIEWER_RE).handler(templateHandler).failureHandler(failureHandler);
 
         // Configure our StatusHandler, used by the Nagios script
         router.get(STATUS).handler(new StatusHandler(myConfig));
