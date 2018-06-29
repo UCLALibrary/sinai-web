@@ -52,7 +52,8 @@
         var anno_token;
         var mirador = Mirador(
         {{#if workspaceSettings}}
-        {{{workspaceSettings}}}
+        // in order to make previously saved workspaces work
+        jQuery.extend(true, {{{workspaceSettings}}}, { 'saveSession': false })
         {{else}}
         {
           "id": "viewer",
