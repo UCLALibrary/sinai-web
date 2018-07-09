@@ -236,26 +236,33 @@ public class PageHandler extends SinaiHandler {
         final JsonObject templateJson = new JsonObject();
         final SearchResultComparator searchResultComparator = new SearchResultComparator();
 
+        // Maps manuscript IDs to undertext object arrays
+        final JsonObject manuscriptIdToUndertextObjects = new JsonObject();
+
+        // Maps undertext object IDs to undertext objects
+        final JsonObject undertextObjectIdToUndertextObject = new JsonObject();
+
+        Iterator<Object> utoItt = undertextObjects.iterator();
+        while (utoItt.hasNext()) {
+            JsonObject uto = (JsonObject) utoItt.next();
+            if (manuscriptIdToUndertextObjects.getJsonArray(uto.getInteger("manuscript_id_i").toString()) == null) {
+                manuscriptIdToUndertextObjects.put(uto.getInteger("manuscript_id_i").toString(), new JsonArray());
+            }
+
+            manuscriptIdToUndertextObjects.getJsonArray(uto.getInteger("manuscript_id_i").toString()).add(uto);
+            undertextObjectIdToUndertextObject.put(uto.getInteger("undertext_object_id_i").toString(), uto);
+        }
+
         Iterator<Object> mIt = manuscripts.iterator();
         while (mIt.hasNext()) {
             JsonObject searchResult = new JsonObject();
             JsonObject m = (JsonObject) mIt.next();
             final Integer mId = m.getInteger("manuscript_id_i");
             final String shelfMark = m.getString("shelf_mark_s", "");
-            JsonArray resultUtos = new JsonArray();
             JsonArray resultMcs = new JsonArray();
 
             searchResult.put("manuscript", m);
-
-            Iterator<Object> utoIt = undertextObjects.iterator();
-            while (utoIt.hasNext()) {
-                JsonObject uto = (JsonObject) utoIt.next();
-                if (uto.getInteger("manuscript_id_i").equals(mId)) {
-
-                    resultUtos.add(uto);
-                }
-            }
-            searchResult.put("undertext_objects", resultUtos);
+            searchResult.put("undertext_objects", manuscriptIdToUndertextObjects.getJsonArray(mId.toString()));
 
             Iterator<Object> mcIt = manuscriptComponents.iterator();
             while (mcIt.hasNext()) {
@@ -273,11 +280,31 @@ public class PageHandler extends SinaiHandler {
                         JsonObject utl = (JsonObject) utlIt.next();
                         if (utl.getInteger("manuscript_component_id_i").equals(manuscriptComponentId)) {
                             // TODO: need place_of_origin_s and scholar_name_ss from UTO
+
+                            final Integer utlUtoId = utl.getInteger("undertext_object_id_i");
+                            if (utlUtoId != null) {
+                                JsonObject uto = undertextObjectIdToUndertextObject.getJsonObject(utlUtoId.toString());
+                                utl.put("work_s", uto.getString("work_s", ""));
+                                utl.put("author_s", uto.getString("author_s", ""));
+                                utl.put("genre_s", uto.getString("genre_s", ""));
+                                utl.put("primary_language_undertext_object_s", uto.getString("primary_language_s", ""));
+                                utl.put("script_s", uto.getString("script_s", ""));
+                                utl.put("script_characterization_s", uto.getString("script_characterization_s", ""));
+                                utl.put("script_date_text_s", uto.getString("script_date_text_s", ""));
+                                utl.put("script_date_start_i", uto.getInteger("script_date_start_i"));
+                                utl.put("script_date_end_i", uto.getInteger("script_date_end_i"));
+                                utl.put("place_of_origin_s", uto.getString("place_of_origin_s", ""));
+                                utl.put("folios_ss", uto.getJsonArray("folios_ss", new JsonArray()));
+                                utl.put("undertext_folio_order_s", uto.getString("undertext_folio_order_s", ""));
+                                utl.put("folio_order_comments_s", uto.getString("folio_order_comments", ""));
+                                utl.put("scholar_name_ss", uto.getJsonArray("scholar_name_ss", new JsonArray()));
+                            }
                             utls.add(utl);
                         }
                     }
                     mc.put("undertext_layers", utls);
 
+                    // TODO: change OTLs into hash table by manuscript_component_id_i
                     Iterator<Object> otlIt = overtextLayers.iterator();
                     while (otlIt.hasNext()) {
                         JsonObject otl = (JsonObject) otlIt.next();

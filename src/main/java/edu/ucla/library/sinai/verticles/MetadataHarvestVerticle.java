@@ -271,6 +271,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 // Add UTOs
                 final MetadataHarvestDBFields[] utoFields = {
                     new MetadataHarvestDBFields("uuid", "uto.uuid", "string", false),
+                    new MetadataHarvestDBFields("undertext_object_id", "uto.id", "int", false),
                     new MetadataHarvestDBFields("manuscript_id", "tlg.manuscript_id", "int", false),
                     new MetadataHarvestDBFields("shelf_mark", "m.shelf_mark", "string", false),
                     new MetadataHarvestDBFields("author", "uto.author", "string", false),
@@ -341,18 +342,12 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 final MetadataHarvestDBFields[] underTextLayerFields = {
                     new MetadataHarvestDBFields("uuid", "tl.uuid", "string", false),
                     new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
+                    new MetadataHarvestDBFields("undertext_object_id", "tl.undertext_object_id", "int", false),
                     new MetadataHarvestDBFields("manuscript_component_id", "tl.manuscript_component_id", "int", false),
-                    new MetadataHarvestDBFields("work_title", "tl.work_title", "string", false),
-                    new MetadataHarvestDBFields("author", "tl.author", "string", false),
                     new MetadataHarvestDBFields("work_passage", "tl.work_passage", "string", false),
-                    new MetadataHarvestDBFields("genre", "tl.genre", "string", false),
                     new MetadataHarvestDBFields("primary_language", "tl.primary_language", "string", false),
-                    new MetadataHarvestDBFields("script", "tl.script", "string", false),
                     new MetadataHarvestDBFields("script_note", "tl.script_note", "string", false),
                     new MetadataHarvestDBFields("secondary_languages", "array_remove(array_replace(ARRAY[tl.secondary_language_1, tl.secondary_language_2, tl.secondary_language_3], '', NULL), NULL)", "string", true),
-                    new MetadataHarvestDBFields("script_date_text", "tl.script_date_text", "string", false),
-                    new MetadataHarvestDBFields("script_date_start", "tl.script_date_start", "int", false),
-                    new MetadataHarvestDBFields("script_date_end", "tl.script_date_end", "int", false),
                     new MetadataHarvestDBFields("marginalia_present", "tl.marginalia_present", "boolean", false),
                     new MetadataHarvestDBFields("marginalia", "tl.marginalia", "string", false),
                     new MetadataHarvestDBFields("nontextual_content_present", "tl.nontextual_content_present", "boolean", false),
@@ -366,11 +361,10 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("preservation_notes", "tl.preservation_notes", "string", false),
                     new MetadataHarvestDBFields("remarks", "tl.remarks", "string", false),
                     new MetadataHarvestDBFields("notes", "tl.notes", "string", false)
-                    // TODO: add undertext_object_id field
                 };
                 final String underTextLayerSql = "SELECT " + String.join(",", Arrays.stream(underTextLayerFields).map(s -> {
                     return s.alias + " AS " + s.name;
-                }).toArray(String[]::new)) + " FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id WHERE tl.type = 'UnderTextLayer'";
+                }).toArray(String[]::new)) + " FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id WHERE tl.type = 'UnderTextLayer' AND tl.undertext_object_id IS NOT NULL";
                 LOGGER.info(underTextLayerSql);
                 updateSolr("undertext_layer", underTextLayerFields, underTextLayerSql, conn, multiValuedFieldDelimiter);
 

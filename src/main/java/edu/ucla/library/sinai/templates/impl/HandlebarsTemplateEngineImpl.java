@@ -728,20 +728,25 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         }
 
                         // TODO: get title, author, genre, and date from undertext_objects, then display them in, and uncomment, the following block
-                        /*
+
                         if (undertextLayers.size() > 0) {
                             li += "<h3>Undertext(s)</h3>";
+                            li += "<ul class=\"folio-undertexts-list\">";
                             Iterator<Object> utlIt = undertextLayers.iterator();
                             for (Integer i = 0; utlIt.hasNext(); i++) {
 
                                 JsonObject utl = (JsonObject) utlIt.next();
 
-                                final String workTitle = StringEscapeUtils.escapeHtml4(utl.getString("work_title_s", ""));
+                                final String work = StringEscapeUtils.escapeHtml4(utl.getString("work_s", ""));
                                 final String author = StringEscapeUtils.escapeHtml4(utl.getString("author_s", ""));
                                 final String workPassage = StringEscapeUtils.escapeHtml4(utl.getString("work_passage_s", ""));
                                 final String genre = StringEscapeUtils.escapeHtml4(utl.getString("genre_s", ""));
+
+                                // Folio primary language vs UTO primary language
                                 final String primaryLanguage = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_s", ""));
+                                final String primaryLanguageUndertextObject = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_undertext_object_s", ""));
                                 final String script = StringEscapeUtils.escapeHtml4(utl.getString("script_s", ""));
+                                final String scriptCharacterization = StringEscapeUtils.escapeHtml4(utl.getString("script_characterization_s", ""));
                                 final String scriptNote = StringEscapeUtils.escapeHtml4(utl.getString("script_note_s", ""));
                                 final JsonArray secondaryLanguage = utl.getJsonArray("secondary_languages_ss", new JsonArray());
                                 final String scriptDateText = StringEscapeUtils.escapeHtml4(utl.getString("script_date_text_s", ""));
@@ -765,10 +770,87 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 final String notes = StringEscapeUtils.escapeHtml4(utl.getString("notes_s", ""));
                                 final JsonArray scholarNames = utl.getJsonArray("scholar_name_ss", new JsonArray());
 
-                                li += "<h4>Undertext #" + new Integer(i + 1).toString() + "</h4>";
-                                li += "<div class=\"indent\">";
+                                li += "<li>";
+                                if (!work.equals("") ||
+                                    !author.equals("") ||
+                                    !genre.equals("") ||
+                                    !primaryLanguageUndertextObject.equals("") ||
+                                    !script.equals("") ||
+                                    (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null))) {
 
-                                if (!workTitle.equals("") ||
+                                    // Concatenation goes here
+                                    Boolean hanging = false;
+
+                                    if (!author.equals("") || !work.equals("") || !genre.equals("")) {
+                                        li += "<p class=\"bold\">";
+                                        hanging = true;
+
+                                        if (!author.equals("")) {
+                                            li += author;
+                                        }
+                                        if (!work.equals("")) {
+                                            if (!author.equals("")) {
+                                                li += ", ";
+                                            }
+                                            li += work;
+                                        }
+                                        if (!genre.equals("")) {
+                                            if (!author.equals("") || !work.equals("")) {
+                                                li += ". ";
+                                            }
+                                            li += genre;
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+
+                                    // second row: primaryLanguage, scriptName
+                                    if (!primaryLanguageUndertextObject.equals("") || !script.equals("")) {
+                                        if (hanging == false) {
+                                            li += "<p>";
+                                            hanging = true;
+                                        } else {
+                                            li += "<p class=\"indent\">";
+                                        }
+                                        if (!primaryLanguageUndertextObject.equals("")) {
+                                            li += primaryLanguageUndertextObject + ".";
+                                        }
+                                        if (!script.equals("")) {
+                                            if (!primaryLanguageUndertextObject.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "Script: " + script + ".";
+                                        }
+                                        li += "</p>";
+                                    }
+
+                                    // third row: scriptDateText, scriptDateStart, scriptDateEnd
+                                    if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
+                                        if (hanging == false) {
+                                            li += "<p>";
+                                            hanging = true;
+                                        } else {
+                                            li += "<p class=\"indent\">";
+                                        }
+                                        if (!scriptDateText.equals("")) {
+                                            li += scriptDateText;
+                                        }
+                                        if (scriptDateStart != null && scriptDateEnd != null) {
+                                            if (!scriptDateText.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+                                } else {
+                                    // fall back on this if no metadata present
+                                    li += "<h4>Undertext #" + new Integer(i + 1).toString() + "</h4>";
+                                }
+
+                                li += "<div class=\"indent\">";
+                                if (!work.equals("") ||
                                     !author.equals("") ||
                                     !workPassage.equals("") ||
                                     !genre.equals("") ||
@@ -780,7 +862,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     !placeOfOrigin.equals("")) {
 
                                     li += "<h4>Identification and provenance</h4>";
-                                    li += !workTitle.equals("") ? "<p>" + "Title: " + workTitle + "." + "</p>" : "";
+                                    li += !work.equals("") ? "<p>" + "Title: " + work + "." + "</p>" : "";
                                     li += !author.equals("") ? "<p>" + "Author: " + author + "." + "</p>" : "";
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
                                     li += !genre.equals("") ? "<p>" + "Genre: " + genre + "." + "</p>" : "";
@@ -856,10 +938,12 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
 
                                 li += !scholarNames.isEmpty() ? "<p class=\"scholar-names\">" + String.join(", ", scholarNames.getList()) + "." : "";
                                 li += "</div>";
+                                li += "</li>";
 
                             }
+                            li += "</ul>";
                         }
-                        */
+
 
                         if (overtextLayer != null) {
                             final String title = StringEscapeUtils.escapeHtml4(overtextLayer.getString("title_s", ""));
