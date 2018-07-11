@@ -745,7 +745,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 // Folio primary language vs UTO primary language
                                 final String primaryLanguage = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_s", ""));
                                 final String primaryLanguageUndertextObject = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_undertext_object_s", ""));
-                                final String script = StringEscapeUtils.escapeHtml4(utl.getString("script_s", ""));
+                                final String scriptName = StringEscapeUtils.escapeHtml4(utl.getString("script_name_s", ""));
                                 final String scriptCharacterization = StringEscapeUtils.escapeHtml4(utl.getString("script_characterization_s", ""));
                                 final String scriptNote = StringEscapeUtils.escapeHtml4(utl.getString("script_note_s", ""));
                                 final JsonArray secondaryLanguage = utl.getJsonArray("secondary_languages_ss", new JsonArray());
@@ -775,7 +775,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     !author.equals("") ||
                                     !genre.equals("") ||
                                     !primaryLanguageUndertextObject.equals("") ||
-                                    !script.equals("") ||
+                                    !scriptName.equals("") ||
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null))) {
 
                                     // Concatenation goes here
@@ -805,7 +805,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     }
 
                                     // second row: primaryLanguage, scriptName
-                                    if (!primaryLanguageUndertextObject.equals("") || !script.equals("")) {
+                                    if (!primaryLanguageUndertextObject.equals("") || !scriptName.equals("")) {
                                         if (hanging == false) {
                                             li += "<p>";
                                             hanging = true;
@@ -815,11 +815,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                         if (!primaryLanguageUndertextObject.equals("")) {
                                             li += primaryLanguageUndertextObject + ".";
                                         }
-                                        if (!script.equals("")) {
+                                        if (!scriptName.equals("")) {
                                             if (!primaryLanguageUndertextObject.equals("")) {
                                                 li += " ";
                                             }
-                                            li += "Script: " + script + ".";
+                                            li += "Script: " + scriptName + ".";
                                         }
                                         li += "</p>";
                                     }
@@ -855,7 +855,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     !workPassage.equals("") ||
                                     !genre.equals("") ||
                                     !primaryLanguage.equals("") ||
-                                    !script.equals("") ||
+                                    !scriptName.equals("") ||
                                     !scriptNote.equals("") ||
                                     !secondaryLanguage.isEmpty() ||
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
@@ -867,7 +867,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
                                     li += !genre.equals("") ? "<p>" + "Genre: " + genre + "." + "</p>" : "";
                                     li += !primaryLanguage.equals("") ? "<p>" + "Primary language: " + primaryLanguage + "." + "</p>" : "";
-                                    li += !script.equals("") ? "<p>" + "Script: " + script + "." + "</p>" : "";
+                                    li += !scriptName.equals("") ? "<p>" + "Script: " + scriptName + "." + "</p>" : "";
                                     li += !scriptNote.equals("") ? "<p>" + "Script note: " + scriptNote + "." + "</p>" : "";
                                     li += !secondaryLanguage.isEmpty() ? "<p>" + "Secondary language(s): " + String.join(", ", secondaryLanguage.getList()) + "." + "</p>" : "";
                                     if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
