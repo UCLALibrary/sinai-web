@@ -311,9 +311,13 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                     new MetadataHarvestDBFields("folio_number", "mc.folio_number", "string", false),
                     new MetadataHarvestDBFields("folio_side", "mc.folio_side", "string", false),
 
-                    new MetadataHarvestDBFields("leading_conjoin_component_type", "mcj.leading_conjoin_component_type", "string", false),
-                    new MetadataHarvestDBFields("leading_conjoin_folio_number", "mcj.leading_conjoin_folio_number", "string", false),
-                    new MetadataHarvestDBFields("leading_conjoin_folio_side", "mcj.leading_conjoin_folio_side", "string", false),
+                    new MetadataHarvestDBFields("leading_conjoin_component_type", "leading_conjoins.leading_conjoin_component_type", "string", false),
+                    new MetadataHarvestDBFields("leading_conjoin_folio_number", "leading_conjoins.leading_conjoin_folio_number", "string", false),
+                    new MetadataHarvestDBFields("leading_conjoin_folio_side", "leading_conjoins.leading_conjoin_folio_side", "string", false),
+
+                    new MetadataHarvestDBFields("trailing_conjoin_component_type", "trailing_conjoins.trailing_conjoin_component_type", "string", false),
+                    new MetadataHarvestDBFields("trailing_conjoin_folio_number", "trailing_conjoins.trailing_conjoin_folio_number", "string", false),
+                    new MetadataHarvestDBFields("trailing_conjoin_folio_side", "trailing_conjoins.trailing_conjoin_folio_side", "string", false),
 
                     new MetadataHarvestDBFields("quire", "mc.quire", "string", false),
                     new MetadataHarvestDBFields("quire_position", "mc.quire_position", "string", false),
@@ -335,7 +339,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 };
                 final String folioSql = "SELECT " + String.join(",", Arrays.stream(folioFields).map(s -> {
                     return s.alias + " AS " + s.name;
-                }).toArray(String[]::new)) + " FROM manuscript_components AS mc LEFT OUTER JOIN ( SELECT id, component_type AS leading_conjoin_component_type, folio_number AS leading_conjoin_folio_number, folio_side AS leading_conjoin_folio_side FROM manuscript_components ) AS mcj ON mc.leading_conjoin_id = mcj.id";
+                }).toArray(String[]::new)) + " FROM manuscript_components AS mc LEFT OUTER JOIN ( SELECT id, component_type AS leading_conjoin_component_type, folio_number AS leading_conjoin_folio_number, folio_side AS leading_conjoin_folio_side FROM manuscript_components ) AS leading_conjoins ON mc.leading_conjoin_id = leading_conjoins.id LEFT OUTER JOIN ( SELECT leading_conjoin_id AS trailing_conjoin_id, component_type AS trailing_conjoin_component_type, folio_number AS trailing_conjoin_folio_number, folio_side AS trailing_conjoin_folio_side FROM manuscript_components ) AS trailing_conjoins ON mc.id = trailing_conjoins.trailing_conjoin_id";
                 updateSolr("manuscript_component", folioFields, folioSql, conn, multiValuedFieldDelimiter);
 
                 // Add under text layers
