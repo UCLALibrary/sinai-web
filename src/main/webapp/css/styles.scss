@@ -26,12 +26,6 @@ body.sinai-body {
     padding: 0;
     height: 100%;
 
-    ul {
-        list-style: outside none none;
-        margin: 0;
-        padding: 0;
-    }
-
     img {
         border: none;
     }
@@ -108,6 +102,9 @@ body.sinai-body {
 
         > ul {
             text-align: right;
+            list-style: outside none none;
+            margin: 0;
+            padding: 0;
 
             > li {
                 display: inline-block;
@@ -162,6 +159,12 @@ body.sinai-body {
         #browse-main-content {
             overflow: hidden;
 
+            ul {
+                list-style: outside none none;
+                margin: 0;
+                padding: 0;
+            }
+
             #search-results {
 
                 .undertexts-header {
@@ -171,9 +174,7 @@ body.sinai-body {
                     color: black;
                     font-size: 1.25em;
                 }
-                .bold {
-                    font-weight: bold;
-                }
+
                 .italic {
                     font-style: italic;
                 }
@@ -499,6 +500,10 @@ body.sinai-body {
 
 .inline {
   display: inline;
+}
+
+.bold {
+    font-weight: bold;
 }
 
 .link-button {

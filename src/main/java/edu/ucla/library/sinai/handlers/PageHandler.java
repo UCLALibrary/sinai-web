@@ -288,7 +288,7 @@ public class PageHandler extends SinaiHandler {
                                 utl.put("author_s", uto.getString("author_s", ""));
                                 utl.put("genre_s", uto.getString("genre_s", ""));
                                 utl.put("primary_language_undertext_object_s", uto.getString("primary_language_s", ""));
-                                utl.put("script_s", uto.getString("script_s", ""));
+                                utl.put("script_name_s", uto.getString("script_name_s", ""));
                                 utl.put("script_characterization_s", uto.getString("script_characterization_s", ""));
                                 utl.put("script_date_text_s", uto.getString("script_date_text_s", ""));
                                 utl.put("script_date_start_i", uto.getInteger("script_date_start_i"));

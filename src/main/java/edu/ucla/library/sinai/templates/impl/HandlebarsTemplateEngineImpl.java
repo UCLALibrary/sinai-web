@@ -607,6 +607,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final String leadingConjoinComponentType = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_component_type_s", ""));
                         final String leadingConjoinFolioNumber = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_number_s", ""));
                         final String leadingConjoinFolioSide = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_side_s", ""));
+
+                        final String trailingConjoinComponentType = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_component_type_s", ""));
+                        final String trailingConjoinFolioNumber = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_folio_number_s", ""));
+                        final String trailingConjoinFolioSide = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_folio_side_s", ""));
+
                         final String quire = StringEscapeUtils.escapeHtml4(json.getString("quire_s", ""));
                         final String quirePosition = StringEscapeUtils.escapeHtml4(json.getString("quire_position_s", ""));
                         final String alternateNumbering = StringEscapeUtils.escapeHtml4(json.getString("alternate_numbering_s", ""));
@@ -666,6 +671,9 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         if (!leadingConjoinComponentType.equals("") ||
                             !leadingConjoinFolioNumber.equals("") ||
                             !leadingConjoinFolioSide.equals("") ||
+                            !trailingConjoinComponentType.equals("") ||
+                            !trailingConjoinFolioNumber.equals("") ||
+                            !trailingConjoinFolioSide.equals("") ||
                             !quire.equals("") ||
                             !quirePosition.equals("") ||
                             !alternateNumbering.equals("")) {
@@ -691,6 +699,28 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                         li += " ";
                                     }
                                     li += leadingConjoinFolioSide;
+                                }
+                                li += "</p>";
+                            } else if (!trailingConjoinComponentType.equals("") ||
+                                       !trailingConjoinFolioNumber.equals("") ||
+                                       !trailingConjoinFolioSide.equals("")) {
+
+                                li += "<p>"
+                                   + "Conjoin: ";
+                                if (!trailingConjoinComponentType.equals("")) {
+                                    li += trailingConjoinComponentType;
+                                }
+                                if (!trailingConjoinFolioNumber.equals("")) {
+                                    if (!trailingConjoinComponentType.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += trailingConjoinFolioNumber;
+                                }
+                                if (!trailingConjoinFolioSide.equals("")) {
+                                    if (!trailingConjoinComponentType.equals("") || !trailingConjoinFolioNumber.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += trailingConjoinFolioSide;
                                 }
                                 li += "</p>";
                             }
@@ -745,7 +775,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 // Folio primary language vs UTO primary language
                                 final String primaryLanguage = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_s", ""));
                                 final String primaryLanguageUndertextObject = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_undertext_object_s", ""));
-                                final String script = StringEscapeUtils.escapeHtml4(utl.getString("script_s", ""));
+                                final String scriptName = StringEscapeUtils.escapeHtml4(utl.getString("script_name_s", ""));
                                 final String scriptCharacterization = StringEscapeUtils.escapeHtml4(utl.getString("script_characterization_s", ""));
                                 final String scriptNote = StringEscapeUtils.escapeHtml4(utl.getString("script_note_s", ""));
                                 final JsonArray secondaryLanguage = utl.getJsonArray("secondary_languages_ss", new JsonArray());
@@ -775,7 +805,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     !author.equals("") ||
                                     !genre.equals("") ||
                                     !primaryLanguageUndertextObject.equals("") ||
-                                    !script.equals("") ||
+                                    !scriptName.equals("") ||
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null))) {
 
                                     // Concatenation goes here
@@ -805,7 +835,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     }
 
                                     // second row: primaryLanguage, scriptName
-                                    if (!primaryLanguageUndertextObject.equals("") || !script.equals("")) {
+                                    if (!primaryLanguageUndertextObject.equals("") || !scriptName.equals("")) {
                                         if (hanging == false) {
                                             li += "<p>";
                                             hanging = true;
@@ -815,11 +845,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                         if (!primaryLanguageUndertextObject.equals("")) {
                                             li += primaryLanguageUndertextObject + ".";
                                         }
-                                        if (!script.equals("")) {
+                                        if (!scriptName.equals("")) {
                                             if (!primaryLanguageUndertextObject.equals("")) {
                                                 li += " ";
                                             }
-                                            li += "Script: " + script + ".";
+                                            li += "Script: " + scriptName + ".";
                                         }
                                         li += "</p>";
                                     }
@@ -855,7 +885,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     !workPassage.equals("") ||
                                     !genre.equals("") ||
                                     !primaryLanguage.equals("") ||
-                                    !script.equals("") ||
+                                    !scriptName.equals("") ||
                                     !scriptNote.equals("") ||
                                     !secondaryLanguage.isEmpty() ||
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
@@ -867,7 +897,7 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
                                     li += !genre.equals("") ? "<p>" + "Genre: " + genre + "." + "</p>" : "";
                                     li += !primaryLanguage.equals("") ? "<p>" + "Primary language: " + primaryLanguage + "." + "</p>" : "";
-                                    li += !script.equals("") ? "<p>" + "Script: " + script + "." + "</p>" : "";
+                                    li += !scriptName.equals("") ? "<p>" + "Script: " + scriptName + "." + "</p>" : "";
                                     li += !scriptNote.equals("") ? "<p>" + "Script note: " + scriptNote + "." + "</p>" : "";
                                     li += !secondaryLanguage.isEmpty() ? "<p>" + "Secondary language(s): " + String.join(", ", secondaryLanguage.getList()) + "." + "</p>" : "";
                                     if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
