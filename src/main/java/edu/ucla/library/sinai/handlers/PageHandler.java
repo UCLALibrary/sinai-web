@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.SolrService;
 import edu.ucla.library.sinai.util.SearchResultComparator;
+import edu.ucla.library.sinai.util.UTOComparator;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -147,7 +149,10 @@ public class PageHandler extends SinaiHandler {
 
                             Handler<AsyncResult<JsonObject>> undertextObjectsSolrSearchHandler = search -> {
                                 if (search.succeeded()) {
-                                    undertextObjects = search.result().getJsonObject("response").getJsonArray("docs");
+                                    // Sort by Language, then by Author, then by Title
+                                    List<JsonObject> arrr = Collections.checkedList(search.result().getJsonObject("response").getJsonArray("docs").getList(), JsonObject.class);
+                                    Collections.sort(arrr, new UTOComparator());
+                                    undertextObjects = new JsonArray(arrr);
                                     service.search(manuscriptComponentsSolrQuery, manuscriptComponentsSolrSearchHandler);
                                 } else {
                                     aContext.put(ERROR_HEADER, "Solr Search Error");
@@ -215,7 +220,8 @@ public class PageHandler extends SinaiHandler {
     /*
      * Builds a list of manuscripts that are shaped like so:
      *
-     * manuscript: {
+     * {
+     *   manuscript: {}
      *   undertext_objects: [ {}, ... ],
      *   manuscript_components: [
      *     {
@@ -224,8 +230,7 @@ public class PageHandler extends SinaiHandler {
      *       ...
      *     },
      *     ...
-     *   ],
-     *   ...
+     *   ]
      * }
      *
      */
