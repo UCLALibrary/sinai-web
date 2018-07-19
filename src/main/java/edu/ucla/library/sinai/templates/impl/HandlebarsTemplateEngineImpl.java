@@ -607,6 +607,11 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         final String leadingConjoinComponentType = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_component_type_s", ""));
                         final String leadingConjoinFolioNumber = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_number_s", ""));
                         final String leadingConjoinFolioSide = StringEscapeUtils.escapeHtml4(json.getString("leading_conjoin_folio_side_s", ""));
+
+                        final String trailingConjoinComponentType = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_component_type_s", ""));
+                        final String trailingConjoinFolioNumber = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_folio_number_s", ""));
+                        final String trailingConjoinFolioSide = StringEscapeUtils.escapeHtml4(json.getString("trailing_conjoin_folio_side_s", ""));
+
                         final String quire = StringEscapeUtils.escapeHtml4(json.getString("quire_s", ""));
                         final String quirePosition = StringEscapeUtils.escapeHtml4(json.getString("quire_position_s", ""));
                         final String alternateNumbering = StringEscapeUtils.escapeHtml4(json.getString("alternate_numbering_s", ""));
@@ -666,6 +671,9 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         if (!leadingConjoinComponentType.equals("") ||
                             !leadingConjoinFolioNumber.equals("") ||
                             !leadingConjoinFolioSide.equals("") ||
+                            !trailingConjoinComponentType.equals("") ||
+                            !trailingConjoinFolioNumber.equals("") ||
+                            !trailingConjoinFolioSide.equals("") ||
                             !quire.equals("") ||
                             !quirePosition.equals("") ||
                             !alternateNumbering.equals("")) {
@@ -691,6 +699,28 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                         li += " ";
                                     }
                                     li += leadingConjoinFolioSide;
+                                }
+                                li += "</p>";
+                            } else if (!trailingConjoinComponentType.equals("") ||
+                                       !trailingConjoinFolioNumber.equals("") ||
+                                       !trailingConjoinFolioSide.equals("")) {
+
+                                li += "<p>"
+                                   + "Conjoin: ";
+                                if (!trailingConjoinComponentType.equals("")) {
+                                    li += trailingConjoinComponentType;
+                                }
+                                if (!trailingConjoinFolioNumber.equals("")) {
+                                    if (!trailingConjoinComponentType.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += trailingConjoinFolioNumber;
+                                }
+                                if (!trailingConjoinFolioSide.equals("")) {
+                                    if (!trailingConjoinComponentType.equals("") || !trailingConjoinFolioNumber.equals("")) {
+                                        li += " ";
+                                    }
+                                    li += trailingConjoinFolioSide;
                                 }
                                 li += "</p>";
                             }
@@ -728,20 +758,25 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                         }
 
                         // TODO: get title, author, genre, and date from undertext_objects, then display them in, and uncomment, the following block
-                        /*
+
                         if (undertextLayers.size() > 0) {
                             li += "<h3>Undertext(s)</h3>";
+                            li += "<ul class=\"folio-undertexts-list\">";
                             Iterator<Object> utlIt = undertextLayers.iterator();
                             for (Integer i = 0; utlIt.hasNext(); i++) {
 
                                 JsonObject utl = (JsonObject) utlIt.next();
 
-                                final String workTitle = StringEscapeUtils.escapeHtml4(utl.getString("work_title_s", ""));
+                                final String work = StringEscapeUtils.escapeHtml4(utl.getString("work_s", ""));
                                 final String author = StringEscapeUtils.escapeHtml4(utl.getString("author_s", ""));
                                 final String workPassage = StringEscapeUtils.escapeHtml4(utl.getString("work_passage_s", ""));
                                 final String genre = StringEscapeUtils.escapeHtml4(utl.getString("genre_s", ""));
+
+                                // Folio primary language vs UTO primary language
                                 final String primaryLanguage = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_s", ""));
-                                final String script = StringEscapeUtils.escapeHtml4(utl.getString("script_s", ""));
+                                final String primaryLanguageUndertextObject = StringEscapeUtils.escapeHtml4(utl.getString("primary_language_undertext_object_s", ""));
+                                final String scriptName = StringEscapeUtils.escapeHtml4(utl.getString("script_name_s", ""));
+                                final String scriptCharacterization = StringEscapeUtils.escapeHtml4(utl.getString("script_characterization_s", ""));
                                 final String scriptNote = StringEscapeUtils.escapeHtml4(utl.getString("script_note_s", ""));
                                 final JsonArray secondaryLanguage = utl.getJsonArray("secondary_languages_ss", new JsonArray());
                                 final String scriptDateText = StringEscapeUtils.escapeHtml4(utl.getString("script_date_text_s", ""));
@@ -765,27 +800,104 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
                                 final String notes = StringEscapeUtils.escapeHtml4(utl.getString("notes_s", ""));
                                 final JsonArray scholarNames = utl.getJsonArray("scholar_name_ss", new JsonArray());
 
-                                li += "<h4>Undertext #" + new Integer(i + 1).toString() + "</h4>";
-                                li += "<div class=\"indent\">";
+                                li += "<li>";
+                                if (!work.equals("") ||
+                                    !author.equals("") ||
+                                    !genre.equals("") ||
+                                    !primaryLanguageUndertextObject.equals("") ||
+                                    !scriptName.equals("") ||
+                                    (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null))) {
 
-                                if (!workTitle.equals("") ||
+                                    // Concatenation goes here
+                                    Boolean hanging = false;
+
+                                    if (!author.equals("") || !work.equals("") || !genre.equals("")) {
+                                        li += "<p class=\"bold\">";
+                                        hanging = true;
+
+                                        if (!author.equals("")) {
+                                            li += author;
+                                        }
+                                        if (!work.equals("")) {
+                                            if (!author.equals("")) {
+                                                li += ", ";
+                                            }
+                                            li += work;
+                                        }
+                                        if (!genre.equals("")) {
+                                            if (!author.equals("") || !work.equals("")) {
+                                                li += ". ";
+                                            }
+                                            li += genre;
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+
+                                    // second row: primaryLanguage, scriptName
+                                    if (!primaryLanguageUndertextObject.equals("") || !scriptName.equals("")) {
+                                        if (hanging == false) {
+                                            li += "<p>";
+                                            hanging = true;
+                                        } else {
+                                            li += "<p class=\"indent\">";
+                                        }
+                                        if (!primaryLanguageUndertextObject.equals("")) {
+                                            li += primaryLanguageUndertextObject + ".";
+                                        }
+                                        if (!scriptName.equals("")) {
+                                            if (!primaryLanguageUndertextObject.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "Script: " + scriptName + ".";
+                                        }
+                                        li += "</p>";
+                                    }
+
+                                    // third row: scriptDateText, scriptDateStart, scriptDateEnd
+                                    if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
+                                        if (hanging == false) {
+                                            li += "<p>";
+                                            hanging = true;
+                                        } else {
+                                            li += "<p class=\"indent\">";
+                                        }
+                                        if (!scriptDateText.equals("")) {
+                                            li += scriptDateText;
+                                        }
+                                        if (scriptDateStart != null && scriptDateEnd != null) {
+                                            if (!scriptDateText.equals("")) {
+                                                li += " ";
+                                            }
+                                            li += "(" + scriptDateStart.toString() + " to " + scriptDateEnd.toString() + ")";
+                                        }
+                                        li += ".";
+                                        li += "</p>";
+                                    }
+                                } else {
+                                    // fall back on this if no metadata present
+                                    li += "<h4>Undertext #" + new Integer(i + 1).toString() + "</h4>";
+                                }
+
+                                li += "<div class=\"indent\">";
+                                if (!work.equals("") ||
                                     !author.equals("") ||
                                     !workPassage.equals("") ||
                                     !genre.equals("") ||
                                     !primaryLanguage.equals("") ||
-                                    !script.equals("") ||
+                                    !scriptName.equals("") ||
                                     !scriptNote.equals("") ||
                                     !secondaryLanguage.isEmpty() ||
                                     (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) ||
                                     !placeOfOrigin.equals("")) {
 
                                     li += "<h4>Identification and provenance</h4>";
-                                    li += !workTitle.equals("") ? "<p>" + "Title: " + workTitle + "." + "</p>" : "";
+                                    li += !work.equals("") ? "<p>" + "Title: " + work + "." + "</p>" : "";
                                     li += !author.equals("") ? "<p>" + "Author: " + author + "." + "</p>" : "";
                                     li += !workPassage.equals("") ? "<p>" + "Passage: " + workPassage + "." + "</p>" : "";
                                     li += !genre.equals("") ? "<p>" + "Genre: " + genre + "." + "</p>" : "";
                                     li += !primaryLanguage.equals("") ? "<p>" + "Primary language: " + primaryLanguage + "." + "</p>" : "";
-                                    li += !script.equals("") ? "<p>" + "Script: " + script + "." + "</p>" : "";
+                                    li += !scriptName.equals("") ? "<p>" + "Script: " + scriptName + "." + "</p>" : "";
                                     li += !scriptNote.equals("") ? "<p>" + "Script note: " + scriptNote + "." + "</p>" : "";
                                     li += !secondaryLanguage.isEmpty() ? "<p>" + "Secondary language(s): " + String.join(", ", secondaryLanguage.getList()) + "." + "</p>" : "";
                                     if (!scriptDateText.equals("") || (scriptDateStart != null && scriptDateEnd != null)) {
@@ -856,10 +968,12 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
 
                                 li += !scholarNames.isEmpty() ? "<p class=\"scholar-names\">" + String.join(", ", scholarNames.getList()) + "." : "";
                                 li += "</div>";
+                                li += "</li>";
 
                             }
+                            li += "</ul>";
                         }
-                        */
+
 
                         if (overtextLayer != null) {
                             final String title = StringEscapeUtils.escapeHtml4(overtextLayer.getString("title_s", ""));
