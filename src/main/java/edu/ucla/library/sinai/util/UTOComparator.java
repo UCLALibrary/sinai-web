@@ -11,6 +11,7 @@ public class UTOComparator implements Comparator<JsonObject> {
 
     @Override
     public int compare(JsonObject o1, JsonObject o2) {
+        // https://sinai-lib.atlassian.net/browse/PAL-60?focusedCommentId=10191&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-10191
         final String language1, language2, author1, author2, work1, work2;
         final Integer languageComparison, authorComparison, workComparison;
 
@@ -43,10 +44,20 @@ public class UTOComparator implements Comparator<JsonObject> {
         work1 = o1.getString("work_s");
         work2 = o2.getString("work_s");
         if (work1 != null && work2 != null) {
+            // remove first pair of parenthesis, since this is the only possible other first character that is not alphanumeric
+            if (work1.charAt(0) == '(') {
+                work1.replaceFirst("\\(", "");
+                work1.replaceFirst("\\)", "");
+            }
+            if (work2.charAt(0) == '(') {
+                work2.replaceFirst("\\(", "");
+                work2.replaceFirst("\\)", "");
+            }
             workComparison = work1.compareTo(work2);
             if (workComparison != 0) {
                 return workComparison;
             }
+        // work should never be null, but just in case, non-null goes first
         } else if (work1 != null && work2 == null) {
             return -1;
         } else if (work1 == null && work2 != null) {
