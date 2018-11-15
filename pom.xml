@@ -535,7 +535,7 @@
         <sinai.user>${user.name}</sinai.user>
         <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
         <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
-        <sinai.logging.config.dir>${basedir}/target</sinai.logging.config.dir>
+        <sinai.logging.config.dir>${basedir}</sinai.logging.config.dir>
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
@@ -551,7 +551,7 @@
         <sinai.user>${user.name}</sinai.user>
         <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
         <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
-        <sinai.logging.config.dir>${basedir}/target</sinai.logging.config.dir>
+        <sinai.logging.config.dir>${basedir}</sinai.logging.config.dir>
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
