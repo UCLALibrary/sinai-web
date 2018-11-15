@@ -132,11 +132,11 @@
       <version>1.4.1</version>
     </dependency>
     <dependency>
-	  <groupId>org.postgresql</groupId>
-	  <artifactId>postgresql</artifactId>
-	  <version>${postgresql.version}</version>
-	</dependency>
-	<dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+    </dependency>
+    <dependency>
       <artifactId>solr-solrj</artifactId>
       <groupId>org.apache.solr</groupId>
       <version>${solrj.version}</version>
@@ -411,12 +411,8 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
-      <!-- FIXME: disabling for now
-      <plugin>
-        <groupId>com.github.klieber</groupId>
-        <artifactId>phantomjs-maven-plugin</artifactId>
-      </plugin>
-      -->
+      <!-- FIXME: disabling for now <plugin> <groupId>com.github.klieber</groupId> <artifactId>phantomjs-maven-plugin</artifactId> 
+        </plugin> -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -452,7 +448,8 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>io.vertx.core.Starter</Main-Class>
                     <Main-Verticle>edu.ucla.library.sinai.verticles.SinaiMainVerticle</Main-Verticle>
@@ -461,9 +458,11 @@
                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
                 </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
               </transformers>
-              <artifactSet> </artifactSet>
+              <artifactSet>
+              </artifactSet>
               <outputFile>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</outputFile>
             </configuration>
           </execution>
@@ -520,6 +519,7 @@
         <sinai.user>${user.name}</sinai.user>
         <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
         <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.logging.config.dir>${basedir}</sinai.logging.config.dir>
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
@@ -535,6 +535,7 @@
         <sinai.user>${user.name}</sinai.user>
         <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
         <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.logging.config.dir>${basedir}/target</sinai.logging.config.dir>
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
@@ -550,6 +551,7 @@
         <sinai.user>${user.name}</sinai.user>
         <sinai.deployment.dir>${basedir}/target</sinai.deployment.dir>
         <sinai.logs.dir>${basedir}/target</sinai.logs.dir>
+        <sinai.logging.config.dir>${basedir}/target</sinai.logging.config.dir>
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
