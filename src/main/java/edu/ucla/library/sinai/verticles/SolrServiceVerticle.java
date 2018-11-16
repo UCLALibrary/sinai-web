@@ -45,7 +45,6 @@ public class SolrServiceVerticle extends AbstractSinaiVerticle {
         });
 
         request.end();
-        aFuture.complete();
     }
 
     /**

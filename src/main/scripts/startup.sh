@@ -44,6 +44,8 @@ fi
 
 # We're going to be opinionated about logging frameworks
 LOG_DELEGATE="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
+LOG_CONFIG_DIR="-Xbootclasspath/p:${sinai.logging.config.dir}"
+LOG_OUTPUT_DIR="-Dsinai.logs.dir=${sinai.logs.dir}"
 KEY_PASS_CONFIG="-Dsinai.key.pass=${sinai.key.pass}"
 SINAI_TEMP_DIR="-Dsinai.temp.dir=${sinai.temp.dir}"
 SINAI_PORT="-Dsinai.port=${sinai.port} -Dsinai.redirect.port=${sinai.redirect.port}"
@@ -81,5 +83,7 @@ if [[ "${dev.tools}" == *"JMX_REMOTE"* ]]; then
   JMX_METRICS="$JMX_METRICS $JMX_REMOTE"
 fi
 
-$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT $DROPWIZARD_METRICS $SOLR_SERVER \
-  $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $JDBC_DRIVER $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG
+$AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT \
+  $LOG_CONFIG_DIR $LOG_OUTPUT_DIR \
+  $DROPWIZARD_METRICS $SOLR_SERVER $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $JDBC_DRIVER \
+  $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG
