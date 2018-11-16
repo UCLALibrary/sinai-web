@@ -15,3 +15,6 @@ sinai-*.log
 
 # Working directory result of compiling SCSS
 .sass-cache
+
+# A custom Logback configuration
+logback.xml
