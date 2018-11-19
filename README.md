@@ -76,6 +76,7 @@ The current workflow for propagating code changes is as follows:
 * Both `stage` and `master` should only be updated with a pull request, rather than being pushed to directly. The convention is to create a new branch for the pull request that is deleted after the pull requst is complete. For example, one would create a `stage-pr` branch for a pull request on `stage`, a `master-pr` branch for a pull request on `master`, etc. The procedure is as follows:
 
         git checkout stage
+        git pull
         git checkout -b stage-pr
         git merge develop
         git push origin stage-pr
@@ -87,6 +88,17 @@ The current workflow for propagating code changes is as follows:
         
 * **NOTE**: so that `master` is not polluted with merge commits, all `{name}-pr` branches must contain new commits from `develop` only (i.e., when preparing `master-pr`, merge in `develop`, not `stage`)
 * **NOTE**: so that whenever `master` is updated it becomes identical to `stage`, the PR branches for each are always to be prepared at the same time
+
+        git checkout master
+        git pull
+        git checkout -b master-pr
+        git merge develop
+        git push origin master-pr
+
+        # submit PR and wait for completion
+
+        git branch -D master-pr
+        git push --delete origin master-pr
 
 ### Using a DDNS Domain with the startup.sh Script
 
