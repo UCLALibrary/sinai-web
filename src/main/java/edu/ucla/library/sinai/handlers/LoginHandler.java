@@ -12,7 +12,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTOptions;
+import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.RoutingContext;
 
@@ -33,12 +33,12 @@ public class LoginHandler extends SinaiHandler {
 
         if (params.contains(TOKEN)) {
             final String rawToken = params.get(TOKEN);
-            final JWTOptions jwtOptions = new JWTOptions().setExpiresInSeconds(60L);
+            final JWTOptions jwtOptions = new JWTOptions().setExpiresInSeconds(60);
             final String token = myJwtAuth.generateToken(new JsonObject().put("sub", "asdf"), jwtOptions);
             final Cookie cookie = aContext.getCookie(TOKEN);
 
             // Not perfect, we know, but a good faith effort
-            if ((cookie != null) && (rawToken != null) && rawToken.equals(cookie.getValue())) {
+            if (cookie != null && rawToken != null && rawToken.equals(cookie.getValue())) {
                 myJwtAuth.authenticate(new JsonObject().put("jwt", token), authHandler -> {
                     final HttpServerResponse response = aContext.response();
 
@@ -64,7 +64,7 @@ public class LoginHandler extends SinaiHandler {
             try {
                 aContext.data().put(HBS_DATA_KEY, toHbsContext(new JsonObject(), aContext));
                 aContext.next();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 LOGGER.error(e.getMessage());
             }
