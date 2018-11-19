@@ -230,7 +230,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
             future.setHandler(aHandler);
 
             futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
-            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
+            // futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
 
             // Confirm all our verticles were successfully deployed
             CompositeFuture.all(futures).setHandler(handler -> {
