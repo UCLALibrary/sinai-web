@@ -21,6 +21,7 @@ import static edu.ucla.library.sinai.Constants.HBS_PATH_SKIP_KEY;
 import static edu.ucla.library.sinai.Constants.MESSAGES;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -58,9 +59,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.impl.CachingTemplateEngine;
 
 /**
- * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
- * @author <a href="http://tfox.org">Tim Fox</a>
- * @author <a href="mailto:ksclarke@library.ucla.edu">Kevin S. Clarke</a>
+ * The Handlebars template engine. This takes JSON and passes it to the Handlebars transformer to generate HTML pages.
  */
 public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template> implements
         HandlebarsTemplateEngine {
@@ -1181,6 +1180,9 @@ public class HandlebarsTemplateEngineImpl extends CachingTemplateEngine<Template
             }
 
             aHandler.handle(Future.succeededFuture(Buffer.buffer(templateOutput)));
+        } catch (final FileNotFoundException details) {
+            LOGGER.debug(details.getMessage(), details);
+            aHandler.handle(Future.failedFuture(details));
         } catch (final Exception details) {
             LOGGER.error(details, details.getMessage());
             aHandler.handle(Future.failedFuture(details));

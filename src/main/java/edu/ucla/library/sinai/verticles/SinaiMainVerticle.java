@@ -18,6 +18,8 @@ import javax.naming.ConfigurationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import info.freelibrary.util.IOUtils;
+
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.RoutePatterns;
 import edu.ucla.library.sinai.handlers.AdminHandler;
@@ -30,7 +32,6 @@ import edu.ucla.library.sinai.handlers.PDFProxyHandler;
 import edu.ucla.library.sinai.handlers.PageHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
-import info.freelibrary.util.IOUtils;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
@@ -222,14 +223,14 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
     @SuppressWarnings("rawtypes")
     private void deploySinaiVerticles(final Handler<AsyncResult<Void>> aHandler) {
         final DeploymentOptions options = new DeploymentOptions();
-        final List<Future> futures = new ArrayList<Future>();
+        final List<Future> futures = new ArrayList<>();
         final Future<Void> future = Future.future();
 
         if (aHandler != null) {
             future.setHandler(aHandler);
 
             futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
-            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
+            // futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
 
             // Confirm all our verticles were successfully deployed
             CompositeFuture.all(futures).setHandler(handler -> {

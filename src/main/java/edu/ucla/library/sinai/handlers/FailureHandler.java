@@ -6,9 +6,10 @@ import static edu.ucla.library.sinai.Constants.MESSAGES;
 
 import java.io.IOException;
 
-import edu.ucla.library.sinai.Configuration;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
+import edu.ucla.library.sinai.Configuration;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -89,7 +90,7 @@ public class FailureHandler extends SinaiHandler {
             if (throwable != null) {
                 String message = throwable.getMessage();
 
-                if (message.startsWith("/webroot/templates")) {
+                if (message != null && message.startsWith("/webroot/templates")) {
                     jsonObject.put(ERROR_HEADER, "File Not Found");
                     message = message.replace("/webroot/templates", "").replace(".hbs", "");
                 } else if (errorMessage != null) {
@@ -116,7 +117,7 @@ public class FailureHandler extends SinaiHandler {
                 }
             });
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
