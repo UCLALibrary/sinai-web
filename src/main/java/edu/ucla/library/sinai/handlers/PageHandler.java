@@ -16,11 +16,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.jknack.handlebars.Context;
+
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.Constants;
 import edu.ucla.library.sinai.services.SolrService;
+import edu.ucla.library.sinai.templates.impl.ShareableContext;
 import edu.ucla.library.sinai.util.SearchResultComparator;
 import edu.ucla.library.sinai.util.UTOComparator;
 import io.vertx.core.AsyncResult;
@@ -66,22 +69,13 @@ public class PageHandler extends SinaiHandler {
 
             if (method == HttpMethod.GET) {
                 final SharedData sharedData = aContext.vertx().sharedData();
-                final LocalMap<String, JsonObject> searchCache = sharedData.getLocalMap(Constants.SEARCH_CACHE_KEY);
+                final LocalMap<String, ShareableContext> cache = sharedData.getLocalMap(Constants.SEARCH_CACHE_KEY);
                 final String query = StringUtils.trimToNull(searchQueryParam) == null ? "*" : searchQueryParam;
 
                 // Check cache to see if we've already done and cached this search; use those results if we have
-                if (searchCache != null && searchCache.containsKey(query)) {
-                    try {
-                        aContext.data().put(HBS_DATA_KEY, toHbsContext(searchCache.get(query), aContext));
-                        aContext.next();
-                    } catch (final IOException details) {
-                        errorMessage = "Failed to process cached search results";
-
-                        aContext.put(ERROR_HEADER, "Internal Server Error");
-                        aContext.put(ERROR_MESSAGE, errorMessage);
-
-                        fail(aContext, new Error(errorMessage));
-                    }
+                if (cache != null && cache.containsKey(query)) {
+                    aContext.data().put(HBS_DATA_KEY, cache.get(query).getHandlebarsContext());
+                    aContext.next();
                 } else {
                     search(aContext, searchQueryParam, service);
                 }
@@ -361,12 +355,13 @@ public class PageHandler extends SinaiHandler {
 
         try {
             final SharedData sharedData = aContext.vertx().sharedData();
-            final LocalMap<String, JsonObject> searchCache = sharedData.getLocalMap(Constants.SEARCH_CACHE_KEY);
+            final LocalMap<String, ShareableContext> searchCache = sharedData.getLocalMap(Constants.SEARCH_CACHE_KEY);
+            final Context context = toHbsContext(templateJson, aContext);
 
             // Put our search results in an in-memory cache so they can be reused
-            searchCache.put(aSearchQuery, templateJson);
+            searchCache.put(aSearchQuery, new ShareableContext(context));
 
-            aContext.data().put(HBS_DATA_KEY, toHbsContext(templateJson, aContext));
+            aContext.data().put(HBS_DATA_KEY, context);
             aContext.next();
         } catch (final IOException details) {
             final String errorMessage = msg("Handlebars context generation failed: {}", templateJson.toString());
