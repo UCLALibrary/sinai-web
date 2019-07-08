@@ -222,6 +222,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
     @SuppressWarnings("rawtypes")
     private void deploySinaiVerticles(final Handler<AsyncResult<Void>> aHandler) {
+        final DeploymentOptions workerOptions = new DeploymentOptions();
         final DeploymentOptions options = new DeploymentOptions();
         final List<Future> futures = new ArrayList<>();
         final Future<Void> future = Future.future();
@@ -229,8 +230,11 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         if (aHandler != null) {
             future.setHandler(aHandler);
 
+            // Pool size of one should be fine since it's only run once per day [Implicit: .setInstances(1)]
+            workerOptions.setWorkerPoolName("Indexing pool").setWorkerPoolSize(1).setWorker(true);
+
             futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
-            // futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), options, Future.future()));
+            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), workerOptions, Future.future()));
 
             // Confirm all our verticles were successfully deployed
             CompositeFuture.all(futures).setHandler(handler -> {
@@ -238,6 +242,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("All verticles were deployed successfully");
                     }
+
                     future.complete();
                 } else {
                     LOGGER.error("One or more verticles failed to deploy");
