@@ -48,7 +48,7 @@ public class LoginHandler extends SinaiHandler {
                         }
 
                         aContext.setUser(authHandler.result());
-                        aContext.reroute(RoutePatterns.BROWSE_RE);
+                        aContext.reroute(RoutePatterns.SEARCH_RESULTS_RE);
                     } else {
                         LOGGER.error(authHandler.cause(), "Authentication did not succeed");
                         response.putHeader(Metadata.CONTENT_TYPE, Metadata.TEXT_MIME_TYPE);

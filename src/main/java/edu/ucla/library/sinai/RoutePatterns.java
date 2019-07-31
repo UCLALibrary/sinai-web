@@ -36,7 +36,7 @@ public interface RoutePatterns {
     /**
      * A path for the browse page.
      */
-    public static final String BROWSE_RE = "/browse";
+    public static final String SEARCH_RESULTS_RE = "/browse";
 
     /**
      * A path for managing user accounts and other administrative tasks.
@@ -73,6 +73,6 @@ public interface RoutePatterns {
     /**
      * A regex that matches route patterns that are to be placed behind an authentication check.
      */
-    public static final String AUTHENTICATION_CHECK_RE = METRICS_RE + "|" + STATUS + "|" + BROWSE_RE + "|" + ADMIN +
+    public static final String AUTHENTICATION_CHECK_RE = METRICS_RE + "|" + STATUS + "|" + SEARCH_RESULTS_RE + "|" + ADMIN +
             "|" + VIEWER_RE;
 }

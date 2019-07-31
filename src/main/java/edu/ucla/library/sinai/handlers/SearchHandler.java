@@ -3,7 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_ADDRESS;
-import static edu.ucla.library.sinai.RoutePatterns.BROWSE_RE;
+import static edu.ucla.library.sinai.RoutePatterns.SEARCH_RESULTS_RE;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
 
@@ -27,9 +27,9 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A generic page handler.
  */
-public class PageHandler extends SinaiHandler {
+public class SearchHandler extends SinaiHandler {
 
-    public PageHandler(final Configuration aConfig) {
+    public SearchHandler(final Configuration aConfig) {
         super(aConfig);
     }
 
@@ -44,7 +44,7 @@ public class PageHandler extends SinaiHandler {
         final String errorMessage;
 
         // If user is navigating to the browse page, need to load metadata
-        if (aContext.normalisedPath().equals(BROWSE_RE)) {
+        if (aContext.normalisedPath().equals(SEARCH_RESULTS_RE)) {
             final HttpMethod method = aContext.request().method();
             final String searchQueryParam = aContext.request().getParam("search");
 

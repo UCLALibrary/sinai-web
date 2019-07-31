@@ -29,7 +29,7 @@ import edu.ucla.library.sinai.handlers.LogoutHandler;
 import edu.ucla.library.sinai.handlers.MetricsHandler;
 import edu.ucla.library.sinai.handlers.MiradorHandler;
 import edu.ucla.library.sinai.handlers.PDFProxyHandler;
-import edu.ucla.library.sinai.handlers.PageHandler;
+import edu.ucla.library.sinai.handlers.SearchHandler;
 import edu.ucla.library.sinai.handlers.StatusHandler;
 import edu.ucla.library.sinai.templates.HandlebarsTemplateEngine;
 import io.vertx.core.AsyncResult;
@@ -153,7 +153,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         final LoginHandler loginHandler = new LoginHandler(myConfig, jwtAuth);
         final LogoutHandler logoutHandler = new LogoutHandler(myConfig);
         final AdminHandler adminHandler = new AdminHandler(myConfig);
-        final PageHandler pageHandler = new PageHandler(myConfig);
+        final SearchHandler searchHandler = new SearchHandler(myConfig);
         final PDFProxyHandler pdfProxyHandler = new PDFProxyHandler(myConfig);
         final MiradorHandler miradorHandler = new MiradorHandler(myConfig);
 
@@ -182,8 +182,7 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
         // Then we have the plain old administrative UI patterns
         router.getWithRegex(METRICS_RE).handler(new MetricsHandler(myConfig));
 
-        // We just use the generic handler for browse page
-        router.getWithRegex(BROWSE_RE).handler(pageHandler);
+        router.getWithRegex(SEARCH_RESULTS_RE).handler(searchHandler);
 
         router.get(ADMIN).handler(adminHandler);
         router.post(ADMIN).handler(adminHandler);
