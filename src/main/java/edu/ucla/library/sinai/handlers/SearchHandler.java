@@ -93,25 +93,24 @@ public class SearchHandler extends SinaiHandler {
                                     aContext.data().put(HBS_DATA_KEY, context);
                                     aContext.next();
                                 } else {
+                                    // toHbsContext threw an exception
                                     final Throwable errorHbs = ar.cause();
 
-                                    aContext.put(ERROR_HEADER, "Internal Server Error");
                                     aContext.put(ERROR_MESSAGE, errorHbs);
-
-                                    fail(aContext, new Error(errorHbs));
+                                    aContext.fail(500);
                                 }
                             });
                         } else {
                             final Throwable searchError = reply.cause();
+                            final String searchErrorUserMsg = "Search failed. Please try again later or <a href=\"/contacts\">contact us</a> for assistance.";
 
-                            LOGGER.info("New search failed: " + searchError.toString());
+                            LOGGER.info(searchError.toString());
                             if (LOGGER.isDebugEnabled()) {
                                 searchError.printStackTrace();
                             }
-                            aContext.put(ERROR_HEADER, "Internal Server Error");
-                            aContext.put(ERROR_MESSAGE, searchError);
 
-                            fail(aContext, new Error(searchError));
+                            aContext.put(ERROR_MESSAGE, searchErrorUserMsg);
+                            aContext.fail(503);
                         }
                     });
                 }
