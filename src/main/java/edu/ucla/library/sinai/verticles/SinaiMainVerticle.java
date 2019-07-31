@@ -222,7 +222,8 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
 
     @SuppressWarnings("rawtypes")
     private void deploySinaiVerticles(final Handler<AsyncResult<Void>> aHandler) {
-        final DeploymentOptions workerOptions = new DeploymentOptions();
+        final DeploymentOptions metadataHarvestWorkerOptions = new DeploymentOptions();
+        final DeploymentOptions searchWorkerOptions = new DeploymentOptions();
         final DeploymentOptions options = new DeploymentOptions();
         final List<Future> futures = new ArrayList<>();
         final Future<Void> future = Future.future();
@@ -231,10 +232,12 @@ public class SinaiMainVerticle extends AbstractSinaiVerticle implements RoutePat
             future.setHandler(aHandler);
 
             // Pool size of one should be fine since it's only run once per day [Implicit: .setInstances(1)]
-            workerOptions.setWorkerPoolName("Indexing pool").setWorkerPoolSize(1).setWorker(true);
+            metadataHarvestWorkerOptions.setWorkerPoolName("Indexing pool").setWorkerPoolSize(1).setWorker(true);
+            searchWorkerOptions.setWorkerPoolName("Searching pool").setWorkerPoolSize(4).setWorker(true);
 
             futures.add(deployVerticle(SolrServiceVerticle.class.getName(), options, Future.future()));
-            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), workerOptions, Future.future()));
+            futures.add(deployVerticle(MetadataHarvestVerticle.class.getName(), metadataHarvestWorkerOptions, Future.future()));
+            futures.add(deployVerticle(SearchVerticle.class.getName(), searchWorkerOptions, Future.future()));
 
             // Confirm all our verticles were successfully deployed
             CompositeFuture.all(futures).setHandler(handler -> {
