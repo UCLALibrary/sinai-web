@@ -3,6 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_ADDRESS;
+import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT;
 import static edu.ucla.library.sinai.RoutePatterns.SEARCH_RESULTS_RE;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
@@ -61,7 +62,7 @@ public class SearchHandler extends SinaiHandler {
                     final DeliveryOptions searchMsgDeliveryOpts = new DeliveryOptions()
                         .setHeaders(new CaseInsensitiveHeaders()
                         .add("action", SEARCH_SERVICE_MESSAGE_ADDRESS))
-                        .setSendTimeout(new Long(60000));
+                        .setSendTimeout(SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT);
                     final JsonObject searchMsg = new JsonObject().put("searchQuery", solrQueryString);
 
                     // Delegate the search result processing to SearchVerticle.
@@ -93,25 +94,24 @@ public class SearchHandler extends SinaiHandler {
                                     aContext.data().put(HBS_DATA_KEY, context);
                                     aContext.next();
                                 } else {
+                                    // toHbsContext threw an exception
                                     final Throwable errorHbs = ar.cause();
 
-                                    aContext.put(ERROR_HEADER, "Internal Server Error");
                                     aContext.put(ERROR_MESSAGE, errorHbs);
-
-                                    fail(aContext, new Error(errorHbs));
+                                    aContext.fail(500);
                                 }
                             });
                         } else {
                             final Throwable searchError = reply.cause();
+                            final String searchErrorUserMsg = "Search failed. Please try again later or <a href=\"/contacts\">contact us</a> for assistance.";
 
-                            LOGGER.info("New search failed: " + searchError.toString());
+                            LOGGER.info(searchError.toString());
                             if (LOGGER.isDebugEnabled()) {
                                 searchError.printStackTrace();
                             }
-                            aContext.put(ERROR_HEADER, "Internal Server Error");
-                            aContext.put(ERROR_MESSAGE, searchError);
 
-                            fail(aContext, new Error(searchError));
+                            aContext.put(ERROR_MESSAGE, searchErrorUserMsg);
+                            aContext.fail(503);
                         }
                     });
                 }

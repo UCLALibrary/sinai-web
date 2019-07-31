@@ -90,4 +90,11 @@ public interface Constants {
     /* Error codes */
 
     int SEARCH_SERVICE_ERROR_SOLR_FAILURE = 1;
+
+    /* Time (milliseconds) */
+
+    int SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT = 60000;
+
+    // Daily
+    int METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24;
 }
