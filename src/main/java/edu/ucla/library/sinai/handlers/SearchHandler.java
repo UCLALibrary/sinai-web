@@ -3,6 +3,7 @@ package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
 import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_ADDRESS;
+import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT;
 import static edu.ucla.library.sinai.RoutePatterns.SEARCH_RESULTS_RE;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
@@ -61,7 +62,7 @@ public class SearchHandler extends SinaiHandler {
                     final DeliveryOptions searchMsgDeliveryOpts = new DeliveryOptions()
                         .setHeaders(new CaseInsensitiveHeaders()
                         .add("action", SEARCH_SERVICE_MESSAGE_ADDRESS))
-                        .setSendTimeout(new Long(60000));
+                        .setSendTimeout(SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT);
                     final JsonObject searchMsg = new JsonObject().put("searchQuery", solrQueryString);
 
                     // Delegate the search result processing to SearchVerticle.
