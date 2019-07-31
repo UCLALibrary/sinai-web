@@ -30,6 +30,7 @@ public class FailureHandler extends SinaiHandler {
         myTemplateEngine = aTemplateEngine;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void handle(final RoutingContext aContext) {
         final JsonObject jsonObject = new JsonObject();
@@ -107,6 +108,7 @@ public class FailureHandler extends SinaiHandler {
 
         try {
             aContext.data().put(HBS_DATA_KEY, toHbsContext(jsonObject, aContext));
+
             myTemplateEngine.render(aContext, "templates/error", handler -> {
                 if (handler.succeeded()) {
                     final HttpServerResponse response = aContext.response();
@@ -114,12 +116,24 @@ public class FailureHandler extends SinaiHandler {
                     // Pass through the output of templating process
                     response.end(handler.result());
                     response.close();
+                } else {
+                    final HttpServerResponse response = aContext.response();
+
+                    LOGGER.error(handler.cause(), handler.cause().getMessage());
+
+                    response.setStatusCode(500);
+                    response.end();
+                    response.close();
                 }
             });
+        } catch (final Exception details) {
+            final HttpServerResponse response = aContext.response();
 
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(details, details.getMessage());
+
+            response.setStatusCode(500);
+            response.end();
+            response.close();
         }
     }
 

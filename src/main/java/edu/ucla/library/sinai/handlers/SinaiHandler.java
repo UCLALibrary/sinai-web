@@ -12,9 +12,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.JsonNodeValueResolver;
 
-import edu.ucla.library.sinai.Configuration;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
+import edu.ucla.library.sinai.Configuration;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -41,7 +42,8 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
      * @param aContext A context with the current session information
      * @return A Handlebars context that can be passed to the template engine
      */
-    Context toHbsContext(final JsonObject aJsonObject, final RoutingContext aContext) throws IOException, JsonParseException, JsonMappingException {
+    Context toHbsContext(final JsonObject aJsonObject, final RoutingContext aContext) throws IOException,
+            JsonParseException, JsonMappingException {
         final String host = System.getProperty("sinai.host", "localhost");
         final String port = System.getProperty("sinai.port", "8443");
 
@@ -51,11 +53,8 @@ abstract class SinaiHandler implements Handler<RoutingContext> {
         // Add a workaround for developers testing on their machines
         aJsonObject.put("sinaihost", host.equals("localhost") ? host + ":" + port : host);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} JSON passed to template page: {}", getClass().getSimpleName(), aJsonObject.toString());
-        }
-
-        return Context.newBuilder(new ObjectMapper().readValue(aJsonObject.toString(), ObjectNode.class)).resolver(JsonNodeValueResolver.INSTANCE).build();
+        return Context.newBuilder(new ObjectMapper().readValue(aJsonObject.toString(), ObjectNode.class)).resolver(
+                JsonNodeValueResolver.INSTANCE).build();
     }
 
     /**

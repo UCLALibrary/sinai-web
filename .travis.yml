@@ -1,7 +1,7 @@
 language: java
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 env:
   global:
@@ -11,10 +11,10 @@ env:
     - secure: "Ck5bgGWCJVqOCTtd/iyV/5HoEO+Nta6DxVhdqnLYfFg9/oEqysRBFnj65IWozt4jRqRTjedDQND6mclpTK/GBzv2bTbit1oEB68Con3LunyMYt0DN99Xnm46q5En55v73RUd1FcM4FcCtByploF4td/T8DhR2FxNVjzjksoSLgdo+b2Lzpk2KdDT0Zqv4O35JBdTveHIupARAjUx3BdsI+JqJXAV7IB55XvT3DNrJBjl3UMWWY3t5qMCWc0mQK9n+w1nHML6aoWOIH0qAOD6mZxEpv7vSAlg7CHPsyTTJ3nqd0cTtfBO/4PY0j8SwCRuIRftDjAM8BNpYZq/rnbzSvjEcJMSEFdAn2mEd1wHbQfhmhKOt+rGdxCUtaA6nDnZ6/wcBhQjdJ9pgNJAB5/IwYhsdAEet81whUJi5XgvMm6yHII1mixKqDCs15zW/Mq3TIFcevhu1ZDthjAwbiO4WrLj5nsZwgcmXabagPVrfE6jkfNTJpLvNsyLLx7KXX0ESib7v5NnhaTPhboIIQzD17Mw6EovLd7YaFFgvCOPTpooWTsDI8/hVXMDKOLyiPvhg69iC6UUUyY6/jBRuuA0BFCCT1HhnRjta9shSQViOzwqjk3bJgjelXy9EX3FOyLTtenRyGWSl/zvo5pdonQ0120FXl7v1E1un6D0tjtlXWY="
 
 install:
-  mvn validate
+  mvn -q validate
 
 script:
-  mvn package -Dsinai.logs.dir=/var/log/sinai -Dsinai.id.key="$SINAI_ID_KEY"
+  mvn -q package -Dsinai.logs.dir=/var/log/sinai -Dsinai.id.key="$SINAI_ID_KEY"
 
 deploy:
   - provider: s3
