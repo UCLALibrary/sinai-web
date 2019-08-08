@@ -57,6 +57,10 @@ public interface Constants {
 
     String SOLR_SERVICE_KEY = "sinai.solr";
 
+    String SEARCH_SERVICE_KEY = "sinai.search";
+
+    String SEARCH_SERVICE_MESSAGE_ADDRESS = "search";
+
     String CONFIG_KEY = "sinai.config";
 
     String GOOGLE_OAUTH_CLIENT_ID = "sinai.oauth.google.clientId";
@@ -83,4 +87,14 @@ public interface Constants {
 
     String FAILURE_RESPONSE = "failure";
 
+    /* Error codes */
+
+    int SEARCH_SERVICE_ERROR_SOLR_FAILURE = 1;
+
+    /* Time (milliseconds) */
+
+    int SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT = 60000;
+
+    // Daily
+    int METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24;
 }
