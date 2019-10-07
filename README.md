@@ -1,5 +1,6 @@
 ## The Sinai Scholars Website
 
+Test
 ### To build locally (without Vagrant)
 
 Check the project out from GitHub, package it and start it.
