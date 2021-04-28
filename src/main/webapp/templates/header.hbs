@@ -38,16 +38,18 @@
     });
   }
 
-  var uuid = uuidv4();
-
-  $('#token').val(uuid);
-  document.cookie = "token=" + uuid;
-</script>
-
-<script>
   {{#if logged-in}}
     $("#loginLink").remove();
   {{else}}
+    var uuid = uuidv4();
+
+    // If the user is not logged in, create a cookie, containing a token, that will only be used for the initial
+    // authentication request to sinai-id. Once a user is logged in, they will receive a separate session cookie
+    // provided by Vert.x.
+
+    $('#token').val(uuid);
+    document.cookie = "token=" + uuid;
+
     $("#logoutLink").remove();
   {{/if}}
 </script>
