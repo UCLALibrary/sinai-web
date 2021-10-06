@@ -40,7 +40,6 @@ jobs:
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
         with:
           maven_goals_phases: "package"
-          maven_profiles: default
           maven_args: >
             -V -ntp -Dsinai.logs.dir=/var/log/sinai -Dsinai.id.key=${{ secrets.SINAI_ID_KEY }}
       - name: Upload build artifact
