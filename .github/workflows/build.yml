@@ -42,4 +42,4 @@ jobs:
         with:
           maven_goals_phases: "verify"
           maven_args: >
-            -V -ntp -Dsinai.logs.dir=/var/log/sinai -Dsinai.id.key=${{ secrets.SINAI_ID_KEY }}
+            -V -ntp -Dsinai.id.key=${{ secrets.SINAI_ID_KEY }}
