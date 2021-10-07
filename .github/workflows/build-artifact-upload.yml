@@ -52,4 +52,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-west-2
           SOURCE_DIR: ./target/build-artifact
-          DEST_DIR: /sinai-web/master
+          DEST_DIR: sinai-web/master
