@@ -22,7 +22,7 @@
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
-    <vertx.version>3.5.4</vertx.version>
+    <vertx.version>3.9.4</vertx.version>
     <javatuples.version>1.2</javatuples.version>
     <freelib.utils.version>0.7.0</freelib.utils.version>
     <handlebars.version>2.2.3</handlebars.version>
