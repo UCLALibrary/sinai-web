@@ -195,10 +195,11 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                             throw new Error(errorMessage);
                         }
 
-                        solrFieldName = fields[i].name + solrDynamicFieldSuffix(fields[i].type, fields[i].multiValued);
-                        if (fields[i].name.equals("uuid")) {
+                        if (fields[i].name.equals("id")) {
+                            solrFieldName = fields[i].name;
                             doc.addField(solrFieldName, solrFieldValue);
                         } else {
+                            solrFieldName = fields[i].name + solrDynamicFieldSuffix(fields[i].type, fields[i].multiValued);
                             // http://yonik.com/solr/atomic-updates/
                             solrInputField = new HashMap<String, Object>(1);
                             solrInputField.put("set", solrFieldValue);
@@ -232,7 +233,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 final String multiValuedFieldDelimiter = ",";
 
                 final MetadataHarvestDBFields[] manuscriptsFields = {
-                    new MetadataHarvestDBFields("uuid", "m.uuid", "string", false),
+                    new MetadataHarvestDBFields("id", "m.uuid", "string", false),
                     new MetadataHarvestDBFields("manuscript_id", "m.id", "int", false),
                     new MetadataHarvestDBFields("shelf_mark", "m.shelf_mark", "string", false),
                     new MetadataHarvestDBFields("title", "m.title", "string", false),
@@ -271,7 +272,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 // Add UTOs
                 final MetadataHarvestDBFields[] utoFields = {
-                    new MetadataHarvestDBFields("uuid", "uto.uuid", "string", false),
+                    new MetadataHarvestDBFields("id", "uto.uuid", "string", false),
                     new MetadataHarvestDBFields("undertext_object_id", "uto.id", "int", false),
                     new MetadataHarvestDBFields("manuscript_id", "tlg.manuscript_id", "int", false),
                     new MetadataHarvestDBFields("shelf_mark", "m.shelf_mark", "string", false),
@@ -302,7 +303,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 // Add folios (manuscript components)
                 final MetadataHarvestDBFields[] folioFields = {
-                    new MetadataHarvestDBFields("uuid", "mc.uuid", "string", false),
+                    new MetadataHarvestDBFields("id", "mc.uuid", "string", false),
                     new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
                     new MetadataHarvestDBFields("manuscript_component_id", "mc.id", "int", false),
 
@@ -345,7 +346,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 // Add under text layers
                 final MetadataHarvestDBFields[] underTextLayerFields = {
-                    new MetadataHarvestDBFields("uuid", "tl.uuid", "string", false),
+                    new MetadataHarvestDBFields("id", "tl.uuid", "string", false),
                     new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
                     new MetadataHarvestDBFields("undertext_object_id", "tl.undertext_object_id", "int", false),
                     new MetadataHarvestDBFields("manuscript_component_id", "tl.manuscript_component_id", "int", false),
@@ -375,7 +376,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
                 // Add over text layers
                 final MetadataHarvestDBFields[] overTextLayerFields = {
-                    new MetadataHarvestDBFields("uuid", "tl.uuid", "string", false),
+                    new MetadataHarvestDBFields("id", "tl.uuid", "string", false),
                     new MetadataHarvestDBFields("manuscript_id", "mc.manuscript_id", "int", false),
                     new MetadataHarvestDBFields("manuscript_component_id", "tl.manuscript_component_id", "int", false),
                     new MetadataHarvestDBFields("text_identity", "tl.text_identity", "string", false),
