@@ -2,7 +2,6 @@
 package edu.ucla.library.sinai.verticles;
 
 import static edu.ucla.library.sinai.Constants.MESSAGES;
-import static edu.ucla.library.sinai.Constants.METADATA_HARVEST_INTERVAL;
 
 import java.io.IOException;
 import java.sql.Array;
@@ -11,6 +10,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,9 +64,9 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
         private final String myDatabaseUrl;
         private final SolrServer mySolrServer;
 
-        public MetadataHarvestHandler() {
+        public MetadataHarvestHandler(final Configuration aConfig) {
 
-            final JsonObject databaseProperties = myConfig.getPostgreSQLProperties();
+            final JsonObject databaseProperties = aConfig.getPostgreSQLProperties();
 
             // Configure PostgreSQL
             myDatabaseUrl = "jdbc:postgresql://"
@@ -79,7 +80,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
             // FIXME: eventually want to use a stronger SSL configuration
             myDatabaseProps.setProperty("sslfactory", databaseProperties.getString("sslfactory"));
 
-            mySolrServer = myConfig.getSolrServer();
+            mySolrServer = aConfig.getSolrServer();
         }
 
         private String solrDynamicFieldSuffix(String type, Boolean multiValued) {
@@ -228,6 +229,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
         @Override
         public void handle(Long arg0) {
+            LOGGER.debug("Starting metadata harvest");
+
             try (final Connection conn = DriverManager.getConnection(myDatabaseUrl, myDatabaseProps)) {
                 // Add manuscripts
                 final String multiValuedFieldDelimiter = ",";
@@ -398,6 +401,8 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 }).toArray(String[]::new)) + " FROM text_layers AS tl INNER JOIN manuscript_components AS mc ON tl.manuscript_component_id = mc.id WHERE tl.type = 'OverTextLayer'";
                 updateSolr("overtext_layer", overTextLayerFields, overTextLayerSql, conn, multiValuedFieldDelimiter);
 
+                LOGGER.debug("Metadata harvest completed");
+
                 conn.close();
             } catch (SQLException e){
                 LOGGER.error("Unable to connect to database " + myDatabaseUrl + " - " + e.getMessage());
@@ -406,15 +411,16 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
     }
 
     private long myTimerId;
-    private static Configuration myConfig;
 
     @Override
     public void start(final Future<Void> aFuture) throws Exception {
-        myConfig = getConfiguration();
+        final Configuration config = getConfiguration();
+        final long metadataHarvestInterval = config.getMedatadaHarvestInterval();
+        final ZonedDateTime initialHarvestTime = ZonedDateTime.now().plus(metadataHarvestInterval, ChronoUnit.MILLIS);
 
-        MetadataHarvestHandler handler = new MetadataHarvestHandler();
+        myTimerId = vertx.setPeriodic(metadataHarvestInterval, new MetadataHarvestHandler(config));
 
-        myTimerId = vertx.setPeriodic(METADATA_HARVEST_INTERVAL, handler);
+        LOGGER.debug("Initial metadata harvest will be run at approximately {}", initialHarvestTime);
 
         aFuture.complete();
     }

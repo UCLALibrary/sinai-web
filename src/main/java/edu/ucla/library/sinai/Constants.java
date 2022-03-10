@@ -35,6 +35,12 @@ public interface Constants {
 
     String METRICS_REG_PROP = "sinai.metrics";
 
+    /**
+     * The time interval (in milliseconds) between metadata harvests, as well as between the app deployment and the
+     * first harvest.
+     */
+    String METATADA_HARVEST_INTERVAL = "sinai.metadata.harvest.interval";
+
     /* Metadata database login properties */
 
     String KATIKON_HOST = "katikon.host";
@@ -94,7 +100,4 @@ public interface Constants {
     /* Time (milliseconds) */
 
     int SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT = 60000;
-
-    // Daily
-    int METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24;
 }

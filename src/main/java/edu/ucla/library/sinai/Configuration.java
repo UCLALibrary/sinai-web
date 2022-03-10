@@ -58,6 +58,8 @@ public class Configuration implements Shareable {
 
     public static final long DEFAULT_SESSION_TIMEOUT = Long.MAX_VALUE; // 7200000L; // two hours
 
+    public static final long DEFAULT_METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24; // Daily
+
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
     private final int myPort;
@@ -76,6 +78,8 @@ public class Configuration implements Shareable {
 
     private String myImageServer;
 
+    private long myMetadataHarvestInterval;
+
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
      *
@@ -93,6 +97,8 @@ public class Configuration implements Shareable {
         myHost = setHost(aConfig);
         myURLScheme = setURLScheme(aConfig);
         myPostgreSQLProperties = setPostgreSQLProperties(aConfig);
+
+        setMetadataHarvestInterval();
 
         if (aHandler != null) {
             result.setHandler(aHandler);
@@ -254,6 +260,27 @@ public class Configuration implements Shareable {
         } else {
             errorMessage = "No handler was passed to setSolrServer";
             result.fail(new ConfigurationException(errorMessage));
+        }
+    }
+
+    /**
+     * Gets the metadata harvest interval.
+     *
+     * @return The metadata harvest interval
+     */
+    public long getMedatadaHarvestInterval() {
+        return myMetadataHarvestInterval;
+    }
+
+    /**
+     * Sets the metadata harvest interval.
+     */
+    private void setMetadataHarvestInterval() {
+        try {
+            myMetadataHarvestInterval =
+                    Long.parseLong(System.getProperties().getProperty(Constants.METATADA_HARVEST_INTERVAL));
+        } catch (final Exception details) {
+            myMetadataHarvestInterval = DEFAULT_METADATA_HARVEST_INTERVAL;
         }
     }
 

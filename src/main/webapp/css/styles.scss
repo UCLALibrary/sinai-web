@@ -149,6 +149,20 @@ body.sinai-body {
     //visibility: hidden;
 }
 
+#maintenance-banner {
+    background-color: yellow;
+    font-size: 1.25em;
+
+    p {
+        @extend .center-fixed-width;
+        padding: 0.5em 0;
+    }
+
+    a {
+        color: $maroon;
+    }
+}
+
 #main {
 
     > div {
