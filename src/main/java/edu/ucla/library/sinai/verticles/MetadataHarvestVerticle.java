@@ -404,7 +404,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
                 LOGGER.debug("Metadata harvest completed");
 
                 conn.close();
-            } catch (final SQLException e){
+            } catch (SQLException e){
                 LOGGER.error("Unable to connect to database " + myDatabaseUrl + " - " + e.getMessage());
             }
         }

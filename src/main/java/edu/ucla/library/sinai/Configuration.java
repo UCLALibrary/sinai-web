@@ -276,10 +276,9 @@ public class Configuration implements Shareable {
      * Sets the metadata harvest interval.
      */
     private void setMetadataHarvestInterval() {
-        final Properties properties = System.getProperties();
-
         try {
-            myMetadataHarvestInterval = Long.parseLong(properties.getProperty(Constants.METATADA_HARVEST_INTERVAL));
+            myMetadataHarvestInterval =
+                    Long.parseLong(System.getProperties().getProperty(Constants.METATADA_HARVEST_INTERVAL));
         } catch (final Exception details) {
             myMetadataHarvestInterval = DEFAULT_METADATA_HARVEST_INTERVAL;
         }
