@@ -58,7 +58,7 @@ public class Configuration implements Shareable {
 
     public static final long DEFAULT_SESSION_TIMEOUT = Long.MAX_VALUE; // 7200000L; // two hours
 
-    public static final long DEFAULT_METADATA_HARVEST_INTERVAL = 1000 * 60 * 24; // Daily
+    public static final long DEFAULT_METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24; // Daily
 
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
