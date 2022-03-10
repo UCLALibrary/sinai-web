@@ -6,14 +6,15 @@ import static edu.ucla.library.sinai.Constants.SHARED_DATA_KEY;
 
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.services.impl.SearchServiceImpl;
+
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 @ProxyGen
 @VertxGen
@@ -25,7 +26,12 @@ public interface SearchService {
     }
 
     static SearchService createProxy(final Vertx aVertx, final String aAddress) {
-        return ProxyHelper.createProxy(SearchService.class, aVertx, aAddress);
+        final Configuration config = (Configuration) aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).get(CONFIG_KEY);
+
+        return new ServiceProxyBuilder(aVertx) //
+                .setAddress(aAddress) //
+                .setOptions(new DeliveryOptions().setSendTimeout(config.getSearchTimeout()))
+                .build(SearchService.class);
     }
 
     /**

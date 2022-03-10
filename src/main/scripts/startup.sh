@@ -62,6 +62,7 @@ SINAI_HOST="-Dsinai.host=${SINAI_HOST:-localhost}"
 SINAI_AUTH_KEY="-Dsinai.id.key=${sinai.id.key}"
 JDBC_DRIVER="-Djdbc.drivers=org.postgresql.Driver"
 SINAI_METADATA_HARVEST_INTERVAL="-Dsinai.metadata.harvest.interval="
+SINAI_SEARCH_TIMEOUT="-Dsinai.search.timeout="
 
 # If we have authbind and it's configured to run our port, let's use it
 if hash authbind 2>/dev/null; then
@@ -87,5 +88,5 @@ fi
 $AUTHBIND java $IMAGE_SERVER $LOG_DELEGATE $KEY_PASS_CONFIG $SINAI_TEMP_DIR $SINAI_PORT \
   $LOG_CONFIG_DIR $LOG_OUTPUT_DIR \
   $DROPWIZARD_METRICS $SOLR_SERVER $JMX_METRICS $SINAI_HOST $SINAI_AUTH_KEY $JDBC_DRIVER \
-  $SINAI_METADATA_HARVEST_INTERVAL \
+  $SINAI_METADATA_HARVEST_INTERVAL $SINAI_SEARCH_TIMEOUT \
   $1 -jar ${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar $SINAI_CONFIG

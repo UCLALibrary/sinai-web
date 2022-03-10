@@ -60,6 +60,8 @@ public class Configuration implements Shareable {
 
     public static final long DEFAULT_METADATA_HARVEST_INTERVAL = 1000 * 60 * 60 * 24; // Daily
 
+    public static final long DEFAULT_SEARCH_TIMEOUT = 1000 * 60; // 1 minute
+
     private final Logger LOGGER = LoggerFactory.getLogger(Configuration.class, MESSAGES);
 
     private final int myPort;
@@ -80,6 +82,8 @@ public class Configuration implements Shareable {
 
     private long myMetadataHarvestInterval;
 
+    private long mySearchTimeout;
+
     /**
      * Creates a new Sinai configuration object, which simplifies accessing configuration information.
      *
@@ -99,6 +103,7 @@ public class Configuration implements Shareable {
         myPostgreSQLProperties = setPostgreSQLProperties(aConfig);
 
         setMetadataHarvestInterval();
+        setSearchTimeout();
 
         if (aHandler != null) {
             result.setHandler(aHandler);
@@ -277,10 +282,29 @@ public class Configuration implements Shareable {
      */
     private void setMetadataHarvestInterval() {
         try {
-            myMetadataHarvestInterval =
-                    Long.parseLong(System.getProperties().getProperty(Constants.METATADA_HARVEST_INTERVAL));
+            myMetadataHarvestInterval = Long.parseLong(System.getProperty(Constants.METATADA_HARVEST_INTERVAL));
         } catch (final Exception details) {
             myMetadataHarvestInterval = DEFAULT_METADATA_HARVEST_INTERVAL;
+        }
+    }
+
+    /**
+     * Gets the search timeout.
+     *
+     * @return The search timeout
+     */
+    public long getSearchTimeout() {
+        return mySearchTimeout;
+    }
+
+    /**
+     * Sets the search timeout.
+     */
+    private void setSearchTimeout() {
+        try {
+            mySearchTimeout = Long.parseLong(System.getProperty(Constants.SEARCH_TIMEOUT));
+        } catch (final Exception details) {
+            mySearchTimeout = DEFAULT_SEARCH_TIMEOUT;
         }
     }
 
