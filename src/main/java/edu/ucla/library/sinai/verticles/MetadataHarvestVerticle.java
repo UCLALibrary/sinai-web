@@ -2,7 +2,6 @@
 package edu.ucla.library.sinai.verticles;
 
 import static edu.ucla.library.sinai.Constants.MESSAGES;
-import static edu.ucla.library.sinai.Constants.METADATA_HARVEST_INTERVAL;
 
 import java.io.IOException;
 import java.sql.Array;
@@ -414,7 +413,7 @@ public class MetadataHarvestVerticle extends AbstractSinaiVerticle {
 
         MetadataHarvestHandler handler = new MetadataHarvestHandler();
 
-        myTimerId = vertx.setPeriodic(METADATA_HARVEST_INTERVAL, handler);
+        myTimerId = vertx.setPeriodic(myConfig.getMedatadaHarvestInterval(), handler);
 
         aFuture.complete();
     }
