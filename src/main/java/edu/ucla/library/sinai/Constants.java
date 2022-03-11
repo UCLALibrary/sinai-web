@@ -41,6 +41,11 @@ public interface Constants {
      */
     String METATADA_HARVEST_INTERVAL = "sinai.metadata.harvest.interval";
 
+    /**
+     * The maximum time (in milliseconds) that a search operation may take to complete.
+     */
+    String SEARCH_TIMEOUT = "sinai.search.timeout";
+
     /* Metadata database login properties */
 
     String KATIKON_HOST = "katikon.host";
@@ -65,7 +70,7 @@ public interface Constants {
 
     String SEARCH_SERVICE_KEY = "sinai.search";
 
-    String SEARCH_SERVICE_MESSAGE_ADDRESS = "search";
+    String SEARCH_VERTICLE_MESSAGE_ADDRESS = "search";
 
     String CONFIG_KEY = "sinai.config";
 
@@ -96,8 +101,4 @@ public interface Constants {
     /* Error codes */
 
     int SEARCH_SERVICE_ERROR_SOLR_FAILURE = 1;
-
-    /* Time (milliseconds) */
-
-    int SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT = 60000;
 }

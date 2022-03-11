@@ -2,13 +2,13 @@
 package edu.ucla.library.sinai.handlers;
 
 import static edu.ucla.library.sinai.Constants.HBS_DATA_KEY;
-import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_ADDRESS;
-import static edu.ucla.library.sinai.Constants.SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT;
+import static edu.ucla.library.sinai.Constants.SEARCH_VERTICLE_MESSAGE_ADDRESS;
 import static edu.ucla.library.sinai.RoutePatterns.SEARCH_RESULTS_RE;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_HEADER;
 import static edu.ucla.library.sinai.handlers.FailureHandler.ERROR_MESSAGE;
 
 import java.io.IOException;
+
 import com.github.jknack.handlebars.Context;
 
 import info.freelibrary.util.StringUtils;
@@ -16,9 +16,9 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.Constants;
 import edu.ucla.library.sinai.templates.impl.ShareableContext;
+
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.http.CaseInsensitiveHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
@@ -59,14 +59,12 @@ public class SearchHandler extends SinaiHandler {
                     aContext.data().put(HBS_DATA_KEY, cache.get(solrQueryString).getHandlebarsContext());
                     aContext.next();
                 } else {
-                    final DeliveryOptions searchMsgDeliveryOpts = new DeliveryOptions()
-                        .setHeaders(new CaseInsensitiveHeaders()
-                        .add("action", SEARCH_SERVICE_MESSAGE_ADDRESS))
-                        .setSendTimeout(SEARCH_SERVICE_MESSAGE_REPLY_TIMEOUT);
+                    final DeliveryOptions searchMsgDeliveryOpts =
+                            new DeliveryOptions().setSendTimeout(myConfig.getSearchTimeout());
                     final JsonObject searchMsg = new JsonObject().put("searchQuery", solrQueryString);
 
                     // Delegate the search result processing to SearchVerticle.
-                    aContext.vertx().eventBus().send(SEARCH_SERVICE_MESSAGE_ADDRESS, searchMsg, searchMsgDeliveryOpts, reply -> {
+                    aContext.vertx().eventBus().send(SEARCH_VERTICLE_MESSAGE_ADDRESS, searchMsg, searchMsgDeliveryOpts, reply -> {
                         if (reply.succeeded()) {
                             final JsonObject searchResults = new JsonObject()
                                 .put("searchResults", reply.result().body());

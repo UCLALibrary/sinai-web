@@ -11,8 +11,9 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 /**
  * Solr service interface that is used to generate the handler, proxy code, etc.
@@ -27,7 +28,12 @@ public interface SolrService {
     }
 
     static SolrService createProxy(final Vertx aVertx, final String aAddress) {
-        return ProxyHelper.createProxy(SolrService.class, aVertx, aAddress);
+        final Configuration config = (Configuration) aVertx.sharedData().getLocalMap(SHARED_DATA_KEY).get(CONFIG_KEY);
+
+        return new ServiceProxyBuilder(aVertx) //
+                .setAddress(aAddress) //
+                .setOptions(new DeliveryOptions().setSendTimeout(config.getSearchTimeout()))
+                .build(SolrService.class);
     }
 
     void search(JsonObject aJsonObject, Handler<AsyncResult<JsonObject>> aHandler);
