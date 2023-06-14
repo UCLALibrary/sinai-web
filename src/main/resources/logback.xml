@@ -17,6 +17,7 @@
 
   <logger name="io.vertx.core.Starter" level="WARN" />
   <logger name="ch.qos.logback" level="WARN" />
+  <logger name="io.netty" level="WARN" />
 
   <logger name="edu.ucla.library.sinai" level="INFO">
     <appender-ref ref="FILE" />
@@ -26,7 +27,7 @@
     <appender-ref ref="FILE" />
   </logger>
 
-  <root level="WARN">
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
 

@@ -18,3 +18,6 @@ sinai-*.log
 
 # A custom Logback configuration
 logback.xml
+
+# The flattened POM produced by the build
+.flattened-pom.xml

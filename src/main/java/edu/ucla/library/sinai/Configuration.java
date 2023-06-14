@@ -25,12 +25,14 @@ import java.util.Properties;
 
 import javax.naming.ConfigurationException;
 
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient.Builder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -72,9 +74,9 @@ public class Configuration implements Shareable {
 
     private final File myTempDir;
 
-    private HttpSolrServer mySolrServer;
+    private HttpSolrClient mySolrServer;
 
-    private JsonObject myPostgreSQLProperties;
+    private final JsonObject myPostgreSQLProperties;
 
     private final String myURLScheme;
 
@@ -91,8 +93,8 @@ public class Configuration implements Shareable {
      * @throws ConfigurationException If there is trouble reading or setting a configuration option
      */
     public Configuration(final JsonObject aConfig, final Vertx aVertx,
-            final Handler<AsyncResult<Configuration>> aHandler) throws ConfigurationException, IOException,
-            JsonProcessingException {
+            final Handler<AsyncResult<Configuration>> aHandler)
+            throws ConfigurationException, IOException, JsonProcessingException {
         final Future<Configuration> result = Future.future();
 
         myTempDir = setTempDir(aConfig);
@@ -152,10 +154,11 @@ public class Configuration implements Shareable {
 
     /**
      * Reads the PostgreSQL properties from a JSON configuration file.
+     *
      * @param aConfig
      * @return The JsonObject to be used by MetadataHarvestHandler
      */
-    private JsonObject setPostgreSQLProperties(JsonObject aConfig) {
+    private JsonObject setPostgreSQLProperties(final JsonObject aConfig) {
         final JsonObject props = new JsonObject();
         props.put("host", aConfig.getString(KATIKON_HOST));
         props.put("port", String.valueOf(aConfig.getInteger(KATIKON_PORT)));
@@ -241,7 +244,7 @@ public class Configuration implements Shareable {
      *
      * @return The Solr server that Sinai should be able to use
      */
-    public HttpSolrServer getSolrServer() {
+    public HttpSolrClient getSolrServer() {
         return mySolrServer;
     }
 
@@ -255,7 +258,7 @@ public class Configuration implements Shareable {
             result.setHandler(aHandler);
 
             if (properties.containsKey(SOLR_SERVER_PROP)) {
-                mySolrServer = new HttpSolrServer(properties.getProperty(SOLR_SERVER_PROP));
+                mySolrServer = new Builder(properties.getProperty(SOLR_SERVER_PROP)).build();
                 LOGGER.debug("Found {} in system properties", SOLR_SERVER_PROP);
                 result.complete(this);
             } else {
@@ -332,29 +335,27 @@ public class Configuration implements Shareable {
         final String http = "http";
 
         // We'll give command line properties first priority then fall back to our JSON configuration
-        if (properties.containsKey(URL_SCHEME_PROP)) {
-            final String scheme = properties.getProperty(URL_SCHEME_PROP);
-
-            if (LOGGER.isDebugEnabled()) {
-                if (scheme.equals(http)) {
-                    LOGGER.debug("Found {} set in system properties as: {}", URL_SCHEME_PROP, http);
-                } else if (scheme.equals(https)) {
-                    LOGGER.debug("Found {} set in system properties as: {}", URL_SCHEME_PROP, https);
-                }
-            }
-
-            if (!scheme.equals(http) && !scheme.equals(https)) {
-                LOGGER.warn("Found {} set in system properties but its value ({}) isn't value so using: {}",
-                        URL_SCHEME_PROP, scheme, https);
-
-                return https;
-            } else {
-                LOGGER.info("Setting Sinai URL scheme to: {}", scheme);
-                return scheme;
-            }
-        } else {
+        if (!properties.containsKey(URL_SCHEME_PROP)) {
             return https;
         }
+        final String scheme = properties.getProperty(URL_SCHEME_PROP);
+
+        if (LOGGER.isDebugEnabled()) {
+            if (scheme.equals(http)) {
+                LOGGER.debug("Found {} set in system properties as: {}", URL_SCHEME_PROP, http);
+            } else if (scheme.equals(https)) {
+                LOGGER.debug("Found {} set in system properties as: {}", URL_SCHEME_PROP, https);
+            }
+        }
+
+        if (!scheme.equals(http) && !scheme.equals(https)) {
+            LOGGER.warn("Found {} set in system properties but its value ({}) isn't value so using: {}",
+                    URL_SCHEME_PROP, scheme, https);
+
+            return https;
+        }
+        LOGGER.info("Setting Sinai URL scheme to: {}", scheme);
+        return scheme;
     }
 
     /**

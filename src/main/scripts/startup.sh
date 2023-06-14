@@ -22,7 +22,7 @@ SOLR_SERVER="-Dsinai.solr.server="
 IMAGE_SERVER="-Dsinai.image.server="
 if [[ $DEPLOY_ENV == "prod" ]]
 then
-    SOLR_SERVER=$SOLR_SERVER"http://solr.library.ucla.edu/solr/sinaimeta"
+    SOLR_SERVER=$SOLR_SERVER"https://p-u-sinaipalimpsolr01.library.ucla.edu/solr/sinaimetaprod"
     IMAGE_SERVER=$IMAGE_SERVER"https://sinai-images.library.ucla.edu"
 elif [[ $DEPLOY_ENV == "stage" ]]
 then
@@ -44,7 +44,7 @@ fi
 
 # We're going to be opinionated about logging frameworks
 LOG_DELEGATE="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
-LOG_CONFIG_DIR="-Xbootclasspath/p:${sinai.logging.config.dir}"
+LOG_CONFIG_DIR="-Xbootclasspath/a:${sinai.logging.config.dir}"
 LOG_OUTPUT_DIR="-Dsinai.logs.dir=${sinai.logs.dir}"
 KEY_PASS_CONFIG="-Dsinai.key.pass=${sinai.key.pass}"
 SINAI_TEMP_DIR="-Dsinai.temp.dir=${sinai.temp.dir}"

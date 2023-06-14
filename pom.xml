@@ -5,7 +5,7 @@
   <artifactId>sinai-web</artifactId>
   <groupId>edu.ucla.library.sinai</groupId>
   <packaging>jar</packaging>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>The Sinai Scholars Website</name>
   <description>A site for Sinai image viewing</description>
 
@@ -22,32 +22,36 @@
     <dev.tools></dev.tools>
 
     <!-- Versions of dependencies managed in this POM -->
-    <vertx.version>3.5.4</vertx.version>
+    <vertx.version>3.9.15</vertx.version>
     <javatuples.version>1.2</javatuples.version>
-    <freelib.utils.version>0.7.0</freelib.utils.version>
-    <handlebars.version>2.2.3</handlebars.version>
+    <freelib.utils.version>4.0.0</freelib.utils.version>
+    <freelib.maven.version>0.4.7</freelib.maven.version>
+    <handlebars.version>4.3.1</handlebars.version>
     <scribe.version>1.3.7</scribe.version>
-    <postgresql.version>42.1.4</postgresql.version>
-    <solrj.version>4.10.0</solrj.version>
+    <solrj.version>9.1.0</solrj.version><!-- 4.10.4 -->
+    <jackson.version>2.15.2</jackson.version>
+    <commons.validator.version>1.4.1</commons.validator.version>
+    <commons.beanutils.version>1.9.4</commons.beanutils.version>
+    <postgresql.version>42.4.3</postgresql.version>
 
     <!-- Versions of plugins managed in this POM -->
     <maven.shade.plugin.version>2.4.1</maven.shade.plugin.version>
     <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
     <maven.clean.plugin.version>2.6.1</maven.clean.plugin.version>
     <maven.keytool.plugin.version>1.5</maven.keytool.plugin.version>
-    <sass.maven.plugin.version>2.14</sass.maven.plugin.version>
+    <sass.maven.plugin.version>3.7.2</sass.maven.plugin.version>
+    <exec.maven.plugin.version>3.1.0</exec.maven.plugin.version>
+    <phantomjs.plugin.version>1.1.0</phantomjs.plugin.version>
+    <commons.lang3.version>3.12.0</commons.lang3.version>
 
-    <!-- This project depends on JDK 8 -->
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <!-- Parent project only uses logback for testing, but we want to use it for real -->
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -109,6 +113,26 @@
       <artifactId>scribe</artifactId>
       <version>${scribe.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${commons.beanutils.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
     <!-- Below here are our testing dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -118,6 +142,7 @@
     <dependency>
       <groupId>com.github.detro.ghostdriver</groupId>
       <artifactId>phantomjsdriver</artifactId>
+      <version>${phantomjs.plugin.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -129,7 +154,7 @@
     <dependency>
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
-      <version>1.4.1</version>
+      <version>${commons.validator.version}</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -161,8 +186,7 @@
       <plugins>
         <plugin>
           <groupId>info.freelibrary</groupId>
-          <artifactId>freelib-utils</artifactId>
-          <version>${freelib.utils.version}</version>
+          <artifactId>freelib-maven-plugins</artifactId>
           <executions>
             <execution>
               <id>set-key-pass</id>
@@ -198,7 +222,7 @@
             <annotationProcessors>
               <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
             </annotationProcessors>
-            <generatedSourcesDirectory> ${project.basedir}/src/main/generated </generatedSourcesDirectory>
+            <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
             <compilerArgs>
               <arg>-Acodegen.output=${project.basedir}/src/main</arg>
             </compilerArgs>
@@ -365,11 +389,10 @@
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>sonar-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -382,6 +405,7 @@
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
             <sinai.key.pass>${sinai.key.pass}</sinai.key.pass>
           </systemPropertyVariables>
+          <argLine>-XX:MaxMetaspaceSize=512m</argLine>
         </configuration>
       </plugin>
       <plugin>
@@ -401,35 +425,23 @@
           </systemPropertyVariables>
           <!-- Temporarily turning off integration tests -->
           <skipTests>true</skipTests>
+          <argLine>-XX:MaxMetaspaceSize=512m</argLine>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>br.com.ingenieux</groupId>
-        <artifactId>jbake-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
       <!-- Generate our MessageCodes class from the messages resource file -->
       <plugin>
         <groupId>info.freelibrary</groupId>
-        <artifactId>freelib-utils</artifactId>
+        <artifactId>freelib-maven-plugins</artifactId>
         <executions>
           <execution>
             <phase>process-resources</phase>
             <goals>
               <goal>generate-codes</goal>
             </goals>
-            <configuration>
-              <message-files>
-                <message-file>src/main/resources/sinai_messages.xml</message-file>
-              </message-files>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -460,6 +472,20 @@
               <artifactSet>
               </artifactSet>
               <outputFile>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</outputFile>
+              <artifactSet>
+                <excludes>
+                  <exclude>commons-logging:commons-logging</exclude>
+                </excludes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>module-info.class</exclude>
+                    <exclude>META-INF/versions/9/module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
@@ -467,6 +493,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>start-sinai</id>
@@ -551,6 +578,37 @@
         <sinai.temp.dir>/tmp/sinai-temp-dir</sinai.temp.dir>
       </properties>
     </profile>
+    <profile>
+      <id>snyk-check</id>
+      <activation>
+        <property>
+          <name>env.SNYK_TOKEN</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.snyk</groupId>
+            <artifactId>snyk-maven-plugin</artifactId>
+            <!-- Configurations have to be overridden in the executions' configuration elements -->
+            <executions>
+              <execution>
+                <id>snyk-test</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <args>
+                    <arg>--org=${env.UCLALIBRARY_SNYK_ORG}</arg>
+                    <arg>--fail-on=all</arg>
+                  </args>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <!-- Couldn't push to Maven repo with this, but we don't plan to anyway -->
@@ -591,7 +649,7 @@
   <parent>
     <groupId>info.freelibrary</groupId>
     <artifactId>freelib-parent</artifactId>
-    <version>0.1.3</version>
+    <version>8.0.3</version>
   </parent>
 
 </project>

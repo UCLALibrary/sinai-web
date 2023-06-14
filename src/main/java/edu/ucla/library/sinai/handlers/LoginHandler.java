@@ -8,12 +8,13 @@ import java.io.IOException;
 import edu.ucla.library.sinai.Configuration;
 import edu.ucla.library.sinai.Metadata;
 import edu.ucla.library.sinai.RoutePatterns;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.jwt.JWTOptions;
 import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.RoutingContext;
 
@@ -29,14 +30,12 @@ public class LoginHandler extends SinaiHandler {
     }
 
     /**
-     * Handles the authentication callback request from <sinai-id.org>.
-     *
-     * The authentication flow for this application doesn't correspond to any of Vert.x's built-in AuthProviders.
-     * Instead, we authenticate a user by trusting a callback HTTP request originating from <sinai-id.org>.
-     *
-     * Essentially, we check that the token provided in that request matches the token that we've placed in a cookie in
-     * the user's browser. That cookie is created or updated whenever <code>src/main/webapp/templates/header.hbs</code>
-     * is rendered while the user is not logged in, and is used solely for the initial authentication request.
+     * Handles the authentication callback request from <sinai-id.org>. The authentication flow for this application
+     * doesn't correspond to any of Vert.x's built-in AuthProviders. Instead, we authenticate a user by trusting a
+     * callback HTTP request originating from <sinai-id.org>. Essentially, we check that the token provided in that
+     * request matches the token that we've placed in a cookie in the user's browser. That cookie is created or updated
+     * whenever <code>src/main/webapp/templates/header.hbs</code> is rendered while the user is not logged in, and is
+     * used solely for the initial authentication request.
      *
      * @param aContext A routing context
      */
