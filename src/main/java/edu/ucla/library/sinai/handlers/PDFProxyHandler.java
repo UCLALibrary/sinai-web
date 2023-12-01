@@ -20,10 +20,10 @@ public class PDFProxyHandler extends SinaiHandler {
     public void handle(final RoutingContext aContext) {
         switch (aContext.normalisedPath()) {
         case "/terms-of-use/please-read":
-            aContext.reroute("/pdfs/A-1_Terms-of-Use_20180711.pdf");
+            aContext.reroute("/pdfs/A-1-Terms-of-Use_20231129.pdf");
             break;
         case "/terms-of-use/contributors":
-            aContext.reroute("/pdfs/A-2_Citing-Contributors_20180711.pdf");
+            aContext.reroute("/pdfs/A-2_Citing-Contributors_20231129.pdf");
             break;
         case "/user-guide":
             aContext.reroute("/pdfs/B-0_Contents_20180712.pdf");
@@ -50,7 +50,7 @@ public class PDFProxyHandler extends SinaiHandler {
             aContext.reroute("/pdfs/C-1_Publications_20180711.pdf");
             break;
         case "/contacts":
-            aContext.reroute("/pdfs/C-2_Contact-Us_20180711.pdf");
+            aContext.reroute("/pdfs/C-2_Contact-Us_20231129.pdf");
             break;
         default:
             aContext.put(ERROR_HEADER, "Bad Request");
