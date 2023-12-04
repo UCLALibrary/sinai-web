@@ -20,7 +20,7 @@ public class PDFProxyHandler extends SinaiHandler {
     public void handle(final RoutingContext aContext) {
         switch (aContext.normalisedPath()) {
         case "/terms-of-use/please-read":
-            aContext.reroute("/pdfs/A-1-Terms-of-Use_20231129.pdf");
+            aContext.reroute("/pdfs/A-1_Terms-of-Use_20231129.pdf");
             break;
         case "/terms-of-use/contributors":
             aContext.reroute("/pdfs/A-2_Citing-Contributors_20231129.pdf");
