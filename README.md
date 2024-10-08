@@ -1,40 +1,22 @@
 ## The Sinai Scholars Website
 
-### To build locally (without Vagrant)
+### To build locally
 
 Check the project out from GitHub, package it and start it.
 
     git clone https://github.com/UCLALibrary/sinai-web
     cd sinai-web
     mvn clean package
-    target/startup.sh --env <dev|test|stage|prod>
+    target/startup.sh  # Note that running this doesn't work unless you have permission to access the Solr server
 
-The `--env` argument allows for selection of the Solr core and IIIF image server to connect to:
+Since there are no more test/stage servers associated with this project, the following production instances of the IIIF image server and Solr search engine will be used (even when running locally):
 
-|`--env`|Solr server|IIIF image server|
-|---|---|---|
-|`dev`|`sinai.solr.server` according to `pom.xml`|https://sinai-images.library.ucla.edu|
-|`test`|http://test-solr.library.ucla.edu/solr/sinaimeta|https://test-sinai-images.library.ucla.edu|
-|`stage`|http://solr.library.ucla.edu/solr/sinaistagemeta|https://stage-sinai-images.library.ucla.edu|
-|`prod`|http://solr.library.ucla.edu/solr/sinaimeta|https://sinai-images.library.ucla.edu|
+* Solr - http://solr.library.ucla.edu/solr/sinaimeta (not publicly accessible)
+* IIIF image server - https://sinai-images.library.ucla.edu
 
 It generates a self-signed certificate, so when you visit
 
 https://localhost:8443/
-
-You will have to click through the security warning.
-
-### To build locally (using Ansible and Vagrant)
-
-Check out the Library's restricted access 'ansible' project and run:
-
-    git clone https://github.com/UCLALibrary/ansible
-    cd ansible
-    PLAYBOOK=sinai_scholars_stage vagrant up
-
-This also generates a self-signed certificate, so when you visit
-
-https://localhost/
 
 You will have to click through the security warning.
 
@@ -69,14 +51,6 @@ The Sinai Scholar's site uses [Mirador](http://projectmirador.org/) as its image
     rm -rf ${SINAI_MIRADOR_PATH}
     cp -r ./mirador ${SINAI_MIRADOR_PATH}
 
-### Using a DDNS Domain with the startup.sh Script
-
-If you want to login with the new EMEL auth system and a DDNS service, you can supply the Sinai host variable at the point of running the test startup script; for instance:
-
-    SINAI_HOST=lisforge.ddns.net target/startup.sh
-
-This is probably only relevant to developers testing the system using an allowed domain name. When supplying the host in this fashion, it's assumed the service is running at port 443 rather than at the out of the box testing default, 8443.
-
 ### Contact
 
-Contact Kevin or Mark with any build, etc., questions you have.
+Contact Kevin S. Clarke with any build, etc., questions you have.
