@@ -1,46 +1,7 @@
 #! /bin/bash
 
-# This script takes one argument:
-# --env - one of ["test", "stage", "prod"]
-# For example:
-# ./startup.sh --env prod
-
-while [[ $# -gt 0 ]]
-do
-    key="$1"
-
-    case $key in
-        --env)
-        DEPLOY_ENV="$2"
-        shift
-        shift
-        ;;
-esac
-done
-
-SOLR_SERVER="-Dsinai.solr.server="
-IMAGE_SERVER="-Dsinai.image.server="
-if [[ $DEPLOY_ENV == "prod" ]]
-then
-    SOLR_SERVER=$SOLR_SERVER"http://solr.library.ucla.edu/solr/sinaimeta"
-    IMAGE_SERVER=$IMAGE_SERVER"https://sinai-images.library.ucla.edu"
-elif [[ $DEPLOY_ENV == "stage" ]]
-then
-    SOLR_SERVER=$SOLR_SERVER"http://solr.library.ucla.edu/solr/sinaistagemeta"
-    IMAGE_SERVER=$IMAGE_SERVER"https://stage-sinai-images.library.ucla.edu"
-elif [[ $DEPLOY_ENV == "test" ]]
-then
-    SOLR_SERVER=$SOLR_SERVER"http://test-solr.library.ucla.edu/solr/sinaimeta"
-    IMAGE_SERVER=$IMAGE_SERVER"https://test-sinai-images.library.ucla.edu"
-elif [[ $DEPLOY_ENV == "dev" ]]
-then
-    SOLR_SERVER=$SOLR_SERVER"${sinai.solr.server}"
-    IMAGE_SERVER=$IMAGE_SERVER"https://sinai-images.library.ucla.edu"
-else
-    # Print usage and exit
-    echo "Usage: ./startup.sh --env [ prod | stage | test | dev ]"
-    exit 1
-fi
+SOLR_SERVER="-Dsinai.solr.server='https://p-u-sinaipalimpsolr01.library.ucla.edu/solr/sinaimetaprod'"
+IMAGE_SERVER="-Dsinai.solr.server='https://sinai-images.library.ucla.edu'"
 
 # We're going to be opinionated about logging frameworks
 LOG_DELEGATE="-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
